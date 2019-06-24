@@ -1,0 +1,308 @@
+<template>
+    <div class="inspection">
+       <div class="addtask">
+      <el-button type="primary" @click="addtask()">新增任务</el-button>
+    </div>
+    <div class="tasklist">
+       <el-table
+         :data="taskData"
+         stripe
+         border
+         style="width: 100%">
+         <el-table-column
+            type="index"
+            label="id"
+            >
+         </el-table-column>
+         <el-table-column
+            label="检验编号"
+            >
+            <template slot-scope="scope">
+               <span>{{scope.row.inspection_number}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="委托单位"
+            >
+             <template slot-scope="scope">
+               <span>{{scope.row.client}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="产品名称"
+            >
+             <template slot-scope="scope">
+               <span>{{scope.row.produt}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="水泵型号"
+            >
+             <template slot-scope="scope">
+               <span>{{scope.row.model}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="测试台体"
+            >
+             <template slot-scope="scope">
+               <span>{{scope.row.updatedAt}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="检验标准">
+             <template slot-scope="scope">
+               <span>{{scope.row.standard}}</span>    
+            </template>
+         </el-table-column>
+         <el-table-column
+            label="创建日期"
+            >
+            <template slot-scope="scope">
+               <span>{{new Date(scope.row.createdAt).toLocaleDateString()}}</span>
+            </template>
+         </el-table-column>
+         <el-table-column
+            width="200"
+            label="查看"
+            >
+             <template slot-scope="scope">
+               <el-button type="primary" @click="taskDetail(scope.row.objectId,scope.row.testbed)">详情</el-button>
+                <el-button type="primary" @click="derive(scope.row.objectId)">导出</el-button>  
+            </template>
+         </el-table-column>
+      </el-table>
+      <div style="margin-top:20px"> 
+         <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :page-sizes="[10, 20, 30, 40]"
+            :page-size=pagesize
+            layout="total, sizes, prev, pager, next, jumper"
+            :total=total>
+         </el-pagination>
+      </div>
+      <div class="block">
+         <el-dialog title="新增检测任务" :visible.sync="taskdialog" width="40%">
+            <el-form :model="form">
+               <el-form-item label="检验编号：" :label-width="formLabelWidth">
+                  <el-input v-model="form.inspection_number" style="width:300px" placeholder="请选择检验编号"></el-input>
+               </el-form-item>
+                <el-form-item label="委托单位：" :label-width="formLabelWidth">
+                  <!-- <el-input v-model="form.client" style="width:300px" placeholder="请选择委托单位"></el-input> -->
+                  <el-select v-model="form.client" placeholder="请选择委托单位" style="width:300px">
+                        <el-option
+                           v-for="(item,index) in options"
+                           :key="index"
+                           :label="item.label"
+                           :value="item.value">
+                        </el-option>
+                  </el-select>
+               </el-form-item>
+                <el-form-item label="产品名称：" :label-width="formLabelWidth">
+                  <el-input v-model="form.produt" style="width:300px" placeholder="请选择产品名称"></el-input>
+               </el-form-item>
+                <el-form-item label="水泵型号：" :label-width="formLabelWidth">
+                  <el-input v-model="form.model" style="width:300px" placeholder="请选择水泵型号"></el-input>
+               </el-form-item>
+               <el-form-item label="检验标准：" :label-width="formLabelWidth">
+                  <el-select v-model="form.region" placeholder="请选择检验标准" style="width:300px" @change="standardName()">
+                  <el-option v-for="(item,key) in form.standard"
+                   :label="item.data.inspection_standard"
+                   :value='JSON.stringify(item.data)'
+                   :key="key"
+                  >
+                  </el-option>
+                  </el-select>
+               </el-form-item>
+                <el-form-item label="测试台体：" :label-width="formLabelWidth">
+                  <el-select v-model="form.bedname" placeholder="请选择测试台体" style="width:300px">
+                  <el-option v-for="(item,key) in form.testbed"
+                  :label="item.attributes.name"
+                  :value="item.id"
+                  :key="key"
+                  ></el-option>
+                  
+                  </el-select>
+               </el-form-item>
+                <el-form-item label="开始时间：" :label-width="formLabelWidth">
+                  <el-date-picker
+                  v-model="form.starttime"
+                  type="datetime"
+                  placeholder="选择开始时间"
+                  style="width:300px"
+                  value-format="timestamp">
+               </el-date-picker>
+               </el-form-item>
+                <el-form-item label="结束时间：" :label-width="formLabelWidth">
+                   <el-date-picker
+                  v-model="form.endtime"
+                  type="datetime"
+                  placeholder="选择结束时间"
+                  style="width:300px"
+                  value-format="timestamp">
+               </el-date-picker>
+               </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+               <el-button @click="taskdialog = false">取 消</el-button>
+               <el-button type="primary" @click="addBedtask()">确 定</el-button>
+            </div>
+            </el-dialog>
+      </div>
+    </div>
+    </div>
+</template>
+<script>
+import Parse from 'parse'
+import { getModule,deriveReport } from '@/api/reportmodule/reportmodule'
+export default {
+   data() {
+      
+      return {
+        taskData: [],
+        pagesize:10,
+        start:0,
+        total:0,
+        standard:'',
+        form: {
+          starttime:'',
+          endtime:'',
+          inspection_number: '',
+          client:'',
+          region:'',
+          produt:'',
+          model:'',
+          standard:[],
+          testbed:[],
+          bedname:''
+        },
+         options: [{
+          value: '浙江利欧',
+          label: '浙江利欧'
+        }, {
+          value: '南方泵业',
+          label: '南方泵业'
+        }, {
+          value: '新界泵业',
+          label: '新界泵业'
+        }, {
+          value: '丰球',
+          label: '丰球'
+        }],
+        formLabelWidth: '200px',
+        taskdialog:false
+      }
+   },
+   created(){
+      
+   },
+   mounted() {
+      this.getTasktable(this.pagesize,this.start)
+   },
+   methods: {
+      getTasktable(pagesize,start){
+         this.taskData = []
+         var Report = Parse.Object.extend('Report')
+         var report = new Parse.Query(Report)
+             report.descending('createdAt')
+             report.limit(pagesize)
+             report.skip(start)
+             report.count().then(count=>{
+                this.total =count
+                report.find().then(resultes=>{
+                   resultes.map(items=>{
+                      var obj={
+                      }
+                      obj = JSON.parse(JSON.stringify(items));
+                       var Testbed = Parse.Object.extend('Testbed')
+                       var testbed = new Parse.Query(Testbed)
+                       testbed.get(items.attributes.testbed).then(resulte=>{
+                        //   console.log(resulte)
+                          obj.updatedAt= resulte.attributes.name 
+                       })
+                       this.taskData.push(obj)
+                   })
+                   console.log(this.taskData)
+                })
+             })
+       
+      },
+      addtask(){
+         this.taskdialog =true
+         var Testbed = Parse.Object.extend("Testbed")
+         var testbed = new Parse.Query(Testbed)
+         testbed.find().then(resultes=>{
+            this.form.testbed = resultes
+         })
+           getModule().then(resultes=>{
+            this.form.standard=resultes.data
+         })
+      },
+      handleSizeChange(val){
+         this.pagesize = val
+      },
+      handleCurrentChange(val){
+         this.start = Number(val - 1) * Number(this.pagesize);
+      },
+      taskDetail(id,testbedid){
+         this.$router.push({
+                  path:'/inspection/reportdetail',
+                  query:{
+                     id:id,
+                     testbedid:testbedid
+                  }
+                })
+      },
+      standardName(){
+         let obj = {};
+         obj = this.form.standard.find((item)=>{//这里的selectList就是上面遍历的数据源
+          return JSON.stringify(item.data) ===this.form.region ;//筛选出匹配数据
+      });
+      this.standard=obj.data.inspection_standard;//我这边的name就是对应label的
+      },
+      addBedtask(){
+         console.log()
+                var Report = Parse.Object.extend('Report')
+                var report =new Report()
+                report.set('inspection_number',this.form.inspection_number)
+                report.set('client',this.form.client)
+                report.set('produt',this.form.produt)
+                report.set('model',this.form.model)
+                report.set('testbed',this.form.bedname)
+                report.set('standard',this.standard)
+                report.set('datas',JSON.parse(this.form.region))
+                report.set('start_time',this.form.starttime/1000)
+                report.set('end_time',this.form.endtime/1000)
+                report.save().then(resultes=>{
+                    this.$message({
+                     message: "新增成功",
+                     type: "success"
+                  });
+                  this.taskdialog=false
+                  this.getTasktable(this.pagesize,this.start)
+                }),(error=>{
+                   console.log(error)
+                })
+      },
+      derive(reportId){
+         deriveReport(reportId).then(res=>{
+            
+         })
+      }
+   }
+}
+</script>
+<style scoped>
+.inspection {
+  width: 100%;
+  min-height: 875px;
+  padding: 20px;
+  margin-top:20px;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+.tasklist{
+   margin-top:21px;
+}
+</style>

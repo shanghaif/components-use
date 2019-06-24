@@ -1,0 +1,241 @@
+<template>
+    <div class="appmarage">
+        <div class="header">
+            <el-button type="primary" @click="checkupdateall">
+                检查更新
+            </el-button>
+        </div>
+        <div class="block">
+            <el-table :data="tableData" style="width: 100%;text-align:center">
+                <el-table-column  label="App" align="center">
+                    <template slot-scope="scope">
+                    <span :style="{'color': (scope.row.active==true ? 'green':'red')}">{{scope.row.app}}</span>
+                </template>
+                </el-table-column>
+                <el-table-column prop="version" label="版本" align="center" sortable></el-table-column>
+                <el-table-column prop="desc" label="描述" align="center" sortable></el-table-column>
+                <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                    <el-button  type="info" @click="startup(scope.row.app)" v-if="scope.row.active==false" plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div>启动</el-button>
+                    <el-button  type="info" @click="stopup(scope.row.app)" v-if="scope.row.active==true"  plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"></div>停止</el-button>
+                    <el-button type="info" plain @click="checkupdate(scope.row.app,scope.row.version)">检查更新</el-button>
+                </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        <div class="block">
+            <el-pagination
+                background
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :page-sizes="[10, 25, 50, 100]"
+                :page-size="length"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total"
+                style="margin-top:30px;"
+            ></el-pagination>
+        </div>
+        <el-dialog
+        title="电表详情"
+        :visible.sync="dialogVisible"
+        width="40%"
+        :before-close="handleClose">
+       <div>
+           <div class="top" >
+               <el-input style="width:200px" placeholder="请输入搜索内容" v-model="searchvalue"></el-input>
+           </div>
+           <el-table :data="tableData1.filter(data => !searchvalue || data.mod.toLowerCase().includes(searchvalue.toLowerCase()))" 
+           style="width: 100%;text-align:center；margin-top:20px">
+               <el-table-column prop="mod" label="模块名称" sortable align="center">
+
+               </el-table-column>
+               <el-table-column prop="is_changed" label="是否修改" sortable align="center">
+
+               </el-table-column>
+           </el-table>
+           <div class="block">
+            <el-pagination
+                background
+                @size-change="handleSizeChange1"
+                @current-change="handleCurrentChange1"
+                :page-sizes="[10, 25, 50, 100]"
+                :page-size="length1"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total1"
+                style="margin-top:30px;"
+            ></el-pagination>
+        </div>
+       </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
+            <el-button style="float:right" type="primary" @click="reupload">热更新</el-button>
+        </span>
+        </el-dialog>
+    </div>
+</template>
+<script>
+import {Getapp,Getmodule,Getmodule1,Getstart,Getstop,GetReload} from '@/api/systemmanage/system'
+import Cookies from 'js-cookie'
+export default {
+   data() {
+      return {
+          tableData:[],
+          total:0,
+          start:0,
+          length:10,
+          node:null,
+          dialogVisible:false,
+          start1:0,
+          length1:10,
+          total1:0,
+          tableData1:[],
+          app:'',
+          version:"",
+          searchvalue:''
+      }
+   },
+   computed: {
+   },
+   mounted() {
+       this.getInformation()
+   },
+   methods: {
+       handleSizeChange(val){
+          this.length=val
+          this.getInformation()
+      },
+      handleCurrentChange(val){
+          this.start=(val-1)*10
+          this.getInformation()
+      },
+      //检查更新
+       handleSizeChange1(val){
+          this.length1=val
+          this.checkupdate(this.app,this.version)
+      },
+      handleCurrentChange1(val){
+          this.start1=(val-1)*10
+          this.checkupdate(this.app,this.version)
+          
+      },
+      getInformation(){
+          //初始化数据
+          Getapp(this.node,this.start,this.length).then(response=>{
+              if(response.result==true){
+                  this.tableData = response.apps
+                  this.total = response.recordsTotal
+              }
+          }).catch(error=>{
+              console.log(error)
+          })
+      },
+       handleClose(){
+           this.dialogVisible=false
+       },
+       checkupdate(app,version){
+           //点击检查更新数据
+           this.searchvalue=''
+           this.dialogVisible=true
+           this.app = app,
+           this.version = version
+           Getmodule(this.node,this.start1,this.length1,this.app,this.version).then(res=>{
+               if(res.result==true){
+                   res.mods.map(item=>{
+                       if(item.is_changed==false){
+                           item.is_changed ='false'
+                       }else{
+                           item.is_changed = 'true'
+                       }
+                   })
+                   this.tableData1 = res.mods,
+                   this.total1 = res.recordsTotal
+               }
+           })
+       },
+       checkupdateall(){
+           this.searchvalue=''
+           this.dialogVisible=true
+           Getmodule1(this.node,this.start1,this.length1).then(res=>{
+               if(res.result==true){
+                   res.mods.map(item=>{
+                       if(item.is_changed==false){
+                           item.is_changed ='false'
+                       }else{
+                           item.is_changed = 'true'
+                       }
+                   })
+                   this.tableData1 = res.mods,
+                   this.total1 = res.recordsTotal
+               }
+           })
+       },
+      //启动
+      startup(app){
+          if(!Cookies.get('username')){
+              this.$message({
+                message: '您还未登录',
+                type: 'warning'
+                })
+          }else{
+              Getstart(this.node,app).then(response=>{
+                  if(response.result==true){
+                      this.$message({
+                        message: '启动成功',
+                        type: 'success'
+                        })
+                        this.getInformation()
+                  }
+              }).catch(error=>{
+                  console.log(error)
+              })
+          }
+      },
+      //停止
+      stopup(app){
+          if(!Cookies.get('username')){
+              this.$message({
+                message: '您还未登录',
+                type: 'warning'
+                })
+          }else{
+              Getstop(this.node,app).then(response=>{
+                  if(response.result==true){
+                      this.$message({
+                        message: '停止成功',
+                        type: 'success'
+                        })
+                        this.getInformation()
+                  }
+              }).catch(error=>{
+                  console.log(error)
+              })
+          }
+      },
+      reupload(){
+          GetReload(this.node,this.app,this.version).then(response=>{
+              if(response==true){
+                  this.$message({
+                        message: response.msg,
+                        type: 'warning'
+                        })
+              }
+          })
+      }
+   }
+}
+</script>
+<style scoped>
+.appmarage{
+ background: #ffffff;
+  padding-left: 10px;
+  margin-top: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 875px;
+}
+</style>
+<style >
+.appmarage .el-dialog__footer{
+    padding-bottom:50px;
+}
+</style>
