@@ -6,7 +6,12 @@
         <el-button type="primary" style="margin-left:30px" @click="deletetask">删 除</el-button>
       </div>
       <div class="right">
-        <el-input type="text" style="width:200px;margin-left:30px;" placeholder="请输入搜索内容" v-model="valueforsearch"></el-input>
+        <el-input
+          type="text"
+          style="width:200px;margin-left:30px;"
+          placeholder="请输入搜索内容"
+          v-model="valueforsearch"
+        ></el-input>
         <el-button type="primary" @click="searchvalue">搜 索</el-button>
       </div>
     </div>
@@ -17,9 +22,11 @@
         tooltip-effect="dark"
         style="width: 100%"
         @selection-change="handleSelectionChange"
+        v-loading="loading"
       >
-        <el-table-column type="selection" width="55" :selectable="selectInit"></el-table-column>
+        <el-table-column type="selection" width="55" ></el-table-column>
         <el-table-column label="任务名称" prop="name"></el-table-column>
+        
         <el-table-column prop="datetime" label="采集开始时间"></el-table-column>
         <el-table-column label="数据项名称">
           <template slot-scope="scope">
@@ -27,6 +34,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="unit" label="周期单位"></el-table-column>
+        <el-table-column label="频率" prop="freq"></el-table-column>
         <el-table-column prop="downchannel" label="下发通道"></el-table-column>
         <el-table-column prop="upchannel" label="上传通道"></el-table-column>
         <el-table-column label="操作">
@@ -48,15 +56,24 @@
       ></el-pagination>
     </div>
     <!--弹窗-->
-    <el-dialog title="电表详情" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
-      <div class="dialog" style="height:250px;">
+    <el-dialog title="配置任务" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+      <div class="dialog" style="height:300px;">
         <div class="children">
           <label for>任务名称：</label>
           <el-input type="text" style="width:200px" v-model="name"></el-input>
         </div>
         <div class="children">
+          <label for>频率：</label>
+          <el-input type="text" style="width:200px" v-model="freq"></el-input>
+        </div>
+        <div class="children">
           <label for>采集开始时间：</label>
-          <el-date-picker v-model="starttime" type="datetime" placeholder="选择日期时间"></el-date-picker>
+          <el-date-picker
+            v-model="starttime"
+            type="datetime"
+            placeholder="选择日期时间"
+            @change="testdata"
+          ></el-date-picker>
         </div>
         <div class="children">
           <label for>终端类型：</label>
@@ -71,11 +88,23 @@
         </div>
         <div class="children">
           <label for>终端逻辑地址：</label>
-          <el-input type="text" style="width:200px" v-model="meteraddress"></el-input>
+          <el-input
+            type="text"
+            style="width:200px"
+            v-model="meteraddress"
+            placeholder="A终端逻辑地址,B终端逻辑地址"
+          ></el-input>
+          <span style="color:black">(all代表全部)</span>
+          <p style="color:black;margin:0 0 0 100px">(注意:逗号为英文逗号)</p>
         </div>
         <div class="children">
           <label for>冻结日期：</label>
-          <el-date-picker v-model="frozendate" type="date" placeholder="选择日期" value-format="yyyy-MM-dd"></el-date-picker>
+          <el-date-picker
+            v-model="frozendate"
+            type="date"
+            placeholder="选择日期"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
         </div>
         <div class="starttime">
           <label for>采样间隔时间：</label>
@@ -96,7 +125,7 @@
             ></el-option>
           </el-select>
         </div>
-        <div class="children">
+        <div class="children" style="margin-top:0;">
           <label for>下发通道：</label>
           <el-select v-model="downchannel" placeholder="请选择">
             <el-option
@@ -107,19 +136,8 @@
             ></el-option>
           </el-select>
         </div>
-        <!-- <div class="children">
-          <label for>　　上传通道：</label>
-          <el-select v-model="upchannel" placeholder="请选择">
-            <el-option
-              v-for="item in sendup"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </div> -->
       </div>
-      <div class="di" style="margin-top:20px;width:100%;">
+      <div class="di" style="width:100%;">
         <label for>数据项标识：</label>
         <el-transfer v-model="diselect" :data="data" :titles="['数据项标识', '数据项标识']"></el-transfer>
       </div>
@@ -131,7 +149,13 @@
   </div>
 </template>
 <script>
-import { Diselect, Alltasks, Addtasks, Removetask} from "@/api/historytask";
+import {
+  Diselect,
+  Alltasks,
+  Addtasks,
+  Removetask,
+  Taskdetail
+} from "@/api/historytask";
 import { timestampToTime, timetounix } from "@/api/login";
 export default {
   data() {
@@ -158,7 +182,7 @@ export default {
       data: generateData(),
       diselect: [],
       dialogVisible: false,
-      valueforsearch:'',
+      valueforsearch: "",
       options: [
         {
           value: "vcaddr",
@@ -179,7 +203,7 @@ export default {
           label: "月"
         },
         {
-          value: "hours",
+          value: "hour",
           label: "时"
         },
         {
@@ -217,24 +241,29 @@ export default {
       freq: "",
       unit: "",
       ftype: "",
-      idselete:[]
+      idselete: [],
+      loading:true
     };
   },
   mounted() {
     this.search();
   },
   methods: {
-    selectInit(row, index) {
-      if (row.id == 1 || row.id == 2) {
-        return false;
-      } else {
-        return true;
-      }
-    },
+    // testdata(val){
+    //   console.log(val)
+    // },
+    // selectInit(row, index) {
+    //   if (row.id == 1 || row.id == 2) {
+    //     return false;
+    //   } else {
+    //     return true;
+    //   }
+    // },
     handleClose() {
       this.dialogVisible = false;
     },
     search() {
+      this.loading = true
       Alltasks(this.start, this.length, this.node, this.draw++, this.valueforsearch).then(
         response => {
           
@@ -255,9 +284,13 @@ export default {
               } else {
                 item.unit = "1日";
               }
+              if (item.freq_unit=="day"){
+                item.freq+="日";
+              }
             });
-            this.tableData3 = response.data;
+            this.tableData3 = response.data.reverse();
             this.total = response.recordsTotal;
+            this.loading=false
         }
       );
     },
@@ -269,7 +302,7 @@ export default {
             label: "1"
           }
         ];
-      } else if (this.unit == "hours") {
+      } else if (this.unit == "hour") {
         this.spacing = [
           { value: "1", label: "1" },
           { value: "2", label: "2" },
@@ -288,13 +321,16 @@ export default {
       }
     },
     handleSelectionChange(val) {
+      this.idselete = [];
       this.multipleSelection = val;
     },
     handleSizeChange(val) {
       this.length = val;
+      this.search();
     },
     handleCurrentChange(val) {
-      this.start = (val - 1) * 10;
+      this.start = (val - 1) * this.length;
+      this.search();
     },
     Meterdetail(id) {
       this.$router.push({
@@ -303,68 +339,95 @@ export default {
       });
     },
     convartion() {
-        var meter=[];
-        var vcaddr = this.meteraddress.split(',')
-        if(this.ftype=='vcaddr'){
-            vcaddr.map(vconitem=>{
-                    meter.push({'vcaddr':vconitem,'dis':this.diselect})
-            })
-        }else{
-            if(this.meteraddress=='all'){
-                meter.push({'vcaddr':'all',"dis":this.diselect})  
-            }else{
-                meter.push({'vcaddr':'all',"addr":JSON.parse(vcaddr),"dis":this.diselect})
-            }
-            
+      var meter = [];
+      var vcaddr = this.meteraddress.split(",");
+      if (this.ftype == "vcaddr") {
+        vcaddr.map(vconitem => {
+          meter.push({ vcaddr: vconitem, dis: this.diselect });
+        });
+      } else {
+        if (this.meteraddress == "all") {
+          meter.push({ vcaddr: "all", dis: this.diselect });
+        } else {
+          meter.push({
+            vcaddr: "all",
+            addr: JSON.parse(vcaddr),
+            dis: this.diselect
+          });
         }
-        Addtasks(this.name, timetounix(this.frozendate+" 00:00:00"), Number(this.downchannel),timetounix(this.starttime), meter , Number(this.freq),this.unit).then(response=>{
+      }
+      Addtasks(
+        this.name,
+        timetounix(this.frozendate + " 00:00:00"),
+        Number(this.downchannel),
+        timetounix(this.starttime),
+        meter,
+        Number(this.freq),
+        this.unit
+      ).then(response => {
+        // if(response.result==true){
+        this.$message({
+          message: "添加成功",
+          type: "success"
+        });
+        this.dialogVisible = false;
+        this.search();
+        // }
+      });
+    },
+    searchvalue() {
+      Alltasks(
+        this.start,
+        this.length,
+        this.node,
+        this.draw++,
+        this.valueforsearch
+      )
+        .then(response => {
           // if(response.result==true){
-            this.search()
+          response.data.map(item => {
+            if (item.downchannel == 1) {
+              item.downchannel = "虚拟通道";
+            } else {
+              item.downchannel = "物理通道";
+            }
+            if (item.upchannel == 1) {
+              item.upchannel = "虚拟通道";
+            } else {
+              item.upchannel = "物理通道";
+            }
+            item.datetime = timestampToTime(item.datetime);
+            if (item.unit == "month") {
+              item.unit = "1月";
+            } else {
+              item.unit = "1日";
+            }
+          });
+          this.tableData3 = response.data;
+          this.total = response.recordsTotal;
           // }
         })
+        .catch(error => {
+          console.log(error);
+        });
     },
-    searchvalue(){
-      Alltasks(this.start, this.length, this.node, this.draw++, this.valueforsearch).then(response=>{
-        // if(response.result==true){
-          response.data.map(item => {
-              if (item.downchannel == 1) {
-                item.downchannel = "虚拟通道";
-              } else {
-                item.downchannel = "物理通道";
-              }
-              if (item.upchannel == 1) {
-                item.upchannel = "虚拟通道";
-              } else {
-                item.upchannel = "物理通道";
-              }
-              item.datetime = timestampToTime(item.datetime);
-              if (item.unit == "month") {
-                item.unit = "1月";
-              } else {
-                item.unit = "1日";
-              }
+    deletetask() {
+      this.multipleSelection.map(item => {
+        this.idselete.push(item.id);
+      });
+      Removetask(this.idselete)
+        .then(response => {
+          if (response) {
+            this.$message({
+              message: "删除成功",
+              type: "success"
             });
-            this.tableData3 = response.data;
-            this.total = response.recordsTotal;
-        // }
-      }).catch(error=>{
-        console.log(error)
-      })
-    },
-    deletetask(){
-      this.multipleSelection.map(item=>{
-        this.idselete.push(item.id)
-      })
-      Removetask(this.idselete).then(response=>{
-      //  if(response.result==true){
-         this.$message({
-                message: '删除成功',
-                type: 'success'
-                })
-      //  }
-      }).catch(error=>{
-        console.log(error)
-      })
+            this.search();
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };
@@ -375,7 +438,6 @@ export default {
   background: white;
   padding: 20px;
   box-sizing: border-box;
-  margin-top:20px;
 }
 .top {
   width: 100%;
@@ -399,19 +461,21 @@ export default {
   padding-bottom: 50px;
 }
 .tasklist .el-dialog__body {
-  height: 600px;
+  height: 650px;
 }
-.dialog .children,
+.tasklist .dialog .children,
 .dialog .starttime {
   float: left;
   margin-top: 20px;
   width: 50%;
   visibility: center;
 }
-.dialog .children label,
-.dialog .starttime label {
+.tasklist .dialog .children label,
+.tasklist .dialog .starttime label {
   float: left;
   margin-top: 10px;
+  width:120px;
+  text-align:right;
 }
 .tasklist .children .el-input--suffix {
   width: 200px;
@@ -426,6 +490,14 @@ export default {
 }
 .tasklist .el-transfer-panel {
   width: 300px;
+}
+.tasklist .el-transfer__button:first-child {
+  position: relative;
+  top: 50px;
+}
+.tasklist .el-transfer__button:nth-child(2) {
+  position: relative;
+  top: -50px;
 }
 </style>
 

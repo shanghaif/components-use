@@ -6,7 +6,7 @@
       <el-button type="primary" @click="Gettaskdetail">搜索</el-button>
     </div>
     <div class="block">
-      <el-table :data="tableData" style="width: 100%;text-align:center">
+      <el-table :data="tableData" style="width: 100%;text-align:center" v-loading="loading">
         <el-table-column type="index" width="50"></el-table-column>
         <el-table-column prop="vcaddr" label="集中器" align="center"></el-table-column>
         <el-table-column prop="datetime" label="冻结日期" align="center"></el-table-column>
@@ -46,7 +46,8 @@ export default {
       length: 10,
       tableData: [],
       total:0,
-      searchvalue:''
+      searchvalue:'',
+      loading:true
     };
   },
   mounted() {
@@ -55,6 +56,7 @@ export default {
   methods: {
     Gettaskdetail() {
       this.id = this.$route.query.id;
+      this.loading=true
       Taskdetail(this.node, this.start, this.length, this.draw++, this.id,this.searchvalue).then(
         response => {
           // if (response.result == true) {
@@ -64,6 +66,7 @@ export default {
             });
             this.tableData = response.data;
             this.total = response.recordsTotal
+            this.loading=false
           // }
         }
       );
@@ -73,7 +76,7 @@ export default {
           this.Gettaskdetail()
       },
       handleCurrentChange(val){
-          this.start=(val-1)*10
+          this.start=(val-1)*this.length
           this.Gettaskdetail()
       },
       Meterdetail(di, datetime, vcaddr) {
@@ -91,7 +94,6 @@ export default {
 .taskschedule {
   background: #ffffff;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   width: 100%;
   min-height: 875px;

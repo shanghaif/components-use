@@ -27,14 +27,14 @@
     </div>
     <div class="devdetail">
       <div class="detailtop">
-        <ul>
-          <li style="text-align:left">
+        <ul style="padding-left:0;width:60%">
+          <li style="text-align:center;width:10%">
             <input type="checkbox" id="allselect">
-            <span style="margin-left:20px;">全选</span>
+            <span >全选</span>
           </li>
-          <li>表地址</li>
-          <li>数据项名称</li>
-          <li>抄表结果</li>
+          <li style="text-align:center;width:20%">表地址</li>
+          <li style="text-align:center;width:20%">数据项名称</li>
+          <li style="text-align:center;width:20%">抄表结果</li>
         </ul>
       </div>
     </div>
@@ -50,7 +50,7 @@ var count = 0;
 export default {
   data() {
     return {
-      di: "",
+      di: [],
       defaultExpandAll: false,
       showCheckbox: true,
       key: 1,
@@ -88,20 +88,23 @@ export default {
   },
   methods: {
     Getmeterdetail() {
-      this.di = this.$route.query.di;
+      this.di = []
+      this.di.push(this.$route.query.di);
       this.id = this.$route.query.id;
       (this.vcaddr = this.$route.query.vcaddr),
         (this.datetime = this.$route.query.datetime);
          html=''
-      Taskmeterdetail(this.node, this.di, this.datetime, this.vcaddr,this.id).then(
+      Taskmeterdetail(this.di, this.vcaddr,this.id).then(
         response => {
           $.each(response.data, function(key, value) {
             table = "";
             response.data[key].map(item => {
-              if (item.result == false) {
+              if (item.result == "fail") {
                 item.result = "失败";
-              } else {
+              } else if(item.result=="success") {
                 item.result = "成功";
+              }else{
+                item.result = "未执行"
               }
               table +=
                 '<tr class="' +
@@ -113,12 +116,13 @@ export default {
                 item.addr +
                 '" di="' +
                 item.di +
-                '" ></td><td style="width:20%;text-align:left">' +
+                '" ></td><td style="width:20%;text-align:center">' +
                 item.addr +
                 '</td><td style="width:20%;text-align:center">' +
                 item.di +
                 '</td><td style="width:20%;text-align:center">' +
                 item.result +
+                '</td><td style="width:30%;text-align:center">' +
                 "</td></tr>";
             });
             html +=
@@ -181,7 +185,6 @@ export default {
   min-height: 875px;
   background: white;
   padding: 20px;
-  margin-top:20px;
   box-sizing: border-box;
   overflow: scroll;
 }
@@ -241,7 +244,7 @@ export default {
   list-style: none;
   text-align: center;
 }
-.devdetail .detailtop ul li:nth-child(2) {
+/* .devdetail .detailtop ul li:nth-child(2) {
   margin-left: 80px;
 }
 .devdetail .detailtop ul li:nth-child(3) {
@@ -249,7 +252,7 @@ export default {
 }
 .devdetail .detailtop ul li:last-child {
   margin-left: 200px;
-}
+} */
 .detailtop ul {
   height: 40px;
 }

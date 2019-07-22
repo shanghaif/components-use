@@ -2,11 +2,11 @@
   <div class="historytask">
     <div class="top">
       <div class="left">
-        <span>集中器count</span>
-        <p><el-tag type="success" >{{length}}</el-tag></p>
+        <span>集中器个数</span>
+        <p><el-tag type="success" >{{total}}</el-tag></p>
       </div>
       <div class="seconds">
-        <span>总数sum</span>
+        <span>电表总数</span>
         <p><el-tag type="success" >{{contotal}}</el-tag></p>
       </div>
       <div class="right">
@@ -29,7 +29,7 @@
         ></el-option>
       </el-select>
       <label for style="margin-left:30px;">冻结日期：</label>
-      <el-date-picker v-model="datetime" type="date" placeholder="选择日期时间"></el-date-picker>
+      <el-date-picker v-model="datetime" type="date" placeholder="选择日期时间" :picker-options="pickerOptions0"></el-date-picker>
       <el-button type="primary" @click="search()" style="margin-left:30px;">查 询</el-button>
       <!--表格-->
       <div class="block">
@@ -38,6 +38,7 @@
           :data="tableData"
           highlight-current-row
           style="width: 100%;text-align:center"
+          v-loading="loading"
         >
           <el-table-column type="index" width="50" align="center"></el-table-column>
           <el-table-column property="vcaddr" label="集中器" align="center"></el-table-column>
@@ -94,7 +95,13 @@ export default {
       consuccess:0,
       consuc:0,
       allsuc:0,
-      searchvalue:''
+      searchvalue:'',
+      loading:true,
+      pickerOptions0: { 
+         disabledDate(time) {
+            return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e7就是不可以选择今天的 
+         }
+      }
     };
   },
   created() {
@@ -120,6 +127,7 @@ export default {
       });
     },
     search() {
+      this.loading=true
       if (this.datetime == "") {
         this.time = this.firsttime;
       } else {
@@ -131,20 +139,20 @@ export default {
       }
       HistoryTask(this.page, this.length, this.diselect, this.time,this.searchvalue)
         .then((res) => {
-          this.contotal=0
-          this.consuccess=0
-          this.consuc=0
-          this.allsuc=0
+          this.loading=false
           // if (res.result == true) {
             res.data.map(item => {
               item.datetime = timestampToTime(item.datetime);
-              this.contotal +=item.all
-              this.consuccess+=item.success
-              this.allsuc+=item.allsuc
+              // this.contotal +=item.all
+              // this.consuccess+=item.success
+              // this.allsuc+=item.allsuc
             });
             this.consuc=res.total_success_rate
             this.tableData = res.data;
             this.total = res.recordsTotal;
+            this.contotal = res.total_meter
+            this.consuccess = res.total_success_meter
+            this.consuc = res.total_success_rate
           // }
         })
         .catch(error => {});
@@ -163,7 +171,7 @@ export default {
     },
     handleCurrentChange(val) {
       // console.log(val)
-      this.page = (val - 1) * 10;
+      this.page = (val - 1) * this.length;
       this.search();
     },
     
@@ -174,10 +182,10 @@ export default {
 .historytask {
   background: #ffffff;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   width: 100%;
   min-height: 875px;
+  margin-bottom: 2rem;
 }
 .block {
   margin-top: 30px;

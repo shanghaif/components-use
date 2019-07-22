@@ -1,175 +1,207 @@
 <template>
   <div class="menu">
-    <div class="search">
-      <el-input placeholder="请输入内容" v-model="search" clearable></el-input>
-      <el-button
-        type="primary"
-        icon="el-icon-search"
-        style="margin-left:20px;"
-        @click="gettable"
-      >搜 索</el-button>
-      <el-button type="primary" icon="el-icon-plus" @click="add()">新 增</el-button>
-    </div>
-    <!--菜单table-->
-    <!-- <div class="menutable">
-       <tree-table :key="key" :default-expand-all="defaultExpandAll" :data="data" :columns="columns" border>
-      <template slot="scope" slot-scope="{scope}">
-        <el-tag>{{ scope.row.parentMenu}}</el-tag>
-      </template>
-      <template slot="operation" slot-scope="{scope}">
-        <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
-      </template>
-    </tree-table>
-    </div> -->
-    <el-dialog title="新增" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
-      <el-form ref="form" :model="form" label-width="80px">
-         <el-form-item label="菜单类型">
-          <el-radio-group v-model="form.resource">
-            <el-radio label="目录"></el-radio>
-            <el-radio label="菜单"></el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="菜单名称" v-if="form.resource=='菜单'">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="目录名称" v-if="form.resource=='目录'">
-          <el-input v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="上级菜单">
-          <el-select v-model="form.topname" placeholder="请选择" style="width:100%;">
-            <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-         <el-form-item label="角色名称">
-          <el-input v-model="form.rolename"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addmenus">确 定</el-button>
-      </span>
-    </el-dialog>
+    <el-table
+      :data="tableData3"
+      tooltip-effect="dark"
+      style="width:100%;text-align:center;margin-top:30px"
+      highlight-current-row
+      class="tb-edit"
+      border
+      stripe
+      height="500"
+      id="out-table"
+    >
+      <el-table-column prop :label="$t('concentrator.status')" align="center" width="100">
+        <template slot-scope="scope">
+          <div
+            v-if="scope.row.is_online==true"
+            style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"
+          ></div>
+          <span
+            v-if="scope.row.is_online==true"
+            style="color:#00cc33"
+          >{{$t('concentrator.isonline')}}</span>
+          <div
+            v-if="scope.row.is_online==false"
+            style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"
+          ></div>
+          <span
+            v-if="scope.row.is_online==false"
+            style="color:#f00"
+          >{{$t('concentrator.notonline')}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('concentrator.concentrator')" prop="vcaddr" align="center"></el-table-column>
+      <el-table-column prop="address" :label="$t('concentrator.courts')" align="center"></el-table-column>
+      <el-table-column :label="$t('concentrator.onlinemeter')" sortable align="center">
+        <template slot-scope="scope">
+          <span>{{(scope.row.dev_total - scope.row.dev_offline)+"/"+scope.row.dev_total}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop :label="$t('concentrator.connection')" align="center" width="100">
+        <template slot-scope="scope">
+          <el-switch v-model="value6" active-color="#13ce66" v-if="scope.row.iscon==true" disabled></el-switch>
+          <el-switch v-if="scope.row.iscon!=true" v-model="value7" active-color="#cccccc" disabled></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column prop="vctime" :label="$t('concentrator.time')" align="center"></el-table-column>
+      <el-table-column prop :label="$t('concentrator.operation')" align="center" width="300">
+        <template slot-scope="scope">
+          <el-button
+            plain
+            size="mini"
+            @click="connect(scope.row.vcaddr)"
+          >{{$t('concentrator.connect')}}</el-button>
+          <el-button
+            size="mini"
+            @click="handleEdit(scope.$index,scope.row)"
+          >{{$t('concentrator.edit')}}</el-button>
+          <el-button
+            size="mini"
+            type="primary"
+            @click="handledetail(scope.$index, scope.row)"
+          >{{$t('concentrator.detail')}}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <paging-query
+      :pager="pager"
+      @setPager="getinformation"
+      @query="setup"
+      @now_drive="setup2"
+      @alldrive="getdeive"
+    />
   </div>
 </template>
 <script>
-import {Parse} from 'parse'
-import treeTable from '@/components/TreeTable'
+import { Parse } from "parse";
+import PagingQuery from "@/components/Pagination";
+import { eventBus } from "@/api/eventBus";
+import {
+  timestampToTime,
+  gettables,
+  makesure,
+  startcon,
+  stopcon,
+  unixtime,
+  submittime,
+  timetounix,
+  startconnect,
+  addcon
+} from "@/api/login";
 export default {
+  components: { PagingQuery },
   data() {
     return {
-      search: "",
-      dialogVisible: false,
-      tableData: [],
-       form: {
-          name: '',
-          resource: '目录',
-          topname:'',
-          rolename:''
-        },
-        parent:'0',
-        current:'',
-        options:[],
-        data:[],
-        key:1,
-        columns: [
-        {
-          label: 'Checkbox',
-          checkbox: true
-        },
-        {
-          label: '',
-          key: 'name',
-          expand: true
-        },
-        {
-          label: 'ID',
-          key: 'id',
-          width: 200,
-          align: 'left'
-        },
-        {
-          label: '上级菜单',
-          key: 'scope'
-        },
-        {
-          label: '操作',
-          key: 'operation'
-        }
-      ],
+      pager: {
+        count: 0,
+        page: 1,
+        rows: 10,
+        name:'111'
+      },
+      draw: 1,
+      vcaddr: "",
+      tableData3: [],
+      obj: {
+        is_online: "状态",
+        vcaddr: "集中器",
+        address: "台区名称",
+        dev_online: "在线电表",
+        iscon: "连接状态",
+        vctime: "集中器时间"
+      }
     };
   },
   mounted() {
+    this.getinformation();
   },
   methods: {
-    searchvalue() {
-
+    setup(item) {
+      this.getinformation();
     },
-    add() {
-      this.dialogVisible = true;
-       var Menu = Parse.Object.extend("Menu");
-       var menu = new Parse.Query(Menu);
-       menu.equalTo('parentId',0)
-       menu.find().then(results=>{
-         console.log(results)
-       })
+    getinformation(item) {
+      console.log(item);
+      if (item) {
+        this.pager.page = item.page;
+        this.pager.rows = item.rows;
+      }
+      gettables(
+        this.vcaddr,
+        (this.pager.page - 1) * this.pager.rows,
+        this.pager.rows,
+        this.draw
+      )
+        .then(res => {
+          res.data.map(item => {
+            item.vctime = timestampToTime(item.vctime);
+          });
+          this.tableData3 = res.data;
+          this.pager.count = res.recordsTotal;
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
-    handleEdit(index, row) {
-      console.log(index, row);
+    getdeive(data) {
+      gettables(
+        this.vcaddr,
+        (data.start - 1) * this.pager.rows,
+        this.pager.rows * (data.end - data.start),
+        this.draw
+      )
+        .then(res => {
+          res.data.map(item => {
+            item.vctime = timestampToTime(item.vctime);
+          });
+          // console.log(res);
+          // this.tableData3 = res.data;
+          // this.pager.count = res.recordsTotal;
+          // console.log(obj);
+          eventBus.$emit("drive", { json: res.data, obj: this.obj });
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
-    handleDelete(index, row) {
-      console.log(index, row);
+    setup2(item) {
+      // console.log(item)
+      this.get_now(item);
     },
-    handleClose(){
-      this.dialogVisible=false
-    },
-    addmenus(){
-            var Object = Parse.Object.extend("Menu");
-            var object = new Object();
-            var acl = new Parse.ACL();
-              object.set("name", this.form.name);
-              object.set("parentId",this.parent);
-              object.set("ACL", acl);
-              object.save().then(object => {
-                this.centerDialogVisible = false;
-            })
-              .catch(console.log("error"));
-    },
-      gettable() {
-        this.tableData = [];
-        var menu = Parse.Object.extend("Menu");
-        var menu = new menu();
-      
-            query.find().then(results => {
-              this.tableData = results;
-            });
-    },
-
-    handleEdit(index, row) {
-       console.log(index, row);
-    },
-        handleDelete(index, row) {
-       console.log(index, row);
-    },
+    // 当页请求
+    get_now(item) {
+      // console.log(this.vcaddr,this.pager.page,this.pager.rows,this.draw);
+      gettables(
+        this.vcaddr,
+        item.page * this.pager.rows - 1,
+        item.rows,
+        this.draw
+      )
+        .then(res => {
+          // console.log(res);
+          res.data.map(item => {
+            item.vctime = timestampToTime(item.vctime);
+          });
+          this.tableData3 = res.data;
+          this.pager.count = res.recordsTotal;
+          console.log(this.tableData3, this.pager.count);
+          eventBus.$emit("drive", { json: this.tableData3, obj: this.obj });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
   }
-   
 };
 </script>
 <style scoped>
 .menu {
   width: 100%;
   min-height: 875px;
-  padding: 20px;
-  margin-top:20px;
+  padding: 20px 20px 40px 20px;
+  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }
 </style>
 <style>
-
 </style>
