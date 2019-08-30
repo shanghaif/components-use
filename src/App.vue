@@ -23,14 +23,13 @@ export default {
     }
   },
   mounted(){
-      // this.getuser()
      Parse.initialize("shuwa", "webapi","HZlora2017");
-    //  Parse.serverURL = "http://148.70.107.74:5080/iotapi";
-     Parse.serverURL = "http://ci.iotn2n.com:5080/iotapi";
+    // Parse.serverURL = "http://148.70.107.74:5080/iotapi";
+    // Parse.serverURL = "http://ci.iotn2n.com:5080/iotapi";
     // Parse.serverURL = "http://192.168.2.113:5080/iotapi";
     // Parse.serverURL = "http://132.232.121.164:5080/iotapi";
-    //  Parse.serverURL = '/iotapi'
-     
+    // Parse.serverURL = "http://prod.iotn2n.com/iotapi";
+    Parse.serverURL = '/iotapi' 
   },
   methods:{
     getuser(){
@@ -54,4 +53,7 @@ export default {
 section{
   background:#f0f2f5;
 }
+#nprogress .bar {
+      background: #67c23a !important;
+    }
 </style>

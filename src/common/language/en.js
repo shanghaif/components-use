@@ -38,5 +38,11 @@ module.exports = {
         'onlinemeter': 'Onlinemeter',
         'operation': 'Operation',
         'time': 'Time'
+  },
+  tagsView: {
+    refresh: 'Refresh',
+    close: 'Close',
+    closeOthers: 'Close Others',
+    closeAll: 'Close All'
   }
 }

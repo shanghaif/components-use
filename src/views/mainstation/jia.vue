@@ -1,73 +1,10 @@
 <template>
   <div class="mainstations">
       <!--第一个tree树-->
-      <div style="width:322px;" class="firstcard">
-        <el-tabs type="border-card" tab-position="left" v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="收藏" name="first"></el-tab-pane>
-          <el-tab-pane label="主网" name="second">
-            <div class="zwheader" style="height:100px;">
-              <el-input placeholder="请输入内容" v-model="searchvalue" style="width:200px">
-                <el-button slot="append" icon="el-icon-search"></el-button>
-              </el-input>
-              <div style="margin-top:20px;">
-                <el-button size="small" type="primary">刷新</el-button>
-                <el-button size="small" type="primary">高级查询</el-button>
-                <el-button size="small" type="primary">重置</el-button>
-              </div>
-            </div>
-            <el-tree
-              :data="treeData"
-              :props="defaultProps"
-              :expand-on-click-node="false"
-              :highlight-current="true"
-              default-expand-all
-              @node-click="handleNodeClick"
-              style="margin-top:20px;"
-            />
-          </el-tab-pane>
-          <!--用户试图-->
-          <el-tab-pane label="配网" name="third">
-            <el-form
-              ref="form"
-              :model="userForm"
-              label-width="100px"
-              style="border-bottom:1px solid #cccccc"
-            >
-              <el-form-item label="用户类型：">
-                <el-select v-model="userForm.usertype" placeholder="请选择用户类型" style="width:176px">
-                  <el-option label="公变" value="shanghai"></el-option>
-                  <el-option label="专变" value="beijing"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="查询类型：">
-                <el-select v-model="userForm.searchtype" placeholder="请选择查询类型" style="width:176px">
-                  <el-option label="用户" value="shanghai"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item label="户号：">
-                <el-input type="text" v-model="userForm.userhh" style="width:176px"></el-input>
-              </el-form-item>
-              <el-form-item label="户名：">
-                <el-input type="text" v-model="userForm.username" style="width:176px"></el-input>
-              </el-form-item>
-              <el-form-item label="终端局号：">
-                <el-input type="text" v-model="userForm.zdjh" style="width:176px"></el-input>
-              </el-form-item>
-              <el-form-item label="逻辑地址：">
-                <el-input type="number" v-model="userForm.ljdz" style="width:176px"></el-input>
-              </el-form-item>
-              <el-form-item size="large" name="third">
-                <el-button type="primary" size="small">查询</el-button>
-                <el-button type="primary" size="small">高级</el-button>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
-          <!--终端试图-->
-          <el-tab-pane label="行业" name="fourth">定时任务补偿</el-tab-pane>
-          <el-tab-pane label="群组" name="five">定时任务补偿</el-tab-pane>
-          <el-tab-pane label="省遥测" name="six">定时任务补偿</el-tab-pane>
-        </el-tabs>
-      </div>
+       <Resource1
+      style="width:360px;height:100vh;overflow:scroll;flex-shrink:0;padding:10px;"
+      @meterdetail="meterdetail"
+    />
       <!--第三个返回数据展示-->
       <div class="secondcard" style="min-height:875px;border-left:2px solid #156FAE;background:#f6fbff" v-if="activeName=='second'">
         <div style="width:100%;height:auto;padding:20px;box-sizing:border-box;">
@@ -100,6 +37,8 @@
               <el-form-item label="通道类型:">
                 <el-select placeholder="数据类型" v-model="formInline.route" style="width:150px">
                   <el-option label="无线" value="tcp"></el-option>
+                   <el-option label="485" value="tcp1"></el-option>
+                    <el-option label="载波" value="tcp2"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="开始测量点号:">
@@ -107,7 +46,7 @@
                   placeholder="开始测量点号"
                   type="number"
                   v-model="formInline.start"
-                  :min="0"
+                  :min="1"
                   :max="2048"
                   style="width:150px"
                 ></el-input>
@@ -117,7 +56,7 @@
                   placeholder="结束测量点号"
                   type="number"
                   v-model="formInline.end"
-                  :min="0"
+                  :min="1"
                   :max="2048"
                   style="width:150px"
                 ></el-input>
@@ -128,7 +67,7 @@
                   type="datetime"
                   placeholder="选择开始时间"
                   value-format="timestamp"
-                  :disabled="isSelecttime"
+                  :picker-options="pickerBeginDateBefore"
                   style="width:150px"
                 ></el-date-picker>
               </el-form-item>
@@ -138,7 +77,7 @@
                   type="datetime"
                   placeholder="选择结束时间"
                   value-format="timestamp"
-                  :disabled="isSelecttime"
+                  :picker-options="pickerBeginDateAfter"
                   style="width:150px"
                 ></el-date-picker>
               </el-form-item>
@@ -146,7 +85,7 @@
           </div>
           <div class="blockfooter">
             <el-button type="primary" @click="getValue">召测</el-button>
-            <el-button type="primary">重置</el-button>
+            <el-button type="primary" @click="test">重置</el-button>
           </div>
           <div style="height:8px;width:100%;background:#ffffff"></div>
           <div class="blockall" style="text-align:center;height:auto">
@@ -173,7 +112,6 @@
       :before-close="handleClose"
       width="82%"
     >
-      <div style="color:green">召测中...</div>
       <el-table
         :data="gridData1.slice((currentPage-1)*pageSize,currentPage*pageSize)"
         style="width:100%;margin-top:10px;"
@@ -182,8 +120,8 @@
         <el-table-column label="序号" type="index" width="50" align="center"></el-table-column>
         <el-table-column property="vcaddr" label="终端逻辑地址" width="120" align="center"></el-table-column>
         <el-table-column property="pn" label="测量点号" width="100" align="center"></el-table-column>
-        <el-table-column property="meteraddr" label="电表名称" align="center"></el-table-column>
-        <el-table-column property="diname" label="数据项标识" width="200" align="center">
+        <el-table-column property="meteraddr" label="电表地址" align="center"></el-table-column>
+        <el-table-column property="diname" label="数据项标识" width="250" align="center">
         </el-table-column>
         <el-table-column property="value" label="数据" align="center"></el-table-column>
         <el-table-column property="time" label="冻结日期" align="center" show-overflow-tooltip></el-table-column>
@@ -196,6 +134,7 @@
           <template slot-scope="scope">
             <span style="color:green" v-if="scope.row.status==1">完成</span>
             <span style="color:green" v-else-if="scope.row.status==0">召测中</span>
+            <span style="color:red" v-else-if="scope.row.status==3">无档案</span>
             <span style="color:red" v-else>超时</span>
           </template>
         </el-table-column>
@@ -225,16 +164,23 @@
 import Parse from "parse";
 import { Mainstationvalue } from "@/api/mainstation";
 import Mainstation from '@/components/mainstation';
+import Resource1 from "@/components/resource/resource";
 import {
   Websocket,
-  sendInfo,
-  TOPIC_EMPTY,
-  MSG_EMPTY,
-  DISCONNECT_MSG,
+  // sendInfo,
+  // TOPIC_EMPTY,
+  // MSG_EMPTY,
+  // DISCONNECT_MSG,
   didata
 } from "@/utils/wxscoket.js";
-
+import { eventBus } from '@/api/eventBus';
+import {timestampToTime} from '@/api/login'
+import { resolve } from 'q';
+import Cookies from 'js-cookie';
 export default {
+  components:{
+    Resource1
+  },
   data() {
     return {
       operatetype:[],
@@ -242,6 +188,7 @@ export default {
       isCollapse:true,
       data1: [],
       value: [],
+      // loading:true,
       renderFunc(h, option) {
         return <span>{option.label}</span>;
       },
@@ -258,10 +205,33 @@ export default {
         start: "1",
         end: "1",
         jiange: "",
-        starttime:"",
+        starttime: "",
         endtime: "",
         route: "tcp"
       },
+      pickerBeginDateBefore: {
+            disabledDate: time => {
+              if (this.formInline.endtime) {
+                return (
+                  time.getTime() > new Date(this.formInline.endtime).getTime()
+                );
+              } else {
+                return time.getTime() > Date.now()- 8.64e6;
+              }
+            }
+         },
+         pickerBeginDateAfter: {
+            disabledDate: time => {
+          if (this.formInline.starttime) {
+            return (
+              time.getTime() > Date.now() ||
+              time.getTime() < new Date(this.formInline.starttime).getTime()
+            );
+          } else {
+            return time.getTime() > Date.now()- 8.64e6;
+          }
+        }
+         },
       operation:'',
       datatype:[],
       dialogTableVisible: false,
@@ -269,7 +239,8 @@ export default {
       data: [],
       defaultProps: {
         children: "children",
-        label: "name"
+        label: "name",
+        isLeaf: 'leaf'
       },
       tableData1: [],
       searchvalue: "",
@@ -284,6 +255,8 @@ export default {
       },
       selectdata: [],
       session: "",
+      data2:{},
+      originrecivedata:[],
       gridData1:[]
     };
   },
@@ -295,18 +268,24 @@ export default {
           child => father.objectId == child.ParentId
         ); //返回每一项的子级数组
         branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
+        branchArr.length > 0 ? (father.leaf = true) : false
         return father.ParentId == 0; //返回第一层
       });
     },
   },
- updated() {
-   this.gridData1=Websocket.originrecivedata;
- },
+//  updated() {
+//    this.gridData1=Websocket.originrecivedata;
+//  },
   mounted() {
-    this.getMainstation();
+    // this.getMainstation('0');
 
-    this.getmess();
+    // this.getmess();
     this.getOperate()
+
+    this.session = sessionStorage.getItem('token')
+    // sessionStorage.setItem('session',this.session)
+     
+     
   },
   methods: {
     getOperate(){
@@ -316,6 +295,9 @@ export default {
       mainstation.ascending('name')
       mainstation.find().then(resultes=>{
         this.operatetype = resultes
+        this.formInline.operation=resultes[1].id
+        this.firstchange(resultes[1].id)
+        
       })
     },
     handleClick(){
@@ -340,29 +322,142 @@ export default {
               }
               this.datatype.push(obj)
             })
-            console.log(this.datatype)
+            this.formInline.datatype =this.datatype[0].key
+            this.dataselect(this.datatype[0].key)
           })
-          // this.datatype = resultes
         })
     },
+    getcheck(data,node){
+     this.getMainstation(data.objectId)
+    },
+    getOrgList(node,resolve) {
+               if (node.level === 0) {
+                 this.data=[]
+                 var Department = Parse.Object.extend("Department");
+                var department = new Parse.Query(Department);
+                department.equalTo('ParentId','0')
+                department.limit(10000)
+                department.find().then(
+                  resultes => {
+                    resultes.map(items => {
+                      var obj = {};
+                      items.createtime = new Date(
+                        items.attributes.createdAt
+                      ).toLocaleDateString();
+                      (obj.name = items.attributes.name),
+                        (obj.ParentId = items.attributes.ParentId);
+                      obj.objectId = items.id;
+                      obj.level = items.attributes.level;
+                      obj.createtime = items.createtime;
+                      obj.alias = items.attributes.alias
+                      obj.leaf = items.attributes.leafnode
+                      obj.icon = items.attributes.org_type
+                      this.data.push(obj);
+                    });
+                     return resolve(this.data);
+                  },
+                  error => {
+                    resolve([])
+                  }
+                );
+                 console.log(this.data)
+               
+                }else{
+                  this.data=[]
+                var Department = Parse.Object.extend("Department");
+                var department = new Parse.Query(Department);
+                department.equalTo('ParentId',node.data.objectId)
+                department.limit(10000)
+                department.find().then(
+                  resultes => {
+                    resultes.map(items => {
+                      var obj = {};
+                      items.createtime = new Date(
+                        items.attributes.createdAt
+                      ).toLocaleDateString();
+                      (obj.name = items.attributes.name),
+                        (obj.ParentId = items.attributes.ParentId);
+                      obj.objectId = items.id;
+                      obj.level = items.attributes.level;
+                      obj.createtime = items.createtime;
+                      obj.alias = items.attributes.alias
+                      obj.leaf = items.attributes.leafnode
+                      obj.icon = items.attributes.org_type
+                      this.data.push(obj);
+                    });
+                     return resolve(this.data);
+                  },
+                  error => {
+                    resolve([])
+                  }
+                );
+        
+            }
+          },
+    test(){
+      this.formInline={
+        protocol: "30",
+        user: "",
+        vcaddr: "",
+        datatype:"",
+        operation: "",
+        start: "1",
+        end: "1",
+        jiange: "",
+        starttime: new Date(),
+        endtime:  new Date(),
+        route: "tcp"
+      }
+      this.getOperate()
+    },
     getValue() {
-      
+      this.gridData1.length=0
+      if(this.selectdata.length==0){
+        this.$message({
+           type: "warning",
+            message: "请选择数据项标识"
+        })
+      }else if(Websocket.connState==false){
+        this.$message({
+            type: "warning",
+            message: "正在重新连接，请稍后"
+        })
+        
+      }else if(this.formInline.vcaddr==''){
+         this.$message({
+           type: "warning",
+            message: "请挑选集中器或电表"
+        })
+        }else{
+      var _this=this
       Websocket.originrecivedata=[]
-      var session = 'F'+Math.ceil(Math.random()*100000)
-      var info = {
-        topic: "vmsc/send/" +session,
-        qos: 0
-      };
-      Websocket.subscribe(info, function(res) {
-        if (res.result) {
-          console.log(info)
-          console.log("订阅成功");
-        }
-      });
+      var ranNum = Math.ceil(Math.random() * 25)
+      var operation = String.fromCharCode(65+ranNum)+Math.ceil(Math.random()*100000)
+        eventBus.$on(operation, data => {
+           _this.gridData1=[]
+            data.data.map(items => {
+            didata.map(child => {
+              if (items.di == child.key) {
+                _this.gridData1.unshift({
+                  "di": items.di,
+                  "pn": items.pn,
+                  "value": items.value,
+                  "vcaddr": data.vcaddr,
+                  "ts": timestampToTime(items.ts),
+                  "meteraddr": items.meteraddr,
+                  "diname": child.label,
+                  "time":items.time,
+                  "status":items.status
+                })
+              }
+            })
+          })
+          });
+          this.formInline.route = 'tcp'
       Mainstationvalue(
         this.formInline.vcaddr,
-        session,
-        this.formInline.operation,
+        this.session,
+        operation,
         this.operation,
         this.formInline.start,
         this.formInline.end,
@@ -372,35 +467,63 @@ export default {
         this.formInline.protocol,
         this.selectdata
       ).then(resultes => {
-        this.dialogTableVisible = true;
+        if(resultes){
+          this.dialogTableVisible = true;
+        }
       }).catch(error=>{
         this.$message({
           type: "error",
-          message: "下发失败"
+          message: error.error
         })
       });
+      }
+     
       
     },
     handleChange(value) {
       this.selectdata = value;
     },
-    handleNodeClick(row) {
-      this.formInline.vcaddr = row.webName;
+    meterdetail(row) {
+      if(row.icon!='集中器'&&row.icon!='电表'){
+        this.$message({
+              type: "warning",
+              message: "请挑选集中器或电表"
+            });
+      }else if(row.icon=='集中器'){
+        this.formInline.vcaddr = row.alias;
+        this.formInline.start = 1
+          this.formInline.end = 1
+      }else if(row.icon=='电表'){
+        var Smartmeter = Parse.Object.extend("Smartmeter");
+        var smartmeter = new Parse.Query(Smartmeter);
+        smartmeter.get(row.objectId).then(resultes=>{
+          this.formInline.vcaddr = resultes.attributes.vcaddr_web
+          this.formInline.start = resultes.attributes.pn
+          this.formInline.end = resultes.attributes.pn
+        },error=>{
+          this.$message({
+            type:'error',
+            message:error.error
+          })
+        })
+      }
+      
     },
     handleSizeChange(val) {
-      // console.log(`每页 ${val} 条`);
+      
       this.currentPage = 1;
       this.pageSize = val;
     },
     handleCurrentChange(val) {
-      // console.log(`当前页: ${val}`);
       this.currentPage = val;
     },
-    getMainstation() {
-      this.data = [];
+    getMainstation(objectId) {
+      // this.data = [];
       this.session = Parse.User.current().attributes.sessionToken;
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
+      department.equalTo('ParentId',objectId)
+      department.limit(10000)
       department.find().then(
         resultes => {
           resultes.map(items => {
@@ -413,7 +536,9 @@ export default {
             obj.objectId = items.id;
             obj.level = items.attributes.level;
             obj.createtime = items.createtime;
-            obj.webName = items.attributes.webName
+            obj.alias = items.attributes.alias
+            obj.leaf = items.attributes.leafnode
+            obj.icon = items.attributes.org_type
             this.data.push(obj);
           });
         },
@@ -430,13 +555,8 @@ export default {
         }
       );
     },
-    getmess() {
-      // Websocket.cInfo.host='ci.iotn2n.com'
-      Websocket.cInfo.host = location.hostname;
-      Websocket.newClient();
-      Websocket.connect();
-    },
     dataselect(val) {
+      didata.length=0
       this.value=[]
       this.data1=[]
       this.datatype.map(items=>{
@@ -467,21 +587,22 @@ export default {
         this.formInline.endtime = new Date()
         }else if(this.operation=='c.2'){
            this.isSelecttime=true
-           this.formInline.starttime = ''
-           this.formInline.endtime = ''
+           this.formInline.endtime = new Date().getTime();
+           this.formInline.starttime = this.formInline.endtime-3*84600000;
         }
-    }
+    },
   }
 };
 </script>
 <style scoped>
 .mainstations {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  padding-bottom: 20px;
   box-sizing: border-box;
   background: #ffffff;
-  box-sizing:border-box;
   display:flex;
+  overflow: scroll;
 }
 .blockcontent {
   height:auto;
@@ -493,7 +614,7 @@ export default {
 }
 </style>
 <style>
-.mainstations .el-tabs--left .el-tabs__item.is-left {
+ .mainstations .el-tabs--left .el-tabs__item.is-left {
   width: 38px;
   white-space: pre-wrap;
   height: auto;
@@ -506,7 +627,7 @@ export default {
   font-size:18px;
 }
 .mainstations .el-tabs--left.el-tabs--border-card .el-tabs__header.is-left {
-  min-height: 875px;
+  min-height: 100%;
 }
 .mainstations .el-tabs__header {
   background: #1579bf;
@@ -538,7 +659,7 @@ export default {
 }
 .mainstations .el-transfer-panel__body {
   height: 400px;
-}
+} 
 .mainstations .demo-form-inline .el-input__inner {
   border-radius:0;
   height:26px;
@@ -565,7 +686,7 @@ export default {
 }
 .mainstations .el-tabs--border-card{
   border:0;
-  width:322px;
+  width:340px;
 }
 .mainstations .el-tabs__item{
   line-height:20px;
@@ -600,6 +721,10 @@ height:25px;
   width:174px;
   border-radius:0;
 }
+.mainstations .el-transfer__button:nth-child(2){
+  position:relative;
+  top:-80px;
+}
 @media screen and (max-width: 1450px) { /*当屏幕尺寸小于750px时，应用下面的CSS样式*/
         .mainstations .el-transfer__buttons{
           width:200px;
@@ -607,6 +732,23 @@ height:25px;
      .mainstations .el-transfer-panel{
        width:300px;
      }
-    } 
+    }
+    @media screen and (max-width:1100px){
+      .mainstations .el-transfer__buttons{
+        width:50px;
+      }
+      .mainstations .el-transfer-panel__item.el-checkbox .el-checkbox__label{
+        font-size:10px;
+      }
+       .el-transfer__buttons .el-button{
+         width:50px;
+       }
+        .mainstations .el-transfer__buttons{
+          width:170px;
+     }
+     .mainstations .el-transfer-panel{
+       width:200px;
+     }
+    }
 </style>
 

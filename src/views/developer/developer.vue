@@ -29,7 +29,6 @@ export default {
      background:#ffffff;
     padding-left:20px;
     padding-top:20px;
-    margin-top:20px;
     box-sizing: border-box;
     min-height:800px;
     display: flex;

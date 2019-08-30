@@ -6,7 +6,7 @@ export function report(start, length, concentrator) {
     return request({
         url: '/shuwa_device/data_source/MSC/devs',
         method: 'get',
-        data: {
+        params: {
             draw: 1,
             start: start,
             length: length,
@@ -20,7 +20,7 @@ export function connectlist(start, length, concentrator) {
     return request({
         url: '/data_source/MSC/devs',
         method: 'get',
-        data: {
+        params: {
             draw: 1,
             start: start,
             length: length,

@@ -1,29 +1,30 @@
 <template>
-  <div v-if="!item.hidden" class="menu-wrapper" style="width:150px;float:left;height:40px;">
+  <div v-if="!item.hidden" class="menu-wrapper" style="height:40px;">
     <!--根据取回来菜单生成-->
-     <!-- <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
-      <app-link v-if="onlyOneChild.name" :to="resolvePath(onlyOneChild.url)">
-        <el-menu-item :index="resolvePath(onlyOneChild.url)" :class="{'submenu-title-noDropdown':!isNest}">
-          <item :icon="onlyOneChild.icon||(item.name&&item.icon)" :title="generateTitle(onlyOneChild.name)" />
+     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&(!item.children)" >
+      <app-link v-if="onlyOneChild.name" :to="resolvePath(onlyOneChild.url)" >
+        <el-menu-item :index="resolvePath(onlyOneChild.url)" :class="{'submenu-title-noDropdown':!isNest}" @click.native="reloadnow(onlyOneChild.url,onlyOneChild.name)">
+          <item :icon="onlyOneChild.icon||(item.name&&item.icon)" :title="generateTitle(onlyOneChild.name)"/>
         </el-menu-item>
       </app-link>
     </template>
 
-    <el-submenu v-else ref="subMenu" :index="resolvePath(item.url)" popper-append-to-body>
+    <el-submenu v-else ref="subMenu" :index="resolvePath(item.url)" :key="item.id" popper-append-to-body>
       <template slot="title">
         <item v-if="item.name" :icon="item.name && item.icon" :title="generateTitle(item.name)" />
       </template>
       <sidebar-item
         v-for="child in item.children"
-        :key="child.rul"
+        :key="child.id"
         :is-nest="true"
         :item="child"
         :base-path="resolvePath(child.url)"
         class="nest-menu"
+        @click.native="reloadnow(child.url,child.name)"
       />
-    </el-submenu> -->
+    </el-submenu>
    <!--根据和路由比较生成-->
-    <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
+    <!-- <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&(!item.children)">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
           <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="generateTitle(onlyOneChild.meta.title)" style="background-color:white"/>
@@ -43,7 +44,7 @@
         :base-path="resolvePath(child.path)"
         class="nest-menu"
       />
-    </el-submenu>
+    </el-submenu> -->
 
   </div>
 </template>
@@ -58,6 +59,7 @@ import AppLink from './Link'
 export default {
   name: 'SidebarItem',
   components: { Item, AppLink },
+  inject:['reload'],
   props: {
     // route object
     item: {
@@ -108,7 +110,16 @@ export default {
       }
       return path.resolve(this.basePath, routePath)
     },
-
+    reloadnow(url,name){
+        if(url.indexOf('http')==-1){
+          this.$router.push({
+          path:url,
+          query:{
+            reload:true
+          }
+        })
+      }
+    },
     generateTitle
   }
 }
@@ -116,5 +127,9 @@ export default {
 <style>
 .nest-menu .svg-icon{
   margin-right:16px;
+}
+.el-submenu__title *{
+  box-sizing:border-box;
+  /* color:#ffffff; */
 }
 </style>

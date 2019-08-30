@@ -19,10 +19,13 @@
               <img :src='imgsrc2' style="width:20px;height:20px;" v-else-if="data.icon=='供电局'">
               <img :src='imgsrc3' style="width:20px;height:20px;" v-else-if="data.icon=='变压器'">
               <img :src='imgsrc4' style="width:20px;height:20px;" v-else-if="data.icon=='线路'">
-              <span style="padding-left: 4px;">{{node.label}}</span>
+              <img :src='imgsrc5' style="width:20px;height:20px;" v-else-if="data.icon=='电表'">
+              <span style="padding-left: 4px;" v-if="data.icon=='集中器'">(集中器){{node.label}}</span>
+              <span style="padding-left: 4px;" v-else-if="data.icon=='电表'">(电能表){{node.label}}</span>
+              <span style="padding-left: 4px;" v-else>{{node.label}}</span>
             </span>
             </el-tree>
-            <!--添加的dialog-->
+            
         </div>
     </div>
 </template>
@@ -36,17 +39,15 @@ export default {
         search:'',
          defaultProps: {
             children: "children",
-            label: "name"
-      },
-      imgsrc: require("../../imgages/Artboard5.png"),
-      imgsrc1:require("../../imgages/Artboard1.png"),
-      imgsrc2:require("../../imgages/Artboard4.png"),
-      imgsrc3:require("../../imgages/Artboard3.png"),
-      imgsrc4:require("../../imgages/Artboard2.png"),
+            label: "name",
+        },
+        imgsrc: require("../../imgages/Artboard5.png"),
+        imgsrc1:require("../../imgages/Artboard1.png"),
+        imgsrc2:require("../../imgages/Artboard4.png"),
+        imgsrc3:require("../../imgages/Artboard3.png"),
+        imgsrc4:require("../../imgages/Artboard2.png"),
+        imgsrc5:require("../../imgages/Artboard6.png"),
       }
-   },
-   watch:{
-       
    },
    computed: {
     treeData() {
@@ -59,6 +60,7 @@ export default {
         branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
         return father.ParentId == 0; //返回第一层
       });
+      
     },
   },
    mounted() {
@@ -66,7 +68,7 @@ export default {
    },
    methods: {
       handleNodeClick(row) {
-          this.$emit('lookdata',row);
+        this.$emit('lookdata',row);
           // console.log(row);
       },
      searchuser(){
@@ -163,10 +165,10 @@ export default {
 </script>
 <style>
 .resource .el-input__inner{
-height: 26px;
-border-radius: 0;
-line-height: 26px;
-width: 150px;
+  height: 26px;
+  border-radius: 0;
+  line-height: 26px;
+  width: 150px;
 }
 </style>
 

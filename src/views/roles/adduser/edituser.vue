@@ -84,11 +84,11 @@ export default {
         var  User = new Parse.User()
         var  user= new Parse.Query(User);
         user.get(userid).then(resultes=>{
-          this.ruleForm2.username = resultes.attributes.chinesename
+          this.ruleForm2.username = resultes.attributes.nick
           this.ruleForm2.phone = resultes.attributes.phone
           this.ruleForm2.account = resultes.attributes.username
           this.ruleForm2.email = resultes.attributes.email
-          this.ruleForm2.departmentid.push(resultes.attributes.department.id)
+          // this.ruleForm2.departmentid.push(resultes.attributes.department.id)
           this.getDepartment()
         })
         
@@ -146,7 +146,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-   margin-top:20px;
   box-sizing: border-box;
   background: #ffffff;
 }

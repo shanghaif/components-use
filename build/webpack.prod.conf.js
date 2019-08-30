@@ -111,10 +111,15 @@ const webpackConfig = merge(baseWebpackConfig, {
           priority: 10,
           chunks: 'initial' // 只打包初始时依赖的第三方
         },
-        elementUI: {
-          name: 'chunk-elementUI', // 单独将 elementUI 拆包
-          priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
-          test: /[\\/]node_modules[\\/]element-ui[\\/]/
+        // elementUI: {
+        //   name: 'chunk-elementUI', // 单独将 elementUI 拆包
+        //   priority: 20, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+        //   test: /[\\/]node_modules[\\/]element-ui[\\/]/
+        // },
+        axios: {
+          name: 'chunk-axios', // 单独将 elementUI 拆包
+          priority: 30, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+          test: /[\\/]node_modules[\\/]axios[\\/]/
         }
       }
     },

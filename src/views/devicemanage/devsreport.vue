@@ -2,7 +2,7 @@
     <div class="devsreport">
         <div class="devsreporttop">
             <label for="">采集器：</label>
-            <el-input v-model="devsreport" placeholder="请输入内容"></el-input>
+            <el-input v-model="devsreport" placeholder="请输入采集器地址"></el-input>
             <el-button type="primary" style="margin-left:20px;" @click="information">查询</el-button>
         </div>
         <div class="devsreportsection">
@@ -12,12 +12,8 @@
                     :data="tableData3"
                     tooltip-effect="dark"
                     style="width:100%;text-align:center"
-                    @selection-change="handleSelectionChange">
-                    <!-- <el-table-column
-                    type="selection"
-                    width="55"
-                    align="center">
-                    </el-table-column> -->
+                    @selection-change="handleSelectionChange"
+                    v-loading="loading">
                     <el-table-column
                     label="状态"
                     align="center"
@@ -80,7 +76,8 @@ export default {
           draw:1,
           devsreport:'',
           tableData3: [],
-        multipleSelection: []
+          multipleSelection: [],
+          loading:true
       }
    },
    mounted(){
@@ -96,16 +93,18 @@ export default {
        
       },
       handleCurrentChange(val) {
-        this.start=(val-1)*10
+        this.start=(val-1)*this.length
         this.information()
       },
       //初始化数据
       information(){
+          this.loading=true
           getdevsreport(this.start,this.length,this.draw,this.devsreport).then(res=>{
-              if(res.result==true){
+              console.log(res)
                   this.tableData3 =res.data
                   this.total = res.recordsFiltered
-              }
+                  this.loading=false
+                  
           }).catch(error=>{
               console.log(error)
           })
@@ -131,9 +130,88 @@ export default {
     background:#ffffff;
     padding-left:20px;
     padding-top:20px;
-    margin-top:20px;
     box-sizing: border-box;
-    min-height:875px;
+    min-height:100%;
+}
+.devsreportsection{
+    margin-top:30px;
+}
+</style>
+<style>
+    .devsreporttop .el-input{
+        width:200px;
+    }
+    .devsreport .el-table th{
+    background:#fafafa;
+    color:#666666;
+    font-weight:600;
+}
+</style>
+
+<script>
+import {getdevsreport} from '@/api/login'
+export default {
+   data() {
+      return {
+          start:0,
+          length:10,
+          total:0,
+          draw:1,
+          devsreport:'',
+          tableData3: [],
+        multipleSelection: []
+      }
+   },
+   mounted(){
+       this.information()
+   },
+   methods:{
+       handleSelectionChange(val) {
+           console.log(val)
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        this.length=val
+        this.information()
+       
+      },
+      handleCurrentChange(val) {
+        this.start=(val-1)*10
+        this.information()
+      },
+      //初始化数据
+      information(){
+          getdevsreport(this.start,this.length,this.draw,this.devsreport).then(res=>{
+              console.log(res)
+                  this.tableData3 =res.data
+                  this.total = res.recordsFiltered
+          }).catch(error=>{
+              console.log(error)
+          })
+      },
+        //编辑
+       handleEdit(index, row){
+
+       }, 
+       //查看详情
+       handledetail(index,val){
+           this.devsreport = val
+           this.$router.push({path:'/devicemanage/devsdetail',query:{devsreport:val}})
+       },
+       //查询
+    //    search(){
+    //        getdevsreport()
+    //    }
+   },
+}
+</script>
+<style scoped>
+.devsreport{
+    background:#ffffff;
+    padding-left:20px;
+    padding-top:20px;
+    box-sizing: border-box;
+    min-height:100%;
 }
 .devsreportsection{
     margin-top:30px;

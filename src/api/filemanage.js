@@ -15,7 +15,7 @@ export function Upload(node, country, province, city, path) {
 }
 export function addmeterforuser(meterdata) {
   return request({
-    url: '/vconcentrator/import_user_meter',
+    url: '/yhgx',
     method: 'post',
     data: {
      yhabh:meterdata.yhabh,

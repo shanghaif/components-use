@@ -37,5 +37,11 @@ module.exports = {
           'onlinemeter': '在线电表',
           'operation': '操作',
           'time': '集中器时间'
+      },
+      tagsView: {
+        refresh: '刷新',
+        close: '关闭',
+        closeOthers: '关闭其它',
+        closeAll: '关闭所有'
       }
   }

@@ -96,7 +96,7 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 875px;
+  min-height: 100%;
 }
 h2 {
   margin-top: 20px;

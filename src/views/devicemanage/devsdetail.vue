@@ -40,11 +40,6 @@
                     label="PN值"
                     >
                     </el-table-column>
-                     <!-- <el-table-column
-                    prop="shortaddr"
-                    label="短地址"
-                    >
-                    </el-table-column> -->
                      <el-table-column
                     label="电表状态"
                     >
@@ -303,9 +298,8 @@ export default {
     background:#ffffff;
     padding-left:20px;
     padding-top:20px;
-    margin-top:20px;
     box-sizing: border-box;
-    min-height:875px;
+    min-height:100%;
 }
 .topsearch,.secondsearch{
     margin-top:30px;
@@ -325,3 +319,4 @@ export default {
     padding-bottom:50px;
 }
 </style>
+

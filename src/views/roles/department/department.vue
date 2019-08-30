@@ -20,10 +20,19 @@
             :show-all-levels="false"
             change-on-select
           ></el-cascader>
+
         </el-form-item>
         <el-form-item label="Level">
           <el-input v-model="form.level"></el-input>
         </el-form-item>
+          <el-form-item label="类别">
+            <el-select v-model="form.type" placeholder="请选择类别" style="width:100%;">
+              <el-option label="省电力公司" value="省电力公司"></el-option>
+              <el-option label="供电局" value="供电局"></el-option>
+              <el-option label="集中器" value="集中器"></el-option>
+              <el-option label="电表" value="电表"></el-option>
+            </el-select>
+          </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -69,6 +78,7 @@
 <script>
 import treeTable from "@/components/TreeTable";
 import { Parse } from "parse";
+import {utc2beijing} from '@/utils'
 export default {
   name: "TreeTableDemo",
   components: { treeTable },
@@ -80,7 +90,7 @@ export default {
       departmentid: "",
       formLabelWidth: "120px",
       departmentEdit: false,
-      defaultExpandAll: false,
+      defaultExpandAll: true,
       showCheckbox: true,
       key: 1,
       treeprops: {
@@ -91,13 +101,14 @@ export default {
         {
           label: "名称",
           key: "name",
-          expand: true
+          expand: true,
+          align:'left'
         },
         {
           label: "ID",
           key: "objectId",
           width: 200,
-          align: "center"
+          // align: "center"
         },
         {
           label: "level",
@@ -106,7 +117,7 @@ export default {
         {
           label: "创建时间",
           key: "createtime",
-          align: "center"
+          // align: "center"
         },
         {
           label: "操作",
@@ -123,7 +134,8 @@ export default {
         resource: "菜单",
         topname: "",
         departmentid: [],
-        level: ""
+        level: "",
+        type:''
       },
       parent: "",
       current: "",
@@ -173,6 +185,8 @@ export default {
         );
       }
       department.set("name", this.form.name);
+      department.set("org_type", this.form.type);
+      department.set("leafnode", false);
       department.save().then(res => {
         this.$message({
           message: "新增成功",
@@ -244,15 +258,13 @@ export default {
       this.data = [];
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
+       department.equalTo('leafnode',false)
       department.find().then(resultes => {
-        // console.log(resultes)
         resultes.map(items => {
           var obj = {};
-          items.createtime = new Date(
-            items.attributes.createdAt
-          ).toLocaleDateString();
-          (obj.name = items.attributes.name),
-            (obj.ParentId = items.attributes.ParentId);
+          items.createtime = utc2beijing(items.createdAt)
+          obj.name = items.attributes.name,
+          obj.ParentId = items.attributes.ParentId;
           obj.objectId = items.id;
           obj.level = items.attributes.level;
           obj.createtime = items.createtime;

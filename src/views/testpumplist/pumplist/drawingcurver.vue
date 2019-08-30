@@ -21,7 +21,7 @@
                <el-table
                 :data="Dataavange"
                  border
-                style="width: 100%;margin-top:10px;">
+                style="width: 100%;margin-top:10px;height:100%">
                 <el-table-column
                   prop="flow"
                   :label='"流量\n(m³/h)"'
@@ -144,6 +144,8 @@ export default {
     this.init();
     timer=null
    this.getcurvedata()
+    window.clearInterval(this.timer)
+    this.setTimer()
   },
   methods: {
      timestampToTime(timestamp) {
@@ -155,6 +157,12 @@ export default {
       var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
       var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
       return Y+M+D+h+m+s;
+    },
+     setTimer(){
+      this.timer = window.setInterval(() => {
+        this.getcurvedata();
+      }, 10000);
+      
     },
     getcurvedata(){
        xaxis = []//时间
@@ -393,8 +401,8 @@ export default {
           message: "请勾选区域!"
         });
       }else{
-        var start =  origindata[selectdata[0]].timestamp
-        var end = origindata[selectdata[1]].timestamp
+        var start =  origindata[selectdata[1]].timestamp
+        var end = origindata[selectdata[0]].timestamp
          getaveragedata(this.reportId,'capture_line_chart',start,end).then(resultes=>{
            this.Dataavange.push(resultes)
          })
@@ -621,6 +629,11 @@ export default {
         });
       },0);
     }
+  },
+  beforeDestroy(){
+      window.clearInterval(this.timer)
+      this.timer = null
+    
   }
 };
 </script>
@@ -629,7 +642,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

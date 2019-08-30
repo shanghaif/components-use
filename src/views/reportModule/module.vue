@@ -107,19 +107,24 @@ export default {
       }
     },
     addmodule() {
-        // console.log(this.editor.getValue())
-        // console.log(addReport)
-      addReport(this.editor.getValue(), this.reportId).then(resultes => {
-        this.$message({
-          type: "success",
-          message: "添加成功!"
-        });
-        this.$router.push({
-            path:'/reportmodule/index'
+      addReport(this.editor.getValue(), this.reportId)
+        .then(resultes => {
+          if (resultes) {
+            this.$message({
+              type: "success",
+              message: "添加成功!"
+            });
+            this.$router.push({
+              path: "/reportmodule/index"
+            });
+          }
         })
-      }).catch(error=>{
-          console.log(error)
-      });
+        .catch(error => {
+          this.$message({
+            type: "error",
+            message: error.error
+          });
+        });
     }
   },
   mounted() {
@@ -133,7 +138,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top:20px;
   box-sizing: border-box;
   background: #ffffff;
 }

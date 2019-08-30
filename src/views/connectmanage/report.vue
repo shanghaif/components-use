@@ -1,6 +1,6 @@
 <template>
     <div class="report">
-        <div class="top"> 
+        <!-- <div class="top"> 
             <div class="left"> 
                 <span>集中器个数</span>
                 <p>{{total}}</p>
@@ -13,18 +13,19 @@
                 <span>在线率</span>
                 <p>{{metersuccess.toFixed(2)}}%</p>
             </div>
-        </div>
+        </div> -->
          <div class="center">
                 <div class="centertop">
                     <label for="">集中器：</label>
-                    <el-input v-model="concentrator" placeholder="请输入内容"></el-input>
-                    <el-button type="primary" style="margin-left:50px;" @click="search">{{ $t('concentrator.search') }}</el-button>
+                    <el-input v-model="concentrator" placeholder="请输入集中器地址"></el-input>
+                    <el-button type="primary" style="margin-left:50px;" @click="searchvalue">{{ $t('concentrator.search') }}</el-button>
             
                 </div>
                 <div class="centertables">
                      <el-table
                         :data="tableData"
                         style="width: 100%;text-align:center"
+                        v-loading="loading"
                         >
                         <el-table-column type="expand"
                         align="left"
@@ -114,26 +115,39 @@ export default {
           tableData: [],
           success:0,
           metertotal:0,
-          metersuccess:0
+          metersuccess:0,
+          loading:true
       }
    },
    mounted() {
        this.search()
    },
    methods: {
-       search(){
-           connectlist(this.start,this.length,this.concentrator).then(response=>{
-            //   if(response.result===true){
+       searchvalue(){
+           this.loading=true
+           connectlist(0,10,this.concentrator).then(response=>{
+           
                  response.data.map(item=>{
                      if(Object.keys(item.report).length>=2){
-                         for(let i=0;i<Object.keys(item.report).length;i++){
+                         if(item.dev_total==0){
+                              item.success = 0
+                            }else{
+                                 for(let i=0;i<Object.keys(item.report).length;i++){
                              this.success +=item.report[Object.keys(item.report)[i]].succ
                          }
-                          item.success=this.success/(item.dev_total*Object.keys(item.report).length)*100
-                          metersuccess=(item.success/item.dev_total)
-                          this.metertotal+=item.dev_total
+                        item.success=this.success/(item.dev_total*Object.keys(item.report).length)*100
+                        metersuccess=(item.success/item.dev_total)
+                         this.metertotal+=item.dev_total
+                        }
+                        
+                         
                       }else if(Object.keys(item.report).length==1){
-                          item.success=item.report[Object.keys(item.report)[0]].succ/item.dev_total*100
+                          if(item.dev_total==0){
+                              item.success = 0
+                          }else{
+                              item.success=item.report[Object.keys(item.report)[0]].succ/item.dev_total*100
+                          }
+                          
                       }else {
                           item.success=0;
                       }
@@ -141,6 +155,46 @@ export default {
                  })
                   this.tableData=response.data
                   this.total=response.recordsFiltered
+                  this.loading=false
+                  
+            //   }
+           }).catch(error=>{
+               console.log(error)
+           })
+       },
+       search(){
+           this.loading=true
+           connectlist(this.start,this.length,this.concentrator).then(response=>{
+           
+                 response.data.map(item=>{
+                     if(Object.keys(item.report).length>=2){
+                         if(item.dev_total==0){
+                              item.success = 0
+                            }else{
+                                 for(let i=0;i<Object.keys(item.report).length;i++){
+                             this.success +=item.report[Object.keys(item.report)[i]].succ
+                         }
+                        item.success=this.success/(item.dev_total*Object.keys(item.report).length)*100
+                        metersuccess=(item.success/item.dev_total)
+                         this.metertotal+=item.dev_total
+                        }
+                        
+                         
+                      }else if(Object.keys(item.report).length==1){
+                          if(item.dev_total==0){
+                              item.success = 0
+                          }else{
+                              item.success=item.report[Object.keys(item.report)[0]].succ/item.dev_total*100
+                          }
+                          
+                      }else {
+                          item.success=0;
+                      }
+                     
+                 })
+                  this.tableData=response.data
+                  this.total=response.recordsFiltered
+                  this.loading=false
                   
             //   }
            }).catch(error=>{
@@ -152,17 +206,23 @@ export default {
         this.search()
       },
       handleCurrentChange(val) {
-        this.start=(val-1)*10
+        this.start=(val-1)*this.length
         this.search()
       },
    }
 }
 </script>
 <style scoped>
+.report{
+    background:#ffffff;
+    padding-left:20px;
+    padding-bottom:20px;
+    box-sizing: border-box;
+    min-height:100%;
+}
 .top{
     width:100%;
     height:150px;
-    margin-top:20px;
     padding-top:50px;
     box-sizing: border-box;
     background:#ffffff;

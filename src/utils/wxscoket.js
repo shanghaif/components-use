@@ -1,8 +1,26 @@
 var TOPIC_EMPTY = 'topic为空！'
 var MSG_EMPTY = '消息内容为空！'
 var DISCONNECT_MSG = '当前尚未连接'
-
+import { Message } from 'element-ui'
 // eslint-disable-next-line no-unused-vars
+// import Parse from 'parse'
+// Parse.initialize("shuwa", "webapi","HZlora2017");
+// Parse.serverURL = "http://ci.iotn2n.com:5080/iotapi";
+// var Clentsession = Parse.User.current().attributes.sessionToken
+// console.log(Clentsession)
+var clientssession=sessionStorage.getItem('token')
+var info ={
+  topic: "web/"+clientssession, 
+  qos: 2,
+};
+function getsession(session){
+    clientssession = session
+    info = {
+    topic: "web/"+clientssession, 
+    qos: 2,
+  };
+  }
+ 
 function formatDate(date, fmt) {
   if (/(y+)/.test(fmt)) {
     fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
@@ -22,16 +40,6 @@ function formatDate(date, fmt) {
   }
   return fmt
 }
-function  timestampToTime(timestamp) {
-  var date = new Date(timestamp * 1000)
-  var Y = date.getFullYear() + '-';
-  var M = (date.getMonth() + 1 <= 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
-  var D = (date.getDate() + 1 <= 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
-  var h = (date.getHours() + 1 <= 10 ? '0' + (date.getHours()) : date.getHours()) + ':';
-  var m = (date.getMinutes() + 1 <= 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':';
-  var s = (date.getSeconds() + 1 <= 10 ? '0' + (date.getSeconds()) : date.getSeconds());
-  return Y + M + D + h + m + s;
-}
 const didata = [];
 function padLeftZero(str) {
   return ('00' + str).substr(str.length)
@@ -42,7 +50,7 @@ var sendInfo = {
   qos: 0,
   retained: true
 }
-
+ 
 // eslint-disable-next-line no-unused-vars
 var Websocket = {
   modName: 'websocket',
@@ -55,10 +63,12 @@ var Websocket = {
     userName: 'test',
     password: 'test123',
     keepAlive: null,
-    cleanSession: true
+    keepAliveInterval:10,
+    cleanSession: false
   },
   sendInfo: '{}',
   tablelist: [],
+  subInfo:info,
   originrecivedata: [],
   send: function () {
     var _this = this
@@ -72,14 +82,18 @@ var Websocket = {
     } catch (e) {
     }
     // eslint-disable-next-line no-undef
-    _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: 'onConnectionLost: ' + JSON.stringify(Msg) })
     console.log(111)
   },
+    // timer:function(){
+    //   var _this=this
+    //   setTimeout(() => {
+    //     _this.connect()
+    //   }, 5000)
+    // },
   newClient: function () {
     var _this = this
     // eslint-disable-next-line no-undef
     _this.client = new Paho.MQTT.Client(_this.cInfo.host, Number(_this.cInfo.port), _this.cInfo.clientId)
-    // _this.connect()
   },
   sslPort: function () {
     var _this = this
@@ -91,43 +105,27 @@ var Websocket = {
     }
   },
   recive: function (msg) {
-    // console.log(msg)
-    var _this = this
-    var origindata = JSON.parse(msg)
-    _this.originrecivedata.length=0
-      origindata.data.map(items => {
-        didata.map(child => {
-          if (items.di == child.key) {
-            _this.originrecivedata.unshift({
-              "di": items.di,
-              "pn": items.pn,
-              "value": items.value,
-              "vcaddr": origindata.vcaddr,
-              "ts": timestampToTime(items.ts),
-              "meteraddr": items.meteraddr,
-              "diname": child.label,
-              "time":items.time,
-              "status":items.status
-            })
-          }
-        })
-      })
-    console.log(_this.originrecivedata)
+    console.log(msg)
   },
   connect: function () {
     var _this = this
     // eslint-disable-next-line no-undef
-    _this.newClient()
-    if (!_this.client) {
-      return
+    if (_this.client.isConnected()) {
+  
+      return 
     }
-
+    // _this.newClient()
     _this.client.onConnectionLost = function (responseObject) {
       if (responseObject.errorCode !== 0) {
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: 'onConnectionLost: ' + JSON.stringify(responseObject.errorMessage) })
         console.log('onConnectionLost: ' + responseObject.errorMessage)
+        setTimeout(function(){
+          _this.connect()
+        },5000)
+       
+      }else{
+        window.clearTimeout()
       }
-      _this.disconnect()
+      // return
     }
     _this.client.onMessageArrived = function (message) {
       try {
@@ -135,20 +133,25 @@ var Websocket = {
       } catch (e) {
         message.msgString = 'Binary message(' + message.payloadBytes.length + ')'
       }
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(message.payloadString) })
       _this.recive(message.payloadString)
     }
-
+ 
     var options = {
       onFailure: function (err) {
         _this.connState = false
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: '连接失败' })
         console.log('连接失败 ' + err.errorMessage)
+        setTimeout(function(){
+          _this.connect()
+        },5000)
       },
       onSuccess: function () {
         _this.connState = true
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: '连接成功' })
-        console.log('连接成功！')
+        _this.subscribe(_this.subInfo,function(res) {
+          if (res.result) {
+           console.log(_this.subInfo)
+            console.log("订阅成功"); 
+          } 
+        })
       },
     }
     var userName = _this.cInfo.userName
@@ -169,27 +172,27 @@ var Websocket = {
     // options.useSSL = useSSL
     _this.client.connect(options)
   },
-
+ 
   disconnect: function () {
     var _this = this
     if (_this.client && this.client.isConnected()) {
       _this.client.disconnect()
       _this.client = null
     }
-    _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: '已断开连接' })
     console.log('已经断开连接！')
     _this.connState = false
+    setTimeout(function(){
+      _this.connect()
+    },5000)
   },
   subscribe: function (subInfo, callback) {
     var _this = this
     if (!_this.client || !_this.client.isConnected()) {
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: DISCONNECT_MSG })
       console.log(DISCONNECT_MSG)
-     alert(DISCONNECT_MSG,'请刷新页面')
+      _this.connect()
       return
     }
     if (!subInfo.topic) {
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: TOPIC_EMPTY })
       console.log(TOPIC_EMPTY)
       return
     }
@@ -197,7 +200,6 @@ var Websocket = {
       qos: Number(subInfo.qos),
       onSuccess: function (msg) {
         subInfo.msg = msg
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(subInfo) })
         console.log(subInfo.msg)
         subInfo.result = true
         callback && callback(subInfo)
@@ -207,7 +209,6 @@ var Websocket = {
           console.log('The topic cannot SUBSCRIBE for ACL Deny')
         }
         subInfo.msg = err
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(err) })
         console.log(err)
         subInfo.result = false
         callback && callback(subInfo)
@@ -219,6 +220,7 @@ var Websocket = {
     if (!_this.client || !_this.client.isConnected()) {
       _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: DISCONNECT_MSG })
       console.log(DISCONNECT_MSG)
+      _this.connect()
       return
     }
     if (!subInfo.topic) {
@@ -229,14 +231,12 @@ var Websocket = {
     _this.client.unsubscribe(subInfo.topic, {
       onSuccess: function (msg) {
         subInfo.msg = msg
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(subInfo) })
         console.log(subInfo)
         subInfo.result = true
         callback && callback(subInfo)
       },
       onFailure: function (err) {
         subInfo.msg = err
-        _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(err) })
         console.log(err)
         subInfo.result = true
         callback && callback(subInfo)
@@ -247,21 +247,16 @@ var Websocket = {
     var _this = this
     var text = sendInfo.text
     if (!_this.client || !_this.client.isConnected()) {
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: DISCONNECT_MSG })
       console.log(DISCONNECT_MSG)
-      
+      _this.connect()
       return
     }
     if (!sendInfo.topic) {
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: TOPIC_EMPTY })
       console.log(TOPIC_EMPTY)
-      
       return
     }
     if (!text) {
-      _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: MSG_EMPTY })
       console.log(MSG_EMPTY)
-     
       return
     }
     // eslint-disable-next-line no-undef
@@ -270,7 +265,6 @@ var Websocket = {
     message.qos = Number(sendInfo.qos)
     message.retained = sendInfo.retained
     _this.client.send(message)
-    _this.tablelist.push({ date: formatDate(new Date(), 'yyyy-MM-dd hh:mm'), content: JSON.stringify(sendInfo) })
     console.log(sendInfo)
   }
 }
@@ -281,5 +275,6 @@ export {
   TOPIC_EMPTY,
   MSG_EMPTY,
   DISCONNECT_MSG,
-  didata
+  didata,
+  getsession
 }

@@ -13,7 +13,12 @@
           >
             <el-table-column type="expand" label="取证" width="200">
               <template slot-scope="props">
-                <el-form label-position="bottom" inline class="demo-table-expand">
+                <el-form
+                  label-position="bottom"
+                  inline
+                  class="demo-table-expand"
+                  style="margin-bottom:10px;"
+                >
                   <el-button @click="flatEvidence(props.row.id)">平板取证</el-button>
                   <el-button @click="consoleEvidenvce(props.row.id,reportid)">控制台取证</el-button>
                   <el-button @click="controllerEvidence(props.row.id,reportid)">控制器取证</el-button>
@@ -85,7 +90,7 @@
           style="min-height:875px;border-left:1px solid blue"
         >
           <div id="Getdata" style="width:100%;height:300px;"></div>
-          <el-table class="tableforfile" :data="Datafile" style="width: 100% text-align:center">
+          <el-table class="tableforfile" :data="Datafile" style="width:100%;text-align:center">
             <el-table-column label="数据来源" align="center">
               <template slot-scope="scope">
                 <span>{{scope.row.attributes.data.source}}</span>
@@ -99,7 +104,7 @@
             <el-table-column align="center" label="内容">
               <template slot-scope="scope">
                 <el-button type="success" @click="detail(scope.row.attributes.data.data)">查 看</el-button>
-                <el-button type="danger" @click="deleteimg(scope.id)">删 除</el-button>
+                <el-button type="danger" @click="deleteimg(scope.row.id)">删 除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -117,6 +122,7 @@
           :on-preview="handlePreview"
           :on-remove="handleRemove"
           :before-upload="getFilename"
+          :on-success="responsesuccess"
           :auto-upload="false"
         >
           <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
@@ -139,10 +145,10 @@
 <script>
 import Parse from "parse";
 import $ from "jquery";
-import { Filedata } from "@/api/pumpdata/pumpdata";
-import { Pumpcontrol,CloundFile } from "@/api/devicescontrol/index";
+import { Filedata, updateFile } from "@/api/pumpdata/pumpdata";
+import { Pumpcontrol, CloundFile } from "@/api/devicescontrol/index";
 export default {
-  inject:['reload'],
+  inject: ["reload"],
   data() {
     return {
       reportid: "",
@@ -156,7 +162,8 @@ export default {
       tetbedid: "",
       tableData1: [],
       Datafile: [],
-      tasknameid:''
+      tasknameid: "",
+      row: 0
     };
   },
   mounted() {
@@ -198,24 +205,31 @@ export default {
       }, 20);
     },
     getReportdetail() {
-     
       this.reportid = this.$route.query.id;
       this.testbedid = this.$route.query.testbedid;
-       this.Datafile = [];
+      this.Datafile = [];
       var Report = Parse.Object.extend("Report");
       var report = new Parse.Query(Report);
-      report.get(this.reportid).then(resultes => {
-        var reporttask = resultes.attributes.datas;
-        var tabledata = reporttask.inspecting;
-        this.datafortable = [];
-        tabledata.map(item => {
-          item.guarantee_value.map(child => {
-            child.inspecting_item = item.inspecting_item;
-            child.type = "imgage";
-            this.datafortable.push(child);
+      report.get(this.reportid).then(
+        resultes => {
+          var reporttask = resultes.attributes.datas;
+          var tabledata = reporttask.inspecting;
+          this.datafortable = [];
+          tabledata.map(item => {
+            item.guarantee_value.map(child => {
+              child.inspecting_item = item.inspecting_item;
+              child.type = "imgage";
+              this.datafortable.push(child);
+            });
           });
-        });
-      });
+        },
+        error => {
+          this.$message({
+            type: "error",
+            message: error.message
+          });
+        }
+      );
     },
     Getchart(head, power, effect) {
       // setTimeout(() => {
@@ -286,14 +300,13 @@ export default {
               formatter: "{value}"
             },
             splitNumber: 5,
-            // axisLine: {},
             axisTick: { show: false }
           },
           {
             type: "value",
             name: "P(kW)",
             position: "left",
-            offset: 100,
+            offset: 50,
             splitLine: {
               show: false
             },
@@ -355,26 +368,27 @@ export default {
     },
 
     startPump(devaddr) {
-      var self = this
+      var self = this;
       Pumpcontrol(devaddr, "start", this.reportid).then(resultes => {
         this.$message({
           type: "success",
           message: "成功启动"
         });
-        self.reload()
+        self.reload();
       });
     },
     stopPump(devaddr) {
-      var self = this
+      var self = this;
       Pumpcontrol(devaddr, "stop", this.reportid).then(resultes => {
         this.$message({
           type: "success",
           message: "成功停止"
         });
-       self.reload()
+        self.reload();
       });
     },
     rowExpand(row) {
+      this.row = row;
       this.tasknameid = row.id;
       this.Datafile = [];
       var PumpData = Parse.Object.extend("PumpData");
@@ -391,7 +405,7 @@ export default {
     },
     //查看文件
     detail(data) {
-      console.log(data)
+      console.log(data);
       CloundFile(data).then(resultes => {
         window.open(resultes.url);
       });
@@ -407,6 +421,7 @@ export default {
               type: "success",
               message: "删除成功"
             });
+            this.rowExpand(this.row);
           },
           error => {
             console.log(error);
@@ -445,11 +460,12 @@ export default {
     },
     submitUpload() {
       var local = "http://" + location.hostname + ":8081";
-      this.$http
-        .get("http://prod.iotn2n.com:8081")
+      // this.$http
+      //   .get("http://prod.iotn2n.com:8081")
+      updateFile()
         .then(
           response => {
-            let data = response.data;
+            let data = response;
             this.action = data.host;
             this.$nextTick(() => {
               this.data.callback = data.callback;
@@ -467,6 +483,12 @@ export default {
         .catch(err => {
           console.log(err);
         });
+    },
+    responsesuccess() {
+      this.$message({
+        type: "success",
+        message: "上传成功"
+      });
     },
     importdata() {
       var Flate = Parse.Object.extend("CloudFile");
@@ -543,8 +565,8 @@ export default {
           query: {
             type: type,
             taskid: taskid,
-            reportId:this.reportid,
-            tasknameid:this.tasknameid
+            reportId: this.reportid,
+            tasknameid: this.tasknameid
           }
         });
       } else if (type == "DTU") {
@@ -553,8 +575,8 @@ export default {
           query: {
             type: type,
             taskid: taskid,
-            reportId:this.reportid,
-            tasknameid:this.tasknameid
+            reportId: this.reportid,
+            tasknameid: this.tasknameid
           }
         });
       } else {
@@ -563,8 +585,8 @@ export default {
           query: {
             type: type,
             taskid: taskid,
-            reportId:this.reportid,
-            tasknameid:this.tasknameid
+            reportId: this.reportid,
+            tasknameid: this.tasknameid
           }
         });
       }
@@ -578,9 +600,8 @@ export default {
 <style scoped>
 .reportdetail {
   width: 100%;
-  min-height: 875px;
+  min-height: 100%;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }
@@ -601,3 +622,4 @@ export default {
   padding-left: 0;
 }
 </style>
+

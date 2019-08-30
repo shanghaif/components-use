@@ -3,7 +3,7 @@
     <el-pagination
       small
       class="fn-right"
-      layout="total, sizes, prev, pager, next, jumper"
+      layout="total, sizes, prev, pager, next, jumper,slot"
       background
       :pager-count="7"
       :total="pager[props.total]"
@@ -13,15 +13,18 @@
       @size-change="onChangeSize"
       @current-change="onChangePage">
     </el-pagination>
-    <el-tooltip content="刷新" placement="top">
-    <span class="iconfont iconicon-refresh"  @click="setup"></span>
-    </el-tooltip>
-    <el-tooltip content="导出当前表格" placement="top">
-    <span class="iconfont iconxls der"  @click="now_derive"></span>
-    </el-tooltip>
-    <el-tooltip content="分页导出表格" placement="top">
-      <span class="iconfont iconfile-xls ders" @click="show_table4"></span>
-    </el-tooltip>
+    <div v-if="pageShow"> 
+      <el-tooltip content="刷新" placement="top">
+        <span class="iconfont iconicon-refresh"  @click="setup"></span>
+      </el-tooltip>
+      <el-tooltip content="导出当前表格" placement="top">
+        <span class="iconfont iconxls der"  @click="now_derive"></span>
+      </el-tooltip>
+      <el-tooltip content="分页导出表格" placement="top">
+        <span class="iconfont iconfile-xls ders" @click="show_table4"></span>
+      </el-tooltip>
+    </div>
+    
     <!--分页导出-->
     <el-dialog title="提示" :visible.sync="centerDialogVisible" width="15%" center>
       <div>
@@ -55,6 +58,11 @@ export default {
     refresh: {
       type: Boolean,
     },
+    // 是否显示导出按钮
+    pageShow:{
+      type:Boolean,
+      default:true
+    },
     props: {
       type: Object,
       required: false,
@@ -64,8 +72,12 @@ export default {
         total: 'count', // 总记录条数
         name: "name" ,// 导出表格名称
         pages: "pages", //页数分类
+        where: [],//导出条件
       }),
-      props:['isShow'],
+      isShow:{
+        type:Boolean,
+        default:true
+      },
     },
   },
   data(){
@@ -100,7 +112,6 @@ export default {
   },
   created(){
     eventBus.$on('drive',data=>{
-      // console.log(data);
       this.json = data.json;
       this.obj = data.obj;
       if (this.json!=[] && this.obj!=[]){
@@ -141,28 +152,42 @@ export default {
      * obj 对应的标题头,key键,属性名
      */
     derive(json,obj){
-      // return;
       let table = [
         []
       ];
       // 获取头部
       let s=0;
       for (let i in obj){
-        table[0][s]=obj[i];
-        s++;
+        if (typeof(obj[i])=="function"){
+          let headers=obj[i]("header");
+          for (let j in headers){
+            table[0][s]=headers[j];
+            s++;
+          }
+        }else{
+          table[0][s]=obj[i];
+          s++;
+        }
       }
       s=null;
       // 拼接json
       for (let i of json){
-        // console.log(i);
         var line = []
         for (let j in obj){
-          line.push(i[j])
+          var col = i[j] 
+          if(typeof(obj[j])=="function"){
+            var Fun = obj[j]
+            let value=Fun(col,line);
+          }else{
+            line.push(col);
+          }
         }
-        table.push(line)
+        console.log(line);
+        table.push(line);
       }
       // console.log(table);
-      const ws = XLSX.utils.json_to_sheet(table,{skipHeader:true});
+      // return;
+      const ws = XLSX.utils.json_to_sheet(table,{skipHeader:true,cellDates:true});
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
       XLSX.writeFile(wb, `${this.pager.name}.xlsx`);
@@ -176,15 +201,11 @@ export default {
         [this.props.page]: rows <= this.total ? 1 : this.pager[this.props.page],
       };
       this.$emit('setPager', Object.assign(this.pager, temp));
-      // console.log(this.pager);
       this.pager[this.props.total] = this.pager.count;
-      // 触发父组件查询请求
-      // this.$emit('query');
     },
     // 翻页
     onChangePage(page) {
       this.$emit('setPager', Object.assign(this.pager, { [this.props.page]: page }));
-      // this.$emit('query');
     },
     setup(){
       this.$emit('query',Object.assign(this.pager));
@@ -202,9 +223,6 @@ export default {
       let end=this.page_end-1;
       this.$emit('alldrive',{start,end})
     },
-    drive(data){
-      // console.log(data)
-    }
   },
 };
 </script>
@@ -228,5 +246,15 @@ export default {
 }
 .fn-clear span.ders {
   color:#84BF56;
+}
+/* 切换页数图标 */
+.btn-prev:before {
+    content: "上一页";
+}
+.btn-next:before {
+    content: "下一页";
+}
+.btn-prev i.el-icon,.btn-next i.el-icon {
+  display:none !important;
 }
 </style>

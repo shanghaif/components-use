@@ -1,12 +1,12 @@
 <template>
     <div class="appmarage">
         <div class="header">
-            <el-button type="primary" @click="checkupdateall">
+            <el-button type="primary" @click="checkupdateall" size="small">
                 检查更新
             </el-button>
         </div>
-        <div class="block">
-            <el-table :data="tableData" style="width: 100%;text-align:center">
+        <div class="block" style="margin-top:10px;">
+            <el-table :data="tableData.slice((start-1)*length,start*length)" style="width: 100%;text-align:center">
                 <el-table-column  label="App" align="center">
                     <template slot-scope="scope">
                     <span :style="{'color': (scope.row.active==true ? 'green':'red')}">{{scope.row.app}}</span>
@@ -14,11 +14,18 @@
                 </el-table-column>
                 <el-table-column prop="version" label="版本" align="center" sortable></el-table-column>
                 <el-table-column prop="desc" label="描述" align="center" sortable></el-table-column>
-                <el-table-column label="操作" align="center">
+                <el-table-column label="操作" align="right">
+                    <template slot="header" slot-scope="scope">
+                        <el-input
+                        v-model="search"
+                        size="mini"
+                        @change="changevalue"
+                        placeholder="输入app搜索"/>
+                    </template>
                 <template slot-scope="scope">
-                    <el-button  type="info" @click="startup(scope.row.app)" v-if="scope.row.active==false" plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div>启动</el-button>
-                    <el-button  type="info" @click="stopup(scope.row.app)" v-if="scope.row.active==true"  plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"></div>停止</el-button>
-                    <el-button type="info" plain @click="checkupdate(scope.row.app,scope.row.version)">检查更新</el-button>
+                    <el-button  type="info" size="small" @click="startup(scope.row.app)" v-if="scope.row.active==false" plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div>启动</el-button>
+                    <el-button  type="info"  size="small" @click="stopup(scope.row.app)" v-if="scope.row.active==true"  plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"></div>停止</el-button>
+                    <el-button type="info"  size="small" plain @click="checkupdate(scope.row.app)">检查更新</el-button>
                 </template>
                 </el-table-column>
             </el-table>
@@ -36,17 +43,18 @@
             ></el-pagination>
         </div>
         <el-dialog
-        title="电表详情"
+        title="模块列表"
         :visible.sync="dialogVisible"
         width="40%"
         :before-close="handleClose">
        <div>
-           <div class="top" >
-               <el-input style="width:200px" placeholder="请输入搜索内容" v-model="searchvalue"></el-input>
-           </div>
-           <el-table :data="tableData1.filter(data => !searchvalue || data.mod.toLowerCase().includes(searchvalue.toLowerCase()))" 
-           style="width: 100%;text-align:center；margin-top:20px">
-               <el-table-column prop="mod" label="模块名称" sortable align="center">
+           <!-- <div class="top" >
+               <el-input style="width:200px" placeholder="请输入搜索内容" v-model="searchvalue" @change="changedialog"></el-input>
+           </div> -->
+           <el-table :data="tableData1.slice((start1-1)*length1,start1*length1)"
+           height="300"
+           style="width: 100%;text-align:center;margin-top:20px">
+               <el-table-column prop="path" label="模块名称" sortable align="center">
 
                </el-table-column>
                <el-table-column prop="is_changed" label="是否修改" sortable align="center">
@@ -76,22 +84,25 @@
 <script>
 import {Getapp,Getmodule,Getmodule1,Getstart,Getstop,GetReload} from '@/api/systemmanage/system'
 import Cookies from 'js-cookie'
+var table = []
+var table1=[]
 export default {
    data() {
       return {
           tableData:[],
           total:0,
-          start:0,
+          start:1,
           length:10,
           node:null,
           dialogVisible:false,
-          start1:0,
+          start1:1,
           length1:10,
           total1:0,
           tableData1:[],
           app:'',
           version:"",
-          searchvalue:''
+          searchvalue:'',
+          search:''
       }
    },
    computed: {
@@ -101,84 +112,103 @@ export default {
    },
    methods: {
        handleSizeChange(val){
+           this.start=1
           this.length=val
-          this.getInformation()
       },
       handleCurrentChange(val){
-          this.start=(val-1)*10
-          this.getInformation()
+          this.start=val
       },
       //检查更新
        handleSizeChange1(val){
-          this.length1=val
-          this.checkupdate(this.app,this.version)
+           this.start1=1
+           this.length1=val
       },
       handleCurrentChange1(val){
-          this.start1=(val-1)*10
-          this.checkupdate(this.app,this.version)
+          this.start1=val
           
       },
       getInformation(){
           //初始化数据
           Getapp(this.node,this.start,this.length).then(response=>{
-              if(response.result==true){
+              if(response){
                   this.tableData = response.apps
+                  table = response.apps
                   this.total = response.recordsTotal
               }
           }).catch(error=>{
-              console.log(error)
+              this.$message({
+                  type:'error',
+                  message:error.error
+              })
           })
       },
        handleClose(){
            this.dialogVisible=false
        },
-       checkupdate(app,version){
+       changevalue(){
+           if(this.search==''){
+               this.tableData = table
+           }
+           this.tableData = this.tableData.filter(data => !this.search || data.app.toLowerCase().includes(this.search.toLowerCase()))
+       },
+       changedialog(){
+           if(this.searchvalue==''){
+               this.tableData1 = table1
+           }
+           this.tableData1 = tableData1.filter(data => !this.searchvalue || data.path.toLowerCase().includes(searchvalue.toLowerCase()))
+       },
+       checkupdate(app){
            //点击检查更新数据
+           this.tableData1=[]
            this.searchvalue=''
            this.dialogVisible=true
            this.app = app,
-           this.version = version
-           Getmodule(this.node,this.start1,this.length1,this.app,this.version).then(res=>{
-               if(res.result==true){
-                   res.mods.map(item=>{
+           this.total1=0
+           Getmodule(app).then(res=>{
+               if(res){
+                   res.map(item=>{
                        if(item.is_changed==false){
                            item.is_changed ='false'
                        }else{
                            item.is_changed = 'true'
                        }
                    })
-                   this.tableData1 = res.mods,
-                   this.total1 = res.recordsTotal
+                   this.tableData1 = res
+                   table1 = res
+                   this.total1 = res.length
                }
            })
        },
        checkupdateall(){
            this.searchvalue=''
            this.dialogVisible=true
-           Getmodule1(this.node,this.start1,this.length1).then(res=>{
-               if(res.result==true){
-                   res.mods.map(item=>{
+           this.tableData1=[]
+           this.total1=0
+           Getmodule1('changed').then(res=>{
+               if(res){
+                   res.map(item=>{
                        if(item.is_changed==false){
                            item.is_changed ='false'
                        }else{
                            item.is_changed = 'true'
                        }
                    })
-                   this.tableData1 = res.mods,
-                   this.total1 = res.recordsTotal
+                   this.tableData1 = res
+                   table1 = res
+                   this.total1 = res.length
                }
            })
        },
       //启动
       startup(app){
-          if(!Cookies.get('username')){
+          if(!sessionStorage.getItem('username')){
               this.$message({
                 message: '您还未登录',
                 type: 'warning'
                 })
           }else{
-              Getstart(this.node,app).then(response=>{
-                  if(response.result==true){
+              Getstart(app).then(response=>{
+                  if(response){
                       this.$message({
                         message: '启动成功',
                         type: 'success'
@@ -192,14 +222,14 @@ export default {
       },
       //停止
       stopup(app){
-          if(!Cookies.get('username')){
+          if(!sessionStorage.getItem('username')){
               this.$message({
                 message: '您还未登录',
                 type: 'warning'
                 })
           }else{
-              Getstop(this.node,app).then(response=>{
-                  if(response.result==true){
+              Getstop(app).then(response=>{
+                  if(response){
                       this.$message({
                         message: '停止成功',
                         type: 'success'
@@ -212,12 +242,19 @@ export default {
           }
       },
       reupload(){
-          GetReload(this.node,this.app,this.version).then(response=>{
-              if(response==true){
-                  this.$message({
-                        message: response.msg,
-                        type: 'warning'
-                        })
+          GetReload(this.app).then(response=>{
+              if(response){
+                  if(response.length==0){
+                       this.$message({
+                    message:'当前无更新',
+                    type: 'warning'
+                    })
+                  }else{
+                    this.$message({
+                    message:'已更新模块'+ response,
+                    type: 'success'
+                    })
+                  }
               }
           })
       }
@@ -227,15 +264,17 @@ export default {
 <style scoped>
 .appmarage{
  background: #ffffff;
-  padding-left: 10px;
-  margin-top: 20px;
+  padding: 20px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 875px;
+  height:100%;
 }
 </style>
 <style >
 .appmarage .el-dialog__footer{
     padding-bottom:50px;
+}
+.appmarage .el-table th.is-leaf{
+    padding:5px 0;
 }
 </style>

@@ -19,3 +19,12 @@ export function Filedata(objectid) {
     data:{}
   })
 }
+export function updateFile(){
+  return request({
+    url: '/file/signature?type=aliyun',
+    method: 'get',
+    params:{
+
+    }
+  })
+}

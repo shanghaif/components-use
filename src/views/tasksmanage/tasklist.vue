@@ -9,7 +9,7 @@
         <el-input
           type="text"
           style="width:200px;margin-left:30px;"
-          placeholder="请输入搜索内容"
+          placeholder="请输入任务名称"
           v-model="valueforsearch"
         ></el-input>
         <el-button type="primary" @click="searchvalue">搜 索</el-button>
@@ -34,7 +34,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="unit" label="周期单位"></el-table-column>
-        <el-table-column label="频率" prop="freq"></el-table-column>
+        <!-- <el-table-column label="频率" prop="freq"></el-table-column> -->
         <el-table-column prop="downchannel" label="下发通道"></el-table-column>
         <el-table-column prop="upchannel" label="上传通道"></el-table-column>
         <el-table-column label="操作">
@@ -62,10 +62,10 @@
           <label for>任务名称：</label>
           <el-input type="text" style="width:200px" v-model="name"></el-input>
         </div>
-        <div class="children">
+        <!-- <div class="children">
           <label for>频率：</label>
           <el-input type="text" style="width:200px" v-model="freq"></el-input>
-        </div>
+        </div> -->
         <div class="children">
           <label for>采集开始时间：</label>
           <el-date-picker
@@ -94,15 +94,19 @@
             v-model="meteraddress"
             placeholder="A终端逻辑地址,B终端逻辑地址"
           ></el-input>
-          <span style="color:black">(all代表全部)</span>
-          <p style="color:black;margin:0 0 0 100px">(注意:逗号为英文逗号)</p>
+          <!-- <p style="color:black"></p> -->
+          <p style="color:black;margin:5px 0 0 100px">(all代表全部)(注意:逗号为英文逗号)</p>
         </div>
         <div class="children">
+          <!-- <el-select v-model="today" placeholder="请选择" @change="selectTime">
+            <el-option label="当天" value="today"></el-option>
+            <el-option label="某一天" value="other"></el-option>
+          </el-select> -->
           <label for>冻结日期：</label>
           <el-date-picker
             v-model="frozendate"
             type="date"
-            placeholder="选择日期"
+            placeholder="当天"
             value-format="yyyy-MM-dd"
           ></el-date-picker>
         </div>
@@ -125,7 +129,7 @@
             ></el-option>
           </el-select>
         </div>
-        <div class="children" style="margin-top:0;">
+        <div class="children">
           <label for>下发通道：</label>
           <el-select v-model="downchannel" placeholder="请选择">
             <el-option
@@ -139,7 +143,7 @@
       </div>
       <div class="di" style="width:100%;">
         <label for>数据项标识：</label>
-        <el-transfer v-model="diselect" :data="data" :titles="['数据项标识', '数据项标识']"></el-transfer>
+        <el-transfer v-model="diselect" :data="data" :titles="['数据项标识', '数据项标识']" :button-texts="['删除', '添加']"></el-transfer>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
@@ -157,6 +161,7 @@ import {
   Taskdetail
 } from "@/api/historytask";
 import { timestampToTime, timetounix } from "@/api/login";
+import $ from 'jquery'
 export default {
   data() {
     const generateData = _ => {
@@ -183,6 +188,24 @@ export default {
       diselect: [],
       dialogVisible: false,
       valueforsearch: "",
+      // pickerOptions: {
+      //     // disabledDate(time) {
+      //     //   return time.getTime() > Date.now();
+      //     // },
+      //     shortcuts: [{
+      //       text: '当前日期',
+      //       onClick(picker) {
+      //         picker.$emit('pick', new Date());
+      //       }
+      //     }, {
+      //       text: '指定日期',
+      //       // onClick(picker) {
+      //       //   const date = new Date();
+      //       //   date.setTime(date.getTime() - 3600 * 1000 * 24);
+      //       //   picker.$emit('pick', date);
+      //       // }
+      //     }]
+      //   },
       options: [
         {
           value: "vcaddr",
@@ -234,13 +257,13 @@ export default {
       ],
       name: "",
       frozendate: "",
-      downchannel: "",
-      // upchannel: "",
+      downchannel: "1",
       starttime: "",
-      meteraddress: "",
+      meteraddress: "all",
       freq: "",
       unit: "",
-      ftype: "",
+      ftype: "vcaddr",
+      today:'today',
       idselete: [],
       loading:true
     };
@@ -266,8 +289,8 @@ export default {
       this.loading = true
       Alltasks(this.start, this.length, this.node, this.draw++, this.valueforsearch).then(
         response => {
-          
-            response.data.map(item => {
+          if(response){
+             response.data.map(item => {
               if (item.downchannel == 1) {
                 item.downchannel = "虚拟通道";
               } else {
@@ -291,6 +314,8 @@ export default {
             this.tableData3 = response.data.reverse();
             this.total = response.recordsTotal;
             this.loading=false
+          }
+           
         }
       );
     },
@@ -356,24 +381,42 @@ export default {
           });
         }
       }
+      if(this.frozendate==''){
+        this.frozendate = null
+      }else{
+        this.frozendate = timetounix(this.frozendate + " 00:00:00")
+      }
       Addtasks(
         this.name,
-        timetounix(this.frozendate + " 00:00:00"),
+        this.frozendate,
         Number(this.downchannel),
         timetounix(this.starttime),
         meter,
         Number(this.freq),
         this.unit
       ).then(response => {
-        // if(response.result==true){
+        if(response){
         this.$message({
           message: "添加成功",
           type: "success"
         });
         this.dialogVisible = false;
         this.search();
-        // }
+        }
+      }).catch(error=>{
+        this.$message({
+          message: error.error,
+          type: "error"
+        });
       });
+    },
+    getfrozen(){
+      console.log(1111)
+    },
+    selectTime(val){
+      if(val=='other'){
+        this.getfrozen()
+      }
     },
     searchvalue() {
       Alltasks(
@@ -384,7 +427,7 @@ export default {
         this.valueforsearch
       )
         .then(response => {
-          // if(response.result==true){
+          if(response){
           response.data.map(item => {
             if (item.downchannel == 1) {
               item.downchannel = "虚拟通道";
@@ -405,7 +448,7 @@ export default {
           });
           this.tableData3 = response.data;
           this.total = response.recordsTotal;
-          // }
+          }
         })
         .catch(error => {
           console.log(error);
@@ -434,7 +477,7 @@ export default {
 </script>
 <style scoped>
 .tasklist {
-  min-height: 875px;
+  min-height: 100%;
   background: white;
   padding: 20px;
   box-sizing: border-box;
@@ -468,7 +511,6 @@ export default {
   float: left;
   margin-top: 20px;
   width: 50%;
-  visibility: center;
 }
 .tasklist .dialog .children label,
 .tasklist .dialog .starttime label {
@@ -498,6 +540,9 @@ export default {
 .tasklist .el-transfer__button:nth-child(2) {
   position: relative;
   top: -50px;
+}
+.tasklist .el-picker-panel__sidebar+.el-picker-panel__body{
+  visibility: hidden;
 }
 </style>
 

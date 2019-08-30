@@ -3,15 +3,13 @@
        <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="详情" name="first">
                 <div class="topsearch">
-                     <!-- <el-button plain>电表详情</el-button>
-                     <el-button type="primary">配置任务</el-button> -->
-                     <el-input placeholder="请输入内容" v-model="input5" style="margin-left:30px;width:300px">
+                     <el-input placeholder="请输入电表地址" v-model="input5" style="margin-left:30px;width:300px">
                         <el-button slot="append" icon="el-icon-search" @click="searchformeter()"></el-button>
                      </el-input>
                 </div>
                 <el-table
                     ref="multipleTable"
-                    :data="tableData3"
+                    :data="tableData"
                     tooltip-effect="dark"
                     style="width:100%;margin-top:30px;"
                     @selection-change="handleSelectionChange">
@@ -40,11 +38,6 @@
                     label="PN值"
                     >
                    </el-table-column>
-                     <!-- <el-table-column
-                    prop="shortaddr"
-                    label="短地址"
-                    >
-                    </el-table-column>  -->
                      <el-table-column
                     label="电表状态"
                     >
@@ -66,16 +59,15 @@
                         <span v-if="scope.row.usercase!=1">虚拟通道</span>
                     </template>
                     </el-table-column>
-                     <el-table-column
+                    <el-table-column
                     prop=""
                     label="操作"
                     >
                     <template slot-scope="scope">
                         <el-button 
                         size="mini"
-                        @click='ammeterdetail(scope.row.devaddr)'
-                        >
-                            电表详情
+                        @click='handleClickLook(scope)'
+                        >显示详情
                         </el-button>
                     </template>
                     </el-table-column>
@@ -172,32 +164,6 @@
                 </div>
             </el-tab-pane>
         </el-tabs>
-        <!--创建电表详情弹窗-->
-        <el-dialog
-        title="电表详情"
-        :visible.sync="dialogVisible"
-        width="30%"
-        :before-close="handleClose">
-        <div v-for="(item,index) in meterdetail" :key="index">
-            <p><span>集中器地址：</span><span>{{item.vcaddr}}</span></p>
-            <p><span>信息点标识PN：</span><span>{{item.pn}}</span></p>
-            <p><span>电表地址：</span><span>{{item.addr}}</span></p>
-            <p><span>用户编号：</span><span>{{item.jldbh}}</span></p>
-            <p><span>用户地址：</span><span>{{item.jlddz}}</span></p>
-            <p><span>用户类别：</span><span>{{item.yhlb}}</span></p>
-            <p><span>供电单位：</span><span>{{item.gddw}}</span></p>
-            <p><span>出厂编号：</span><span>{{item.ccbh}}</span></p>
-            <p><span>生产厂商：</span><span>{{item.sccj}}</span></p>
-            <p><span>设备类型：</span><span>{{item.sblx}}</span></p>
-            <p><span>通信规约：</span><span>{{item.txgy}}</span></p>
-            <p><span>台区：</span><span>{{item.tq}}</span></p>
-            <p><span>地理位置：</span><span>{{item.province+item.city}}</span></p>
-            
-        </div>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
-        </span>
-        </el-dialog>
     </div>
 </template>
 <script>
@@ -206,120 +172,173 @@ import {Parse} from 'parse'
 export default {
    data() {
       return {
-          total:0,
-          length:10,
-          start:0,
-          start1:0,
-          length1:10,
-          total1:0,
-          draw:1,
-          activeName: 'first',
-          vcaddr:'',
-          input5:'',
-          input6:'',
-          addr:'',
-          tableData3: [],
-          multipleSelection: [],
-          tableData4:[],
-          multipleSelection1:[],
-          dialogVisible:false,
-          meterdetail: []
+        total:0,
+        length:10,
+        start:0,
+        start1:0,
+        length1:10,
+        total1:0,
+        draw:1,
+        activeName: 'first',
+        vcaddr:'',
+        input5:'',
+        input6:'',
+        addr:'',
+        tableData: [],
+        multipleSelection: [],
+        tableData4:[],
+        multipleSelection1:[],
+        isShow:false,//是否展开信息
+        index:-1,//当前选中的电表
       }
    },
    mounted() {
        this.vcaddr = this.$route.query.vcaddr
-    //    this.condetail()
        this.detail()
    },
    methods:{
-       handleClose(){
-           this.dialogVisible=false
-       },
-       handleClick(event) {
+    //电表详情
+    handleClickLook(scope){
+        if (this.index==scope.$index){
+            this.isShow=false;
+        }else {
+            this.isShow=true;
+            this.index=scope.$index;
+        }
+        // 改变按钮文字
+        let btnText=document.getElementsByClassName("el-button");
+        for (let i=1;i<btnText.length;i++){
+            btnText[i].children[0].innerHTML="显示详情";
+        }
+        // 显示
+        if (this.isShow){
+            btnText[this.index+1].children[0].innerHTML="隐藏详情";
+            // 显示的时候，先隐藏之前所有
+            this.delNewTrs();
+            // 获取当前电表地址
+            this.addr=scope.row.devaddr;
+            var Smartmeter = Parse.Object.extend('Smartmeter')
+            var smartmeter = new Parse.Query(Smartmeter)
+            smartmeter.equalTo('addr_web',this.addr)
+            smartmeter.find().then(resultes=>{
+                let info=resultes[0].attributes;
+                // 对象解构，取出需要的属性
+                let { vcaddr_web="",pn="",addr_web="",jldbh="",jlddz="",yhlb="",gddw="",ccbh="",sccj="",sblx="",txgy="",tq="",yhdz="" }=info;
+                let row=document.getElementsByClassName("el-table__row")[this.index];
+                let tr=document.createElement("tr");
+                tr.setAttribute("class","NewTr");
+                let td=document.createElement("td");
+                td.setAttribute("colspan",9);
+                let div=document.createElement("div");
+                div.setAttribute("class","NewDiv")
+                // 对应放个容器中
+                div.innerHTML=`
+                    <p>集中器地址:${vcaddr_web}</p>
+                    <p>信息点标识PN:${pn}</p>
+                    <p>电表地址:${addr_web}</p>
+                    <p>用户编号:${jldbh}</p>
+                    <p>用户地址:${jlddz}</p>
+                    <p>用户类别:${yhlb}</p>
+                    <p>供电单位:${gddw}</p>
+                    <p>出厂编号:${ccbh}</p>
+                    <p>生产厂商:${sccj}</p>
+                    <p>设备类型:${sblx}</p>
+                    <p>通信规约:${txgy}</p>
+                    <p>台区:${tq}</p>
+                    <p>地理位置:${yhdz}</p>
+                `;
+                td.appendChild(div);
+                tr.appendChild(td);
+                row.parentElement.insertBefore(tr,row.nextElementSibling);
+            },error=>{
+                if(error.code=='209'){
+                    this.$message({
+                    type: "warning",
+                    message: "登陆权限过期，请重新登录"
+                    });
+                    this.$router.push({
+                    path:'/login'
+                    })
+                }else if(error.code==119){
+                    this.$message({
+                        type:'error',
+                        message:'没有操作权限'
+                    })
+                }
+            })
+        }else {
+            this.delNewTrs();
+            btnText[this.index+1].children[0].innerHTML="显示详情";
+            this.index=-1;
+        }
+    },
+    // 删除所有展开的内容
+    delNewTrs(){
+        let tbody=document.getElementsByTagName("tbody")[0];
+        let NewTrs=document.getElementsByClassName("NewTr");
+        if (NewTrs.length>0){
+            for (let i=0;i<NewTrs.length;i++){
+                tbody.removeChild(document.getElementsByClassName("NewTr")[i]);
+            }
+        }
+    },
+    handleClick(event) {
         console.log(event);
-      },
-      //详情
-      handleSelectionChange(val) {
+    },
+    //详情
+    handleSelectionChange(val) {
         this.multipleSelection = val;
-      },
-      handleSizeChange(val) {
-        this.length=val
-        this.detail() 
-      },
-     
-      handleCurrentChange(val) {
-        this.start=(val-1)*10
-       this.detail() 
-      },
-       //实时任务模板
-      handleSelectionChange1(val) {
+    },
+    handleSizeChange(val) {
+        this.length=val;
+        this.detail();
+        this.delNewTrs();
+    },
+    handleCurrentChange(val) {
+        this.start=(val-1)*this.length;
+        this.detail();
+        this.delNewTrs();
+    },
+    //实时任务模板
+    handleSelectionChange1(val) {
         this.multipleSelection1 = val;
-      },
-      handleSizeChange1(val) {
-        this.length1=val
-        
-      },
-      handleCurrentChange1(val) {
-        this.start1=(val-1)*10
+    },
+    handleSizeChange1(val) {
+        this.length1=val;
+    },
+    handleCurrentChange1(val) {
+        this.start1=(val-1)*this.length
         this.detail()
-      },
-      //初始化数据实时任务
-    // condetail(){
-    //     var condition = {
-	// 			cbname: '',
-	// 			di: '',
-	// 			vcaddr: this.vcaddr,
-	// 			history: true,
-	// 			group: [{vcaddr:'all'},{data:''},{taskanme:''},{di:''}],
-	// 			frozen_date: '',
-	// 			taskname: '',
-	// 		}
-    //     getcondetail(this.start,this.length,condition,++this.draw).then(res=>{
-    //             res.data.map((item)=>{
-    //                  item.date=timestampToTime(item.date).substr(0,10)
-    //              })
-    //         this.total1 = res.recordsFiltered
-    //         this.tableData4 = res.data
-    //     })
-    // },
+    },
     detail(){
         detailforcon(this.start,this.length,this.vcaddr, ++this.draw).then(res=>{
-        //    if(res.result==true){
-               this.tableData3 = res.data
+           if(res){
+               this.tableData = res.data
                this.total=res.recordsFiltered
-        //    }
+           }
         }).catch(err=>{
             console.log(err)
         })
     },
     //电表详情
-    ammeterdetail(val){
-        this.addr=val
-        this.meterdetail=[]
-                var Smartmeter = Parse.Object.extend('Smartmeter')
-                var smartmeter = new Parse.Query(Smartmeter)
-                smartmeter.equalTo('addr_web',this.addr)
-                smartmeter.find().then(resultes=>{
-                    this.dialogVisible=true
-                    resultes.map(items=>{
-                        this.meterdetail.push(items.attributes)
-                    })
-                })
+    getMeterInfo(val){
+        
+        
     },
     //电表搜索
     searchformeter(){
         gettables1(this.input5,this.start,this.length,++this.draw).then(res=>{
-        //    if(res.result==true){
-              this.tableData3 = res.data
+           if(res){
+              this.tableData = res.data
               this.total = res.recordsFiltered
-        //    }
+           }
         }).catch(error=>{
             console.log(error)
         })
     },
     //实时任务补抄
     supplementarycopy(val){
-
+ 
     }
    }
 }
@@ -328,15 +347,15 @@ export default {
 .topsearch,.secondsearch{
     margin-top:30px;
 }
+
 </style>
 <style>
 .condetail{
     background:#ffffff;
     padding-left:20px;
     padding-top:20px;
-    margin-top:20px;
     box-sizing: border-box;
-    min-height:875px;
+    min-height:100%;
 }
 .condetail .el-table th{
     background:#fafafa;
@@ -348,5 +367,16 @@ export default {
 }
 .condetail .el-dialog__footer{
     padding-bottom:50px;
+}
+/* 展开表格div样式 */
+.condetail .el-table .NewDiv {
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.condetail .el-table .NewDiv p {
+    width: 25%;
+    text-align: left;
 }
 </style>

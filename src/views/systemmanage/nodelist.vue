@@ -20,7 +20,6 @@ export default {
 .nodelist {
   background: #ffffff;
   padding-left: 10px;
-  margin-top: 20px;
   box-sizing: border-box;
   width: 100%;
   min-height: 875px;

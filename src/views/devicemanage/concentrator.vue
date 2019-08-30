@@ -2,7 +2,7 @@
   <div class="concentrator">
     <div class="top">
       <label for>{{ $t('concentrator.concentrator') }}:</label>
-      <el-input v-model="vcaddr" :placeholder="$t('concentrator.input')" style="width:200px;"></el-input>
+      <el-input v-model="vcaddr" placeholder="请输入集中器地址" style="width:200px;"></el-input>
       <el-button
         type="primary"
         style="margin-left:20px;"
@@ -10,7 +10,7 @@
       >{{ $t('concentrator.search') }}</el-button>
     </div>
     <div class="section">
-      <el-button type="primary" icon="el-icon-plus" @click="uploadadd">{{ $t('concentrator.add') }}</el-button>
+      <!-- <el-button type="primary" icon="el-icon-plus" @click="uploadadd">{{ $t('concentrator.add') }}</el-button> -->
       <el-button plain @click="startdev">{{ $t('concentrator.start') }}</el-button>
       <el-button plain @click="stop">{{ $t('concentrator.end') }}</el-button>
       <el-button plain @click="checktime">{{ $t('concentrator.checktime') }}</el-button>
@@ -22,6 +22,7 @@
         tooltip-effect="dark"
         style="width:100%;text-align:center;"
         @selection-change="handleSelectionChange"
+        v-loading="loading"
       >
         <el-table-column type="selection" align="center" width="50"></el-table-column>
         <el-table-column prop :label="$t('concentrator.status')" align="center" width="100">
@@ -111,12 +112,12 @@
           </el-form-item>
           <el-form-item label="通道类型" style="margin-left:30px;">
             <el-select v-model="sizeForm.type">
-              <el-option label="GPRS/CDMA" value="2"></el-option>
-              <el-option label="PSTN" value="3"></el-option>
-              <el-option label="Ethernet" value="4"></el-option>
-              <el-option label="RS232/RS485" value="6"></el-option>
-              <el-option label="CSD" value="7"></el-option>
-              <el-option label="Radio" value="8"></el-option>
+              <el-option label="GPRS/CDMA" :value="2"></el-option>
+              <el-option label="PSTN" :value="3"></el-option>
+              <el-option label="Ethernet" :value="4"></el-option>
+              <el-option label="RS232/RS485" :value="6"></el-option>
+              <el-option label="CSD" :value="7"></el-option>
+              <el-option label="Radio" :value="8"></el-option>
             </el-select>
           </el-form-item>
         </div>
@@ -180,8 +181,8 @@
           </el-form-item>
           <el-form-item label="主通道类型" style="margin-left:30px;">
             <el-select v-model="sizeForm.mainchannel">
-              <el-option label="虚拟集中器通道" value="1"></el-option>
-              <el-option label="物理集中器通道" value="2"></el-option>
+              <el-option label="虚拟集中器通道" :value="1"></el-option>
+              <el-option label="物理集中器通道" :value="2"></el-option>
             </el-select>
           </el-form-item>
         </div>
@@ -251,6 +252,7 @@ export default {
     return {
       // value2: true,
       //  value1: true,
+      loading:true,
       value6: true,
       value7: false,
       start: 0,
@@ -319,19 +321,19 @@ export default {
     handleEdit(index, row) {
       (this.sizeForm.vcaddr = row.vcaddr),
         (this.sizeForm.ipaddress = row.local_ip);
-      this.sizeForm.type = String(JSON.parse(row.remote_param).channel_type);
+      this.sizeForm.type = row.remote_param.channel_type;
       this.sizeForm.hbinterval = row.hb_interval;
       this.sizeForm.port = row.local_port;
       this.sizeForm.notonline = row.recall_interval;
       this.sizeForm.localmask = row.local_mask;
       this.sizeForm.recalltimes = row.recall_times;
       this.sizeForm.localgateway = row.local_gateway;
-      this.sizeForm.localip = JSON.parse(row.remote_param).remote_ip;
+      this.sizeForm.localip = row.remote_param.remote_ip;
       this.sizeForm.ipgetway = String(row.get_ip_mod);
-      this.sizeForm.remoteport = JSON.parse(row.remote_param).remote_port;
+      this.sizeForm.remoteport = row.remote_param.remote_port;
       this.sizeForm.tcporudp = String(row.tcp_or_udp);
       this.sizeForm.region = String(row.channel_mod);
-      this.sizeForm.mainchannel = String(row.master_channel);
+      this.sizeForm.mainchannel = Number(row.master_channel);
       this.dialogVisible = true;
     },
     handledetail(index, row) {
@@ -345,25 +347,31 @@ export default {
       this.getinformation();
     },
     handleCurrentChange(val) {
-      this.start = (val - 1) * 10;
+      this.start = (val - 1) * this.length;
       this.getinformation();
     },
     //数据初始化
     getinformation() {
+      this.loading=true
       gettables(this.vcaddr, this.start, this.length, this.draw)
         .then(res => {
-          
-          res.data.map(item => {
+          if(res){
+            res.data.map(item => {
             item.vctime = timestampToTime(item.vctime);
-            console.log(item.iscon)
           });
           this.tableData3 = res.data;
          
           this.total = res.recordsTotal;
+          this.loading=false
+          }
+          
         })
-        .catch(error => {
-          console.log(error);
-        });
+        .catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
     },
     //编辑
     Makesureedit() {
@@ -386,18 +394,21 @@ export default {
       };
       makesure(this.sizeForm.vcaddr, data)
         .then(res => {
-          // if (res.result == true) {
+          if (res) {
             this.$message({
               message: "编辑成功",
               type: "success"
             });
             this.dialogVisible = false;
             this.getinformation();
-          // }
+          }
         })
-        .catch(error => {
-          console.log(error);
-        });
+        .catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
     },
     //搜索
     search() {
@@ -419,14 +430,19 @@ export default {
         });
       } else {
         startcon(this.addrs).then(res => {
-          // if (res.result === true) {
+          if (res) {
             this.$message({
               message: "成功启动",
               type: "success"
             });
             this.getinformation();
-          // }
-        });
+          }
+        }).catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
       }
     },
     //停止
@@ -442,14 +458,19 @@ export default {
         });
       } else {
         stopcon(this.addrs).then(res => {
-          // if (res.result === true) {
+          if (res) {
             this.$message({
               message: "成功关闭",
               type: "success"
             });
             this.getinformation();
-          // }
-        });
+          }
+        }).catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
       }
     },
     //校时
@@ -472,38 +493,53 @@ export default {
     connect(val) {
       this.vcaddr = val;
       startconnect(this.vcaddr).then(res => {
-        // if (res.result === true) {
+        if (res) {
           this.$message({
             message: "主站连接成功",
             type: "success"
           });
           this.vcaddr = "";
           this.getinformation();
-        // }
+        }
+      }).catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
       });
     },
     //提交
     submitchecktime() {
       if (this.vcaddrs.length > 0) {
         submittime(timetounix(this.unixtime), this.vcaddrs).then(res => {
-          // if (res.result === true) {
+          if (res) {
             this.$message({
               message: "校时成功",
               type: "success"
             });
             this.getinformation();
-          // }
-        });
+          }
+        }).catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
       } else {
         submittime(timetounix(this.unixtime)).then(res => {
-          // if (res.result === true) {
+          if (res) {
             this.$message({
               message: "校时成功",
               type: "success"
             });
             this.getinformation();
-          // }
-        });
+          }
+        }).catch(error=>{
+        this.$message({
+              message: error.error,
+              type: "error"
+            });
+      });
       }
       this.checktimedialog = false;
     },
@@ -514,18 +550,18 @@ export default {
       var config = JSON.parse(this.vcConfig)
       config .vcaddr = this.concenForm.vcaddr
       addcon(config).then(response=>{
-        // if(response.result==true){
+        if(response){
            this.$message({
               message: "新增/更新成功",
               type: "success"
             })
             this.addconcentrator = false
             this.getinformation()
-
-        // }
+ 
+        }
       }).catch(error=>{
         this.$message({
-              message: "'error'",
+              message: error.error,
               type: "warning"
             });
       })
@@ -538,9 +574,8 @@ export default {
   background: #ffffff;
   padding-left: 20px;
   padding-top: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
-  min-height: 875px;
+  min-height: 100%;
 }
 .top {
   margin-top: 10px;
@@ -591,4 +626,3 @@ export default {
   font-weight: 600;
 }
 </style>
-

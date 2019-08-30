@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="tableData" :row-style="showRow" v-bind="$attrs" v-on="$listeners">
+  <el-table :data="tableData" :row-style="showRow" v-bind="$attrs" v-on="$listeners" row-key="objectId">
     <slot name="selection" />
     <slot name="pre-column" />
     <el-table-column
@@ -13,11 +13,12 @@
       <template slot-scope="scope">
         <slot :scope="scope" :name="item.key">
           <template v-if="item.expand">
-            <span :style="{'padding-left':+scope.row._level*indent + 'px'} " />
+            <span :style="{'padding-left':20+ 'px'} " />
             <span v-show="showSperadIcon(scope.row)" class="tree-ctrl" @click="toggleExpanded(scope.$index)">
-              <i v-if="!scope.row._expand" class="el-icon-plus" />
-              <i v-else class="el-icon-minus" />
+              <!-- <i v-if="!scope.row._expand" class="el-icon-plus" /> -->
+              
             </span>
+            <i v-if="(!scope.row._expand)&&(!scope.row.children)" class="el-icon-minus" style="margin-right:5px;"/>
           </template>
           <template v-if="item.checkbox">
             <el-checkbox
@@ -75,6 +76,7 @@ export default {
   },
   computed: {
     children() {
+      
       return this.defaultChildren
     },
     tableData() {

@@ -96,7 +96,7 @@ export default {
    methods: {
        search(){
            connectlist(this.start,this.length,this.concentrator).then(response=>{
-              if(response.result===true){
+              if(response){
                   this.tableData=response.data
                   this.total=response.recordsFiltered
                   
@@ -118,12 +118,15 @@ export default {
 </script>
 <style scoped>
 .connectlist{
-    min-height:875px;
+    background:#ffffff;
+    padding-left:20px;
+    padding-bottom:20px;
+    box-sizing: border-box;
+    min-height:100%;
 }
 .top{
     width:100%;
     height:150px;
-    margin-top:20px;
     padding-top:50px;
     box-sizing: border-box;
     background:#ffffff;

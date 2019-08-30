@@ -10,6 +10,10 @@
         <p>{{success}}</p>
       </div>
       <div class="right">
+        <span>未执行</span>
+        <p>{{unexe}}</p>
+      </div>
+      <div class="right">
         <span>失败</span>
         <p>{{fail}}</p>
       </div>
@@ -60,6 +64,7 @@ export default {
       success: 0,
       node: null,
       fail: 0,
+      unexe:0,
       diselect: [],
       isselect: 0,
       success_rate: "",
@@ -96,7 +101,8 @@ export default {
          html=''
       Taskmeterdetail(this.di, this.vcaddr,this.id).then(
         response => {
-          $.each(response.data, function(key, value) {
+          if(response){
+            $.each(response.data, function(key, value) {
             table = "";
             response.data[key].map(item => {
               if (item.result == "fail") {
@@ -142,8 +148,11 @@ export default {
           this.tableData5 = response.data;
           this.total = response.all;
           this.success = response.success;
-          this.fail = response.all - response.success;
+          this.fail = response.fail;
+          this.unexe = response.unexe
           this.success_rate = response.success_rate + "%";
+          }
+          
         }
       );
     },
@@ -157,18 +166,22 @@ export default {
           datetime: _this.datetime
         });
       });
-      Supporttask(sendup)
+       if(sendup.length==0){
+        _this.$message({
+          type:'warning',
+          message:'请勾选要补抄的电表'
+        })
+      }else{
+        Supporttask(sendup)
         .then(response => {
-          // if (response.result == true) {
+          if (response) {
             this.$message({
               message: "补抄成功",
               type: "success"
             });
             $(".detailtop").html('');
             this.Getmeterdetail()
-          // } else {
-            
-          // }
+          } 
         })
         .catch(error => {
           this.$message({
@@ -176,13 +189,15 @@ export default {
               type: "warning"
             });
         });
+      }
+      
     }
   }
 };
 </script>
 <style scoped>
 .meterdetail {
-  min-height: 875px;
+  min-height: 800px;
   background: white;
   padding: 20px;
   box-sizing: border-box;
@@ -198,7 +213,7 @@ export default {
   border: 1px solid #cccccc;
 }
 .top div {
-  width: 20%;
+  width: 16.6%;
   float: left;
   text-align: center;
   height: 50px;
@@ -213,6 +228,9 @@ export default {
   border-right: 1px solid #cccccc;
 }
 .top div:nth-child(4) {
+  border-right: 1px solid #cccccc;
+}
+.top div:nth-child(5) {
   border-right: 1px solid #cccccc;
 }
 .top div span {

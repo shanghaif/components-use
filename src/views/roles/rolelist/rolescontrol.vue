@@ -11,6 +11,7 @@
       :data="treeData"
       :columns="columns"
       style="margin-top:20px;"
+      row-key="objectId"
     >
       <template slot="scope" slot-scope="{scope}">
         <el-tag>{{scope.row.createtime}}</el-tag>
@@ -50,12 +51,13 @@
 import treeTable from "@/components/TreeTable";
 import {getcontrol} from '@/api/getrole'
 import Parse from 'parse'
+import {utc2beijing} from '@/utils'
 export default {
     components: { treeTable },
   data() {  
     return {
-        formLabelWidth:'120px',
-        roleEdit:false,
+      formLabelWidth:'120px',
+      roleEdit:false,
        form: {
         name: "",
         alias: "",
@@ -68,13 +70,13 @@ export default {
       columns: [
         {
           label: "名称",
-          key: "name",
+          key: "alias",
           expand: true,
           align:'left',
         },
         {
           label: "别名",
-          key: "alias",
+          key: "name",
           width: 200,
           align: "center"
         },
@@ -112,6 +114,7 @@ export default {
              this.form.name = resultes.attributes.name;
             this.form.description = resultes.attributes.description;
             this.form.alias = resultes.attributes.alias;
+            
             this.roleEdit = true
           })
       },
@@ -133,7 +136,7 @@ export default {
             obj.alias = items.attributes.alias
             obj.objectId = items.id
             obj.parent = items.attributes.parent.id
-            obj.createtime = new Date(items.attributes.createdAt).toLocaleDateString()
+            obj.createtime = utc2beijing(items.attributes.createdAt)
             this.data.push(obj)
           })
         })
@@ -162,7 +165,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

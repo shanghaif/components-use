@@ -145,7 +145,7 @@ export default {
                 type: "success",
                 message: "删除成功!"
               });
-              this.getBedtable()
+              this.getBedtable(this.pagesize, this.start)
             });
           });
         })
@@ -210,7 +210,7 @@ export default {
             type: "success"
           });
           this.beddialog = false;
-          this.getBedtable();
+          this.getBedtable(this.pagesize, this.start);
         });
       } else {
         var Testbed = Parse.Object.extend("Testbed");
@@ -238,7 +238,7 @@ export default {
               type: "success"
             });
             this.beddialog = false;
-            this.getBedtable();
+            this.getBedtable(this.pagesize, this.start);
           });
         });
       }
@@ -259,7 +259,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

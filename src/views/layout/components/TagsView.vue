@@ -15,12 +15,15 @@
         <span class="el-icon-close" @click.prevent.stop="closeSelectedTag(tag)" />
       </router-link>
     </scroll-pane>
-    <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
+    <div class="copyright" style="color:#999999;font-size:12px;position:absolute;top:10px;right:10px" v-html="copyright">
+       
+    </div>
+    <!-- <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
       <li @click="refreshSelectedTag(selectedTag)">{{ $t('tagsView.refresh') }}</li>
       <li @click="closeSelectedTag(selectedTag)">{{ $t('tagsView.close') }}</li>
       <li @click="closeOthersTags">{{ $t('tagsView.closeOthers') }}</li>
       <li @click="closeAllTags">{{ $t('tagsView.closeAll') }}</li>
-    </ul>
+    </ul> -->
   </div>
 </template>
 
@@ -35,12 +38,13 @@ export default {
       visible: false,
       top: 0,
       left: 0,
-      selectedTag: {}
+      selectedTag: {},
+      copyright:''
     }
   },
   computed: {
     visitedViews() {
-      console.log(this.$store.state.tagsView.visitedViews)
+      // console.log(this.$store.state.tagsView.visitedViews)
       return this.$store.state.tagsView.visitedViews
     }
   },
@@ -59,8 +63,12 @@ export default {
   },
   mounted() {
     this.addViewTags()
+    this.getCopyright()
   },
   methods: {
+     getCopyright(){
+       this.copyright = sessionStorage.getItem('copyright')
+     },
     generateTitle, // generateTitle by vue-i18n
     isActive(route) {
       return route.path === this.$route.path

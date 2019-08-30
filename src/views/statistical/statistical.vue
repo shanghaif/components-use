@@ -125,9 +125,7 @@ export default {
     min-height: 875px;
   background: white;
   padding: 20px;
-   margin-top:20px;
   box-sizing: border-box;
-  margin-top:20px;
 }
 .meterhistory{
    margin-top:30px;

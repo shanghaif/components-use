@@ -84,23 +84,21 @@ export function Taskdetail(node, start, length, draw, id, searchvalue) {
     }
   })
 }
-export function Taskmeterdetail(node, di, datetime, vcaddr, id) {
+export function Taskmeterdetail(di,vcaddr, id) {
   return request({
     url: 'shuwa_task/meter',
-    method: 'get',
-    params: {
-      node: node,
-      di: di,
-      datetime: datetime,
-      vcaddr: vcaddr,
-      id: id
+    method: 'post',
+    data:{
+      dis:di,
+      vcaddr:vcaddr,
+      id:id
     }
   })
 }
 export function Removetask(id) {
   return request({
-    url: '/shuwa_task/remove_task',
-    method: 'post',
+    url: '/shuwa_task/task',
+    method: 'DELETE',
     data: {
       id: id
     }

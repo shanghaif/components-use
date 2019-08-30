@@ -29,10 +29,10 @@ export function gettables1(vcaddr, start, length, draw) {
     url: '/data_source/DLT645/devs',
     method: 'get',
     params: {
-      draw: draw,
-      'search[value]': vcaddr,
-      start: start,
-      length: length
+      draw,
+      'search[regex]': vcaddr,
+      start,
+      length,
     }
   })
 }
@@ -143,20 +143,20 @@ export function searchdevs(devsreport, start, length, draw) {
   })
 }
 // 智能电表
-export function getmetersearch(value, start, length, draw) {
-  return request({
-    url: '/dba/smartmeter_info',
-    method: 'get',
-    params: {
-      draw: draw,
-      type:'DLT645',
-      key:'devs',
-      'search[regex]': value,
-      start: start,
-      length: length
-    }
-  })
-}
+// export function getmetersearch(value, start, length, draw) {
+//   return request({
+//     url: '/data_source/MSC/devs',
+//     method: 'get',
+//     params: {
+//       draw: draw,
+//       type:'DLT645',
+//       key:'devs',
+//       'search[regex]': value,
+//       start: start,
+//       length: length
+//     }
+//   })
+// }
 export function getInfo(token) {
   return request({
     url: '/user/info',
@@ -249,6 +249,14 @@ export function UpdatedRole(role,roles){
     data: {
       role:'role:'+role,
       items:roles
+    }
+  })
+}
+export function Sitepro(pro){
+  return request({
+    url: '/classes/Site/'+pro,
+    method: 'get',
+    data: {
     }
   })
 }

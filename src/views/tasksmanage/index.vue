@@ -118,12 +118,15 @@ export default {
   methods: {
      Getlist(){
        Historydi().then((res) => {
-        res.data.map(item => {
+         if(res){
+            res.data.map(item => {
           this.options.push({
             value: item.di,
             label: item.di + "---" + item.name
           });
         });
+         }
+       
       });
     },
     search() {
@@ -140,7 +143,7 @@ export default {
       HistoryTask(this.page, this.length, this.diselect, this.time,this.searchvalue)
         .then((res) => {
           this.loading=false
-          // if (res.result == true) {
+          if (res) {
             res.data.map(item => {
               item.datetime = timestampToTime(item.datetime);
               // this.contotal +=item.all
@@ -153,7 +156,7 @@ export default {
             this.contotal = res.total_meter
             this.consuccess = res.total_success_meter
             this.consuc = res.total_success_rate
-          // }
+          }
         })
         .catch(error => {});
     },
@@ -184,7 +187,7 @@ export default {
   padding: 20px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 875px;
+  min-height: 100%;
   margin-bottom: 2rem;
 }
 .block {

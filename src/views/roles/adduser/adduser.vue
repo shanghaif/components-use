@@ -13,15 +13,25 @@
         <el-input v-model="ruleForm2.account" placeholder="请输入账号" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item label="手机号" prop="phone">
-        <el-input v-model.number="ruleForm2.phone" placeholder="请输入手机号" :maxlength="11" auto-complete="off"></el-input>
+        <el-input
+          v-model.number="ruleForm2.phone"
+          placeholder="请输入手机号"
+          :maxlength="11"
+          auto-complete="off"
+        ></el-input>
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
         <el-input v-model="ruleForm2.email" placeholder="请输入邮箱" auto-complete="off"></el-input>
       </el-form-item>
       <el-form-item label="姓名" prop="username">
-        <el-input v-model="ruleForm2.username" placeholder="2-5个文字" :maxlength="5" auto-complete="off"></el-input>
+        <el-input
+          v-model="ruleForm2.username"
+          placeholder="2-5个文字"
+          :maxlength="5"
+          auto-complete="off"
+        ></el-input>
       </el-form-item>
-      <el-form-item label="密码" prop="password" >
+      <el-form-item label="密码" prop="password">
         <el-input
           type="password"
           v-model="ruleForm2.password"
@@ -39,18 +49,18 @@
           :maxlength="10"
         ></el-input>
       </el-form-item>
-        <el-form-item label="部门选择">
-          <el-cascader
-            style="width:600px"
-            placeholder="请选择部门"
-            v-model="ruleForm2.departmentid"
-            :props="treeprops"
-            :options="treeData"
-            auto-complete="off"
-            :show-all-levels="false"
-            change-on-select
-          ></el-cascader>
-        </el-form-item>
+      <el-form-item label="部门选择">
+        <el-cascader
+          style="width:600px"
+          placeholder="请选择部门"
+          v-model="ruleForm2.departmentid"
+          :props="treeprops"
+          :options="treeData"
+          auto-complete="off"
+          :show-all-levels="false"
+          change-on-select
+        ></el-cascader>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('ruleForm2')">保存</el-button>
       </el-form-item>
@@ -58,7 +68,7 @@
   </div>
 </template>
 <script>
-import{ Parse } from 'parse'
+import { Parse } from "parse";
 export default {
   data() {
     var validatePass = (rule, value, callback) => {
@@ -81,11 +91,12 @@ export default {
       }
     };
     return {
-      data:[],
-      treeprops:{
-        value:'objectId',
-        label:'name'
+      data: [],
+      treeprops: {
+        value: "objectId",
+        label: "name"
       },
+      nowuserid: "",
       ruleForm2: {
         account: "",
         phone: "",
@@ -93,7 +104,7 @@ export default {
         password: "",
         email: "",
         checkPass: "",
-        departmentid:[] 
+        departmentid: []
       },
       id: "",
       rules2: {
@@ -136,57 +147,76 @@ export default {
       }
     };
   },
-  computed:{
-        treeData(){
-          let cloneData = JSON.parse(JSON.stringify(this.data))    // 对源数据深度克隆
-          return cloneData.filter(father=>{               
-            let branchArr = cloneData.filter(child=>father.objectId == child.ParentId)    //返回每一项的子级数组
-            branchArr.length>0 ? father.children = branchArr : ''   //如果存在子级，则给父级添加一个children属性，并赋值
-            return father.ParentId==0;      //返回第一层
-          });
-        },
+  computed: {
+    treeData() {
+      let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
+      return cloneData.filter(father => {
+        let branchArr = cloneData.filter(
+          child => father.objectId == child.ParentId
+        ); //返回每一项的子级数组
+        branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
+        return father.ParentId == 0; //返回第一层
+      });
+    }
   },
   mounted() {
-    this.getDepartment()
+    this.getDepartment();
+    console.log();
+    this.nowuserid = Parse.User.current().id;
   },
   methods: {
     submitForm(formName) {
-      console.log(this.ruleForm2.departmentid)
+      console.log(this.ruleForm2.departmentid);
       this.$refs[formName].validate(valid => {
         if (valid) {
-           var User = Parse.Object.extend("_User");
-           var user = new User();
-          if(this.ruleForm2.departmentid.length==0){
-            }else{
+          var User = Parse.Object.extend("_User");
+          var user = new User();
+          if (this.ruleForm2.departmentid.length == 0) {
+          } else {
             //   var pointer = user.pointer('department')
             //  pointer.set('objectId',this.ruleForm2.departmentid[this.ruleForm2.departmentid.length-1])
             //  user.add(pointer)
             var Department = Parse.Object.extend("Department");
             var department = new Department();
-            department.set('objectId',this.ruleForm2.departmentid[this.ruleForm2.departmentid.length-1])
-            user.set('department',department)
-            }
+            department.set(
+              "objectId",
+              this.ruleForm2.departmentid[
+                this.ruleForm2.departmentid.length - 1
+              ]
+            );
+            user.set("department", department);
+          }
           user.set("username", this.ruleForm2.account);
           user.set("nick", this.ruleForm2.username);
           user.set("password", this.ruleForm2.password);
           user.set("phone", this.ruleForm2.phone.toString());
           user.set("email", this.ruleForm2.email);
-          let acl = new Parse.ACL();
-          user.save().then(resultes => {
-               this.$message({
+          var acl = new Parse.ACL();
+          acl.setReadAccess(this.nowuserid, true);
+          acl.setWriteAccess(this.nowuserid, true);
+          user.set("ACL", acl);
+          user.save().then(
+            resultes => {
+              this.$message({
                 message: "新增成功",
                 type: "success"
               });
               this.$router.push({
-                  path:'/roles/structure'
-              })
-            })
-            .catch(console.log("error"));
+                path: "/roles/structure"
+              });
+            },
+            error => {
+              this.$message({
+                type: "error",
+                message: error.error
+              });
+            }
+          );
         } else {
           this.$message({
-                message: "信息错误",
-                type: "danger"
-              });;
+            message: "信息错误",
+            type: "danger"
+          });
           return false;
         }
       });
@@ -194,19 +224,29 @@ export default {
     getDepartment() {
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
-      department.find().then(resultes => {
-        // console.log(resultes)
-        resultes.map(items=>{
-          var obj={}
-          items.createtime = new Date(items.attributes.createdAt).toLocaleDateString()
-          obj.name = items.attributes.name,
-          obj.ParentId = items.attributes.ParentId
-          obj.objectId =items.id
-          obj.level = items.attributes.level
-          obj.createtime = items.createtime
-          this.data.push(obj)
-        })
-      });
+      department.find().then(
+        resultes => {
+          // console.log(resultes)
+          resultes.map(items => {
+            var obj = {};
+            items.createtime = new Date(
+              items.attributes.createdAt
+            ).toLocaleDateString();
+            (obj.name = items.attributes.name),
+              (obj.ParentId = items.attributes.ParentId);
+            obj.objectId = items.id;
+            obj.level = items.attributes.level;
+            obj.createtime = items.createtime;
+            this.data.push(obj);
+          });
+        },
+        error => {
+          this.$message({
+            type: "error",
+            message: error.error
+          });
+        }
+      );
     }
   }
 };
@@ -216,7 +256,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-   margin-top:20px;
   box-sizing: border-box;
   background: #ffffff;
 }

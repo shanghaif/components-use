@@ -25,12 +25,14 @@
           </span>
           <el-input
             v-model="ruleForm2.phone"
+            ref="phonerole"
             name="phone"
             type="text"
             auto-complete="on"
             :maxlength="11"
             placeholder="请输入手机号"
             style="width:250px"
+           
           />
         </el-form-item>
         <div class="yzm" style="height:50px;margin-left:20px;margin-bottom:20px;">
@@ -202,6 +204,11 @@ export default {
       //  query.find().then(res=>{
 
       //  })
+      
+      this.$refs['phonerole'].$refs.input.disabled=true
+      // console.log(['disabled'])
+    }else{
+      
     }
     this.ruleForm2.diqu = [];
     this.actions = this.$route.query.action;
@@ -236,12 +243,13 @@ export default {
               Parse.User.become(result.sessionToken).then(
                 function(user) {
                   Cookies.set("sessionToken", result.sessionToken);
-              var Menu = Parse.Object.extend("Menu");
+              var Menu = Parse.Object.extend("Navigation");
               var menu = new Parse.Query(Menu);
               menu.find().then(menu => {
                 var menu1 = menu;
                 menu1.map(items => {
-                  if (items.attributes.parentId) {
+                  console.log(items)
+                  if (items.attributes.parent) {
                      _this.routes.push(items);
                   }
                 });
@@ -249,6 +257,7 @@ export default {
                   message: "成功登录",
                   type: "success"
                 });
+                // console.log(_this.routes)
                 sessionStorage.setItem("username",user.attributes.username);
                 sessionStorage.setItem("list", JSON.stringify(_this.routes));
                 sessionStorage.setItem("token", result.sessionToken);

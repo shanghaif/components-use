@@ -7,24 +7,27 @@
     <!-- <div class="centent">
       <h2>adfasfdafasf</h2>
     </div> -->
-    <sidebar class="sidebar-container" style="background:#004998;text-align:center"/>
+    <!-- <sidebar class="sidebar-container" style="background:#004998;text-align:center"/> -->
     <div class="main-container">
      
       <app-main/>
+      <TagsView/>
     </div>
+    
   </div>
 </template>
 
 <script>
-import { Navbar, Sidebar, AppMain } from './components'
+import { Sidebar, AppMain,TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
-
+import Navbar from './Navbar'
 export default {
   name: 'Layout',
   components: {
     Navbar,
     Sidebar,
-    AppMain
+    AppMain,
+    TagsView
   },
   mixins: [ResizeMixin],
   computed: {

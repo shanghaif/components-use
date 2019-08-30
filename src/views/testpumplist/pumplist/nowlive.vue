@@ -53,7 +53,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

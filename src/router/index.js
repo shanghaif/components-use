@@ -33,47 +33,17 @@ export const constantRouterMap = [
   hidden: true},
 
   {
-    path: '',
+    path: '/',
     component: Layout,
     redirect: '/dashboard',
-    name: '首页',
+    name:'首页',
     children: [{
-      path: 'dashboard',
+      path: '/dashboard',
       component: () => import('@/views/dashboard/index'),
       name:'首页',
       meta: { title: '首页', icon: 'devicemanage' },
     }]
   },
-  //  主站菜单
-  // {
-  //   path: '/mainstation',
-  //   component: Layout,
-  //   redirect: '/mainstation/writeparameter',
-  //   name: '主站菜单',
-  //  
-  //   meta: { title: '主站菜单', icon: 'zhuzhan' },
-  //   children: [
-  //     {
-  //       path: 'writeparameter',
-  //       name: '写参数',
-  //       component: () => import('@/views/mainstation/writeparameter'),
-  //       meta: { title: '写参数', icon: 'xieshuju' }
-  //     },
-  //     {
-  //       path: 'allterminal',
-  //       name: '批量终端召测',
-  //       component: () => import('@/views/mainstation/allterminal'),
-  //       meta: { title: '批量终端召测', icon: 'piliang' }
-  //     },
-  //     {
-  //       path: 'readparameter',
-  //       name: '读参数',
-  //       component: () => import('@/views/mainstation/readparameter'),
-  //       meta: { title: '读参数', icon: 'dushuju' },
-  //     },
-     
-  //   ]
-  // },
   //档案管理
   {
     path: '/filemanage',
@@ -90,7 +60,7 @@ export const constantRouterMap = [
       //   meta: { title: '户表关系导入', icon: 'hubiao' }
       // },
       {
-        path: 'metersearch',
+        path: '/filemanage/metersearch',
         name: '档案维护',
         component: () => import('@/views/devicemanage/metersearch'),
         meta: { title: '档案维护', icon: 'meter' }
@@ -133,54 +103,69 @@ export const constantRouterMap = [
   {
     path: '/tasksmanage',
     component: Layout,
-    name:'数据采集管理',
+    name:'采集管理',
     redirect: '/tasksmanage/tasklist',
-    meta: { title: '数据采集管理', icon: 'tasks' },
+    meta: { title: '采集管理', icon: 'tasks' },
    
     children: [
       {
-        path: 'tasklist',
+        path: '/tasksmanage/tasklist',
         name: '定制任务管理',
         component: () => import('@/views/tasksmanage/tasklist'),
-        meta: { title: '定制任务管理', icon: 'tasklist' }
+        meta: { title: '定制任务管理', icon: 'taskslist' }
       },
       {
-        path: 'schedule',
+        path: '/tasksmanage/schedule',
         name: '任务进度',
         component: () => import('@/views/tasksmanage/taskschedule'),
+        meta: { title: '任务进度'},
         hidden: true
       },
       {
-        path: 'history',
+        path: '/tasksmanage/history',
         name: '采集质量分析',
         component: () => import('@/views/tasksmanage/index'),
         meta: { title: '采集质量分析', icon: 'history' }
       },
       {
-        path: 'taskmeterdetail',
+        path: '/tasksmanage/taskmeterdetail',
         name: '实时进度',
         component: () => import('@/views/tasksmanage/taskmeterdetail'),
+        meta: { title: '实时进度'},
         hidden: true
       },
       {
-        path: 'meterdetail',
+        path: '/tasksmanage/meterdetail',
         name: '任务进度',
         component: () => import('@/views/tasksmanage/meterdetail'),
         meta: { title: '任务进度' },
         hidden: true
       },
       {
-        path: 'readnow',
-        name: '单终端召测',
+        path: '/tasksmanage/readnow',
+        name: '实时采集',
         component: () => import('@/views/mainstation/jia'),
-        meta: { title: '单终端召测', icon: 'dangqianshuju' }
+        meta: { title: '实时采集', icon: 'dangqianshuju' }
       },
       {
-        path: 'allterminal',
-        name: '批量数据召测',
-        component: () => import('@/views/mainstation/allterminal'),
-        meta: { title: '批量数据召测', icon: 'piliang' }
+        path:'/tasksmanage/long_control',
+        name:'远程控制',
+        component: ()=> import('@/views/tasksmanage/long_range_control'),
+        meta: {title: '远程控制', icon:'long_control'}
       },
+      // {
+      //   path:'/tasksmanage/performance_monitoring',
+      //   name:'运行监控',
+      //   component: ()=> import('@/views/tasksmanage/performance_monitoring'),
+      //   meta: {title: '运行监控', icon:'performance'}
+      // },
+      // {
+      //   path: 'allterminal',
+      //   name: '批量召测',
+      //   component: () => import('@/views/mainstation/allterminal'),
+      //   meta: { title: '批量召测', icon: 'piliang' }
+      // },
+      
     ]
   },
   {
@@ -192,80 +177,117 @@ export const constantRouterMap = [
     alwaysShow:true,
     children:[
       {
-        path: 'historystatistical',
+        path: '/readmeter/historystatistical',
         name: '抄表数据查询',
         component: () => import('@/views/statistical/statistical'),
         meta: { title: '抄表数据查询', icon: 'statisticalhistory' }
       }
     ]
   },
+
   {
     path: '/devicemanage',
     component: Layout,
     redirect: '/devicemanage',
-    name: '虚拟设备管理',
-    meta: { title: '虚拟设备管理', icon: 'devicemanage' },
+    name: '设备管理',
+    meta: { title: '设备管理', icon: 'devicemanage' },
     children: [
       {
-        path: 'concentrator',
-        name: '集中器',
+        path: '/devicemanage/concentrator',
+        name: '集中器管理',
         component: () => import('@/views/devicemanage/concentrator'),
-        meta: { title: '集中器', icon: 'concentrator' }
+        meta: { title: '集中器管理', icon: 'concentrator' }
       },
       {
-        path: 'devsreport',
-        name: '采集器',
+        path: '/devicemanage/devsreport',
+        name: '采集器管理',
         component: () => import('@/views/devicemanage/devsreport'),
-        meta: { title: '采集器', icon: 'devsreport' }
+        meta: { title: '采集器管理', icon: 'devsreport' }
       },
       {
-        path: 'devicepump',
+        path: '/devicemanage/smartmeter',
+        name: '智能电表',
+        component: () => import('@/views/devicemanage/smartmeter'),
+        meta: { title: '智能电表', icon: 'smartmeter' }
+      },
+      {
+        path: '/devicemanage/devicepump',
         component: () => import('@/views/devicemanage/devicepump'),
         name:'采证设备列表',
         meta: { title: '采证设备列表', icon: 'devpump' }
       },
       {
-        path: 'testbedpump',
+        path: '/devicemanage/testbedpump',
         component: () => import('@/views/devicemanage/testbedpump'),
         name:'测试台体',
         meta: { title: '测试台体', icon: 'testbedpump' }
       },
       {
-        path: 'condetail',
+        path: '/devicemanage/condetail',
         name: '集中器详情',
         component: () => import('@/views/devicemanage/condetail'),
         meta: { title: '集中器详情' },
         hidden: true
       },
       {
-        path: 'devsdetail',
+        path: '/devicemanage/devsdetail',
         name: 'Ⅱ采详情',
         component: () => import('@/views/devicemanage/devsdetail'),
         meta: { title: 'Ⅱ采详情' },
         hidden: true
       },
       {
-        path: 'meterdetail',
+        path: '/devicemanage/meterdetail',
         name: '智能电表详情',
         component: () => import('@/views/devicemanage/meterdetail'),
         meta: { title: '智能电表详情' },
         hidden: true
       },
       {
-        path: 'perception',
-        name: '智能感知',
-        component: () => import('@/views/devicemanage/perception'),
-        meta: { title: '智能感知',icon:'ganzhi' }
-      }
+        path: '/devicemanage/generalmanage',
+        name: '设备综合管理',
+        component: () => import('@/views/devicemanage/generalmanage'),
+        meta: { title: '设备综合管理',icon:'general' }
+      },
+      {
+        path: '/devicemanage/sukeserver',
+        name: '服务商管理',
+        component: () => import('@/views/devicemanage/sukeserver'),
+        meta: { title: '服务商管理',icon:'sukeserver' }
+      },
+      {
+        path: '/devicemanage/sukezl',
+        name: '指令管理',
+        component: () => import('@/views/devicemanage/sukezl'),
+        meta: { title: '指令管理',icon:'zhiling' }
+      },
+      {
+        path: '/devicemanage/search_meter',
+        name: '智能搜表',
+        component: () => import('@/views/devicemanage/intelligent_search_meter'),
+        meta: { title: '智能搜表', icon: 'searchmeter' }
+      },
+      {
+        path: '/devicemanage/enrollment_management',
+        name: '注册管理',
+        component: () => import('@/views/devicemanage/enrollment_management'),
+        meta: { title: '注册管理', icon: 'enrollment' }
+      },
+      {
+        path: '/devicemanage/bulkImport',
+        name: '批量导入',
+        component: () => import('@/views/devicemanage/bulkImport'),
+        meta: { title: '批量导入', icon: 'enrollment' }
+      },
     ]
   },
   {
     path: '/connectmanage',
     component: Layout,
     redirect: '/connectmanage/report',
-    name: '虚拟设备检测',
+    name: '主站交互',
     alwaysShow:true,
-    meta: { title: '虚拟设备检测', icon: 'connect' },
+    meta: { title: '主站交互', icon: 'connect' },
    
     children: [
       // {
@@ -275,31 +297,34 @@ export const constantRouterMap = [
       //   meta: { title: '连接列表', icon: 'list' }
       // },
       {
-        path: 'report',
+        path: '/connectmanage/report',
         name: '主站连接监测',
         component: () => import('@/views/connectmanage/report'),
         meta: { title: '主站连接监测', icon: 'report' }
       }
     ]
   },
-  
-  
-  // {
-  //   path: '/test',
-  //   component: Layout,
-  //   redirect: '/test/',
-  //   name:'菜单测试',
-  //   meta: { title: '菜单测试', icon: 'test' },
-  //  
-  //   children: [
-  //     {
-  //       path: 'testmenu',
-  //       name: '菜单测试',
-  //       component: () => import('@/views/test1/menu/index'),
-  //       meta: { title: '测试菜单', icon: 'test' }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/monitoring',
+    component: Layout,
+    name:'监控分析',
+    redirect: '/monitoring',
+    meta: { title: '监控分析', icon: 'tasks' },
+    children:[
+      {
+        path: '/monitoring/meterReading',
+        name: '抄表结果',
+        component: () => import('@/views/monitoring/meterReading'),
+        meta: { title: '抄表结果', icon: 'piliang' }
+      },
+      {
+        path: '/monitoring/meterMonitoring',
+        name: '运行监控',
+        component: () => import('@/views/monitoring/meterMonitoring'),
+        meta: { title: '运行监控', icon: 'piliang' }
+      },
+    ]
+  },
   {
     path: '/inspection',
     component: Layout,
@@ -309,35 +334,38 @@ export const constantRouterMap = [
     alwaysShow:true,
     children: [
       {
-        path: 'index',
+        path: '/inspection/index',
         name: '检测任务',
         component: () => import('@/views/testpumplist/pumplist/Inspection'),
         meta: { title: '检测任务', icon: 'history' }
       },
       {
-        path: 'reportdetail',
+        path: '/inspection/reportdetail',
         name: '任务详情',
         component: () => import('@/views/testpumplist/pumplist/reportdetail'),
+        meta: { title: '任务详情'},
         hidden:true
       },
       {
-        path: 'console_evidence',
+        path: '/inspection/console_evidence',
         name: '取证详情',
         component: () => import('@/views/testpumplist/pumplist/drawingcurver'),
+        meta: { title: '取证详情'},
         hidden:true
       },
       {
-        path: 'controller_evidence',
+        path: '/inspection/controller_evidence',
         name: '控制器取证',
         component: () => import('@/views/testpumplist/pumplist/drawing_curver'),
+        meta: { title: '控制器取证'},
         hidden:true
       },
       {
-        path: 'live_evidence',
+        path: '/inspection/live_evidence',
         name: '摄像头取证',
         component: () => import('@/views/testpumplist/pumplist/nowlive'),
-        meta: { title: '摄像头取证', icon: 'pumptest' },
-        // hidden:true
+        meta: { title: '摄像头取证'},
+        hidden:true
       }
     ]
   },
@@ -353,13 +381,13 @@ export const constantRouterMap = [
    },
     children: [
       {
-        path: 'index',
+        path: '/reportmodule/index',
         component: () => import('@/views/reportModule/index'),
         name:'检测标准',
         meta: { title: '检测标准', icon: 'link' }
       },
       {
-        path: 'module',
+        path: '/reportmodule/module',
         component: () => import('@/views/reportModule/module'),
         hidden:true,
         name:'报告模板',
@@ -367,22 +395,22 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/flat',
-    component: Layout,
-    redirect: '/flat/index',
-    name: '设备搜寻',
-    meta: { title: '设备搜寻', icon: 'zhuzhan' },
-    children: [
-      {
-        path: 'index',
-        name: '搜寻设备',
-        component: () => import('@/views/flat/index'),
-        meta: { title: '搜寻设备', icon: 'dushuju' },
-      },
+  // {
+  //   path: '/flat',
+  //   component: Layout,
+  //   redirect: '/flat/index',
+  //   name: '设备搜寻',
+  //   meta: { title: '设备搜寻', icon: 'zhuzhan' },
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: '搜寻设备',
+  //       component: () => import('@/views/flat/index'),
+  //       meta: { title: '搜寻设备', icon: 'dushuju' },
+  //     },
      
-    ]
-  },
+  //   ]
+  // },
   // {
   //   path: '/sysmanage',
   //   component: Layout,
@@ -424,23 +452,23 @@ export const constantRouterMap = [
     alwaysShow:true,
      meta: {
      title: '数据分析',
-     icon: 'department'
+     icon: 'dataany'
    },
     children: [
       {
-        path: 'index1',
+        path: '/dataanalysis/index1',
         component: () => import('@/views/dataanalysis/index1'),
         name:'行业分析',
         meta: { title: '行业分析', icon: 'link' }
       },
       {
-        path: 'index2',
+        path: '/dataanalysis/index2',
         component: () => import('@/views/dataanalysis/index2'),
         name:'质量比对',
         meta: { title: '质量比对', icon: 'link' }
       },
       {
-        path: 'index3',
+        path: '/dataanalysis/index3',
         component: () => import('@/views/dataanalysis/index3'),
         name:'远程检测',
         meta: { title: '远程检测', icon: 'link' }
@@ -455,72 +483,126 @@ export const constantRouterMap = [
     meta: { title: '系统管理', icon: 'rolemanage' },
     children:[
       {
-        path: 'structure',
+        path: '/roles/structure',
         name: '用户管理',
         component: () => import('@/views/roles/structure'),
         meta: { title: '用户管理', icon: 'usermanage' }
       },
       {
-        path: 'roles',
+        path: '/roles/roles',
         name: '角色管理',
         component: () => import('@/views/roles/rolelist/roles'),
         meta: { title: '角色管理', icon: 'adminmanage' }
       },
       {
-        path: 'rolescontrol',
+        path: '/roles/rolescontrol',
         name: '权限管理',
         component: () => import('@/views/roles/rolelist/rolescontrol'),
-        meta: { title: '权限管理', icon: 'quanxian' }
+        meta: { title: '权限管理', icon: 'rolescontrol' }
       },
       {
-        path: 'editroles',
+        path: '/roles/editroles',
         name: '添加角色',
+        meta: { title: '添加角色'},
         hidden:true,
         component: () => import('@/views/roles/rolelist/addroles'),
-        // meta: { title: '添加角色', icon: 'adminmanage' }
       },
-      // {
-      //   path: 'user',
-      //   name: '用户管理',
-      //   component: () => import('@/views/roles/user'),
-      //   meta: { title: '用户管理', icon: 'usermanage' }
-      // },
       {
-        path: 'adduser',
+        path: '/roles/application',
+        name: '应用管理',
+        component: () => import('@/views/roles/application'),
+        meta: { title: '应用管理', icon: 'application' }
+      },
+      {
+        path: '/roles/adduser',
         name: '新增用户',
+        meta: { title: '新增用户'},
         hidden:true,
         component: () => import('@/views/roles/adduser/adduser'),
       },
-      // {
-      //   path: 'menu',
-      //   name: '菜单管理',
-      //   component: () => import('@/views/roles/test111'),
-      //   meta: { title: '菜单管理', icon: 'menumanage' }
-      // },
       {
-        path: 'edituser',
+        path: '/roles/edituser',
         name: '编辑用户',
+        meta: { title: '编辑用户'},
         hidden:true,
         component: () => import('@/views/roles/adduser/edituser'),
       },
       {
-        path: 'menu',
+        path: '/roles/menu',
         name: '菜单管理',
         component: () => import('@/views/roles/test'),
         meta: { title: '菜单管理', icon: 'menu' }
       },
       {
-        path: 'department',
+        path: '/roles/department',
         name: '部门管理',
         component: () => import('@/views/roles/department/department'),
         meta: { title: '部门管理', icon: 'department' }
       },
-      // {
-      //   path: 'departmentforuser',
-      //   name: '岗位管理',
-      //   component: () => import('@/views/roles/departmentforuser'),
-      //   meta: { title: '岗位管理', icon: 'gangwei' }
-      // },
+      {
+        path: '/roles/protocol',
+        name: '协议管理',
+        component: () => import('@/views/roles/protrol'),
+        meta: { title: '协议管理', icon: 'department' }
+      },
+      {
+        path: '/roles/applicationManagement',
+        name: '应用管理',
+        component: () => import('@/views/roles/applicationManagement'),
+        meta: { title: '应用管理', icon: 'department' }
+      },
+      {
+        path: '/applicationManagement/addApp',
+        name: '新增应用',
+        component: () => import('@/views/roles/appOperate/addApp'),
+        meta: { title: '新增应用', icon: 'department' }
+      },
+      {
+        path: '/roles/appmanage',
+        name: '插件管理',
+        component: () => import('@/views/systemmanage/appmarage'),
+        meta: { title: '插件管理', icon: 'appmanage' }
+      },
+      {
+        path: '/roles/thing',
+        name: '设备管理',
+        component: () => import('@/views/equipment_management/index'),
+        meta: { title: '设备管理',icon:'device' }
+      },
+      {
+        path: '/roles/product',
+        name: '产品管理',
+        component: () => import('@/views/equipment_management/devproduct'),
+        meta: { title: '产品管理',icon:'product' }
+      },
+      {
+        path: '/roles/detailproduct',
+        name: '产品详情',
+        component: () => import('@/views/equipment_management/proddetail'),
+        meta: { title: '产品详情'},
+        hidden:true
+      },
+      {
+        path: '/roles/editdevices',
+        name: '设备详情',
+        component: () => import('@/views/equipment_management/editdevices'),
+        meta: { title: '设备详情'},
+        hidden:true
+      },
+      {
+        path: '/roles/onlinetest',
+        name: '在线调试',
+        component: () => import('@/views/equipment_management/onlinetest'),
+        meta: { title: '在线调试', icon:'onlinetest'}
+       
+      },
+      {
+        path: '/roles/channelManage',
+        name: '服务通道管理',
+        component: () => import('@/views/equipment_management/channelManage'),
+        meta: { title: '服务通道管理',icon:'channelmanage' }
+      },
+      // 
     ]
   },
   // {

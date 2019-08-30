@@ -1,6 +1,7 @@
 <template>
   <div class="device">
     <h3>采证设备</h3>
+    
     <div class="deviceslist" style="margin-top:20px">
       <el-table :data="tableData" stripe style="width: 100%" border>
         <el-table-column label="设备名称">
@@ -121,9 +122,8 @@ export default {
 <style scoped>
 .device {
   width: 100%;
-  min-height: 875px;
+  min-height: 100%;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

@@ -2,193 +2,183 @@
   <div class="consoleevidece">
     <el-tabs type="border-card">
       <el-tab-pane label="特性曲线">
-          <div style="border-bottom:1px solid #cccccc;">
-               <div id="echarts" style="width:100%;height:400px;">
-
-                </div>
-                <div style="width:100%;text-align:center;margin-bottom:20px;">
-                    <el-button type="primary" @click="Getdata">采 集</el-button>
-                </div>
+        <div style="border-bottom:1px solid #cccccc;">
+          <div id="echarts" style="width:100%;height:400px;"></div>
+          <div style="width:100%;text-align:center;margin-bottom:20px;">
+            <el-button type="primary" @click="Getdata">采 集</el-button>
           </div>
-       
-        <div id="bottom" style="width:100%;height:400px;margin-top:20px;display:flex;">
+        </div>
+
+        <div id="bottom" style="width:100%;height:400px;margin-top:20px;display:flex">
           <div id="bottomleft" style="width:70%;height:100%;"></div>
           <div id="bottomright" style="width:30%;height:100%;">
-               <div class="caozuo">
+            <div class="caozuo">
               <el-button type="success" @click="updatedcurver">绘 图</el-button>
               <el-button type="success" @click="supportdata">提 交</el-button>
             </div>
-               <el-table
-                :data="Dataavange"
-                 border
-                style="width: 100%;margin-top:10px;">
-                <el-table-column
-                  prop="flow"
-                  :label='"流量\n(m³/h)"'
-                  >
-                </el-table-column>
-                <el-table-column
-                  prop="head"
-                  :label='"扬程\n(m)"'
-                  >
-                </el-table-column>
-                <el-table-column
-                  prop="power"
-                  :label='"输入功率\n(kW)"'>
-                </el-table-column>
-                <el-table-column
-                  prop="effect"
-                  :label='"机组效率\nη(%)"'>
-                </el-table-column>
-                 <el-table-column
-                  label="操作">
-                  <template slot-scope="scope">
-                   <el-button type="danger" @click="deletedata(scope.$index)">删 除</el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
+            <el-table :data="Dataavange" border style="width: 100%;margin-top:10px;height:100%">
+              <el-table-column prop="flow" :label="'流量\n(m³/h)'"></el-table-column>
+              <el-table-column prop="head" :label="'扬程\n(m)'"></el-table-column>
+              <el-table-column prop="power" :label="'输入功率\n(kW)'"></el-table-column>
+              <el-table-column prop="effect" :label="'机组效率\nη(%)'"></el-table-column>
+              <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <el-button type="danger" @click="deletedata(scope.$index)">删 除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </div>
       </el-tab-pane>
       <el-tab-pane label="测试监控">
-          <el-table
-                :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-                style="width: 100%">
-            <el-table-column
-                prop="flow"
-                label="流量"
-                >
-            </el-table-column>
-            <el-table-column
-                prop="head"
-                label="扬程"
-               >
-            </el-table-column>
-            <el-table-column
-                prop="power"
-                label=功率>
-            </el-table-column>
-            <el-table-column
-                prop="power_factor"
-                label=功率因数>
-            </el-table-column>
-            <el-table-column
-                prop="pressure_in"
-                label=进口压力>
-            </el-table-column>
-            <el-table-column
-                prop="pressure_out"
-                label=出口压力>
-            </el-table-column>
-            <el-table-column
-                prop="current"
-                label=电流>
-            </el-table-column>
-            <el-table-column
-                prop="effect"
-                label=机组效率>
-            </el-table-column>
-            <el-table-column
-                prop="speed"
-                label=转速>
-            </el-table-column>
-             <el-table-column
-                label=传输时间>
-                <template slot-scope="scope">
-                 <span>{{timestampToTime(scope.row.timestamp)}}</span>
-                </template>
-            </el-table-column>
-            </el-table>
-            <div class="block" style="margin-top:15px;">
-              <el-pagination align='center' @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[1,5,10,20]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="tableData.length">
-              </el-pagination>
-            </div>
-
+        <el-table
+          :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+          style="width: 100%"
+        >
+          <el-table-column prop="flow" label="流量"></el-table-column>
+          <el-table-column prop="head" label="扬程"></el-table-column>
+          <el-table-column prop="power" label="功率"></el-table-column>
+          <el-table-column prop="power_factor" label="功率因数"></el-table-column>
+          <el-table-column prop="pressure_in" label="进口压力"></el-table-column>
+          <el-table-column prop="pressure_out" label="出口压力"></el-table-column>
+          <el-table-column prop="current" label="电流"></el-table-column>
+          <el-table-column prop="effect" label="机组效率"></el-table-column>
+          <el-table-column prop="speed" label="转速"></el-table-column>
+          <el-table-column label="传输时间">
+            <template slot-scope="scope">
+              <span>{{timestampToTime(scope.row.timestamp)}}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="block" style="margin-top:15px;">
+          <el-pagination
+            align="center"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[1,5,10,20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="tableData.length"
+          ></el-pagination>
+        </div>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script>
-import {Pumpcurverdata, getaveragedata} from '@/api/devicescontrol/index'
-import { Supporttask } from '@/api/historytask';
-import {Parse} from 'parse'
+import { Pumpcurverdata, getaveragedata } from "@/api/devicescontrol/index";
+import { Supporttask } from "@/api/historytask";
+import { Parse } from "parse";
+import { clearInterval } from 'timers';
 var origindata = [];
 var selectdata = [];
-var timer=null
-var xaxis = []
-var yaxisflow = []//流量
-var yaxishead = []//扬程
-var yaxiseffect = []//效率
-var yaxisepower = []//功率
-var arr1=[],arr2=[],arr3=[],arr7=[],arr5=[],arr6=[]
+var timer = null;
+var xaxis = [];
+var yaxisflow = []; //流量
+var yaxishead = []; //扬程
+var yaxiseffect = []; //效率
+var yaxisepower = []; //功率
+var arr1 = [],
+  arr2 = [],
+  arr3 = [],
+  arr7 = [],
+  arr5 = [],
+  arr6 = [];
 export default {
   data() {
     return {
       currentPage: 1, // 当前页码
       total: 20, // 总条数
-      pageSize: 10 ,// 每页的数据条数
+      pageSize: 10, // 每页的数据条数
       myChart: null,
       myChart1: null,
-      tableData:[],
-      Dataavange:[],
-      reportId:'',
-      tasknameid:''
+      tableData: [],
+      Dataavange: [],
+      reportId: "",
+      tasknameid: "",
+      timer:null
     };
   },
-  mounted() {
-    this.reportId = this.$route.query.reportId
-    this.tasknameid = this.$route.query.tasknameid
-    this.Getecharts();
-    this.Getecharts2()
-    this.init();
-    timer=null
-   this.getcurvedata()
+  created(){
+    console.log(111)
+    // this.setTimer()
   },
+  mounted() {
+    this.reportId = this.$route.query.reportId;
+    this.tasknameid = this.$route.query.tasknameid;
+    this.Getecharts();
+    this.Getecharts2();
+    this.init();
+    this.getcurvedata()
+    window.clearInterval(this.timer)
+    this.setTimer()
+  },
+  
   methods: {
-     timestampToTime(timestamp) {
-      var date = new Date(timestamp * 1000) 
-      var Y = date.getFullYear() + '-';
-      var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-      var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
-      var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
-      var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
-      var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
-      return Y+M+D+h+m+s;
+    timestampToTime(timestamp) {
+      var date = new Date(timestamp * 1000);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 <= 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D =
+        (date.getDate() + 1 <= 10 ? "0" + date.getDate() : date.getDate()) +
+        " ";
+      var h =
+        (date.getHours() + 1 <= 10 ? "0" + date.getHours() : date.getHours()) +
+        ":";
+      var m =
+        (date.getMinutes() + 1 <= 10
+          ? "0" + date.getMinutes()
+          : date.getMinutes()) + ":";
+      var s =
+        date.getSeconds() + 1 <= 10
+          ? "0" + date.getSeconds()
+          : date.getSeconds();
+      return Y + M + D + h + m + s;
     },
-    getcurvedata(){
-       xaxis = []//时间
-      yaxisflow = []//流量
-      yaxishead = []//扬程
-      yaxiseffect = []//效率
-      yaxisepower = []//功率
-     Pumpcurverdata(this.reportId,'dtu','curver').then(res=>{
-       this.tableData = res.reverse()
-      origindata = res
-       res.map(item=>{
-              xaxis.push(this.timestampToTime(item.timestamp).substring(11,19))
-              yaxiseffect.push(item.effect)
-              yaxisepower.push(item.power)
-              yaxisflow.push(item.flow)
-              yaxishead.push(item.head)
-       })
-       this.Getecharts(xaxis, yaxisflow, yaxishead, yaxiseffect, yaxisepower)
-     })
+    setTimer(){
+      this.timer = window.setInterval(() => {
+        this.getcurvedata();
+      }, 10000);
+      
     },
-     handleSizeChange(val) {
-            // console.log(`每页 ${val} 条`);
-            this.currentPage = 1;
-            this.pageSize = val;
-        },
-        handleCurrentChange(val) {
-            // console.log(`当前页: ${val}`);
-            this.currentPage = val;
-        },
+    getcurvedata() {
+      xaxis = []; //时间
+      yaxisflow = []; //流量
+      yaxishead = []; //扬程
+      yaxiseffect = []; //效率
+      yaxisepower = []; //功率
+      Pumpcurverdata(this.reportId, "dtu", "curver").then(res => {
+        this.tableData = res.reverse();
+        origindata = res;
+        res.map(item => {
+          xaxis.push(this.timestampToTime(item.timestamp).substring(11, 19));
+          yaxiseffect.push(item.effect);
+          yaxisepower.push(item.power);
+          yaxisflow.push(item.flow);
+          yaxishead.push(item.head);
+        });
+        this.Getecharts(xaxis, yaxisflow, yaxishead, yaxiseffect, yaxisepower);
+      });
+    },
+    handleSizeChange(val) {
+      // console.log(`每页 ${val} 条`);
+      this.currentPage = 1;
+      this.pageSize = val;
+    },
+    handleCurrentChange(val) {
+      // console.log(`当前页: ${val}`);
+      this.currentPage = val;
+    },
     init() {
       //关键三
       setTimeout(() => {
         window.addEventListener("resize", () => {
           this.myChart.resize();
-          this.myChart1.resize()
+          this.myChart1.resize();
         });
       }, 20);
     },
@@ -203,6 +193,7 @@ export default {
           calculable: true,
           tooltip: {
             trigger: "axis",
+
             axisPointer: {
               show: true,
               type: "cross",
@@ -243,10 +234,15 @@ export default {
               boundaryGap: false,
               axisLabel: {
                 formatter: "{value}",
-                rotate:45
+                rotate: 45,
+                textStyle: {
+                  color: function(value, index) {
+                    return index % 2 == 0 ? "black" : "none";
+                  }
+                }
               },
               data: time,
-              splitNumber:15
+              splitNumber: 15
             }
           ],
           yAxis: [
@@ -367,103 +363,107 @@ export default {
         });
       }, 0);
     },
-    Getdata(){
-      if(selectdata.length==0){
+    Getdata() {
+      if (selectdata.length == 0) {
         this.$message({
           type: "warning",
           message: "请勾选区域!"
         });
-      }else{
-        var start =  origindata[selectdata[0]].timestamp
-        var end = origindata[selectdata[1]].timestamp
-         getaveragedata(this.reportId,'dtu',start,end).then(resultes=>{
-           this.Dataavange.push(resultes)
-         })
+      } else {
+        var start = origindata[selectdata[1]].timestamp;
+        var end = origindata[selectdata[0]].timestamp;
+        getaveragedata(this.reportId, "dtu", start, end).then(resultes => {
+          this.Dataavange.push(resultes);
+        });
       }
     },
-    deletedata(index){
-      this.Dataavange.splice(index,1)
+    deletedata(index) {
+      this.Dataavange.splice(index, 1);
     },
-    updatedcurver(){
+    updatedcurver() {
       for (var i = 0; i < this.Dataavange.length; i++) {
-                    arr1 = []
-                    arr2 = []
-                    arr3 = []
-                    arr1.push(this.Dataavange[i].flow, this.Dataavange[i].head)
-                    arr5.push(arr1)
-                    arr2.push(this.Dataavange[i].flow, this.Dataavange[i].power)
-                    arr6.push(arr2)
-                    arr3.push(this.Dataavange[i].flow, this.Dataavange[i].effect)
-                    arr7.push(arr3)
-                }
+        arr1 = [];
+        arr2 = [];
+        arr3 = [];
+        arr1.push(this.Dataavange[i].flow, this.Dataavange[i].head);
+        arr5.push(arr1);
+        arr2.push(this.Dataavange[i].flow, this.Dataavange[i].power);
+        arr6.push(arr2);
+        arr3.push(this.Dataavange[i].flow, this.Dataavange[i].effect);
+        arr7.push(arr3);
+      }
 
-                arr5.sort(function (a, b) {
-                    if (a[0] < b[0]) {
-                        return -1
-                    }
-                    if (a[0] > b[0]) {
-                        return 1
-                    }
-                })
-                arr6.sort(function (a, b) {
-                    if (a[0] < b[0]) {
-                        return -1
-                    }
-                    if (a[0] > b[0]) {
-                        return 1
-                    }
-                })
-                arr7.sort(function (a, b) {
-                    if (a[0] < b[0]) {
-                        return -1
-                    }
-                    if (a[0] > b[0]) {
-                        return 1
-                    }
-                })
-                this.Getecharts2(arr5, arr6, arr7)
-
+      arr5.sort(function(a, b) {
+        if (a[0] < b[0]) {
+          return -1;
+        }
+        if (a[0] > b[0]) {
+          return 1;
+        }
+      });
+      arr6.sort(function(a, b) {
+        if (a[0] < b[0]) {
+          return -1;
+        }
+        if (a[0] > b[0]) {
+          return 1;
+        }
+      });
+      arr7.sort(function(a, b) {
+        if (a[0] < b[0]) {
+          return -1;
+        }
+        if (a[0] > b[0]) {
+          return 1;
+        }
+      });
+      this.Getecharts2(arr5, arr6, arr7);
     },
-    supportdata(){
-      this.$confirm('此操作只可提交一次, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-         
-          var PumpData = Parse.Object.extend('PumpData')
-                var pumpdata = new PumpData()
-                pumpdata.set('data', { 'type': 'curve', "data":this.Dataavange, 'source': 'dtu' })
-                pumpdata.set('type', 'dtu')
-                var Report = Parse.Object.extend('Report')
-                var report = new Report()
-                report.set('objectId', this.reportId)
-                pumpdata.set('reportId', report)
-                pumpdata.set('itemId', this.tasknameid.toString())
-                pumpdata.save().then(result => {
-                    this.Dataavange = []
-                     this.$message({
-                      type: 'success',
-                      message: '提交成功'
-                    }); 
-                },
-                    (error => {
-                        console.log(error)
-                    })
-                )
-        }).catch(() => {
+    supportdata() {
+      this.$confirm("此操作只可提交一次, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          var PumpData = Parse.Object.extend("PumpData");
+          var pumpdata = new PumpData();
+          pumpdata.set("data", {
+            type: "curve",
+            data: this.Dataavange,
+            source: "dtu"
+          });
+          pumpdata.set("type", "dtu");
+          var Report = Parse.Object.extend("Report");
+          var report = new Report();
+          report.set("objectId", this.reportId);
+          pumpdata.set("reportId", report);
+          pumpdata.set("itemId", this.tasknameid.toString());
+          pumpdata.save().then(
+            result => {
+              this.Dataavange = [];
+              this.$message({
+                type: "success",
+                message: "提交成功"
+              });
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消提交'
-          });          
+            type: "info",
+            message: "已取消提交"
+          });
         });
-       
     },
     Getecharts2(head, power, effect) {
       setTimeout(() => {
         let Echarts = document.getElementById("bottomleft");
         this.myChart1 = this.$echarts.init(Echarts);
-        var colors = ['#5793f3', '#d14a61', '#675bba'];
+        var colors = ["#5793f3", "#d14a61", "#675bba"];
         this.myChart1.setOption({
           color: colors,
           tooltip: {
@@ -532,8 +532,8 @@ export default {
               },
               axisLabel: {
                 formatter: "{value}"
-              },
-         },
+              }
+            },
             {
               type: "value",
               name: "P(kW)",
@@ -541,7 +541,7 @@ export default {
               max: 0.35,
               splitNumber: 5,
               position: "left",
-              offset: 50,
+              offset: 80,
               splitLine: {
                 show: false
               },
@@ -552,8 +552,7 @@ export default {
               },
               axisLabel: {
                 formatter: "{value}"
-              },
-              
+              }
             },
             {
               type: "value",
@@ -572,11 +571,11 @@ export default {
               },
               axisLabel: {
                 formatter: "{value}"
-              },
+              }
             }
           ],
           series: [
-            { 
+            {
               name: "扬程",
               type: "line",
               smooth: true,
@@ -600,8 +599,13 @@ export default {
             }
           ]
         });
-      },0);
+      }, 0);
     }
+  },
+  beforeDestroy(){
+      window.clearInterval(this.timer)
+      this.timer = null
+    
   }
 };
 </script>
@@ -610,7 +614,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }
@@ -620,7 +623,7 @@ export default {
   width: 200px;
   text-align: center;
 }
-.consoleevidece .el-table .cell{
-  white-space:pre-line;
+.consoleevidece .el-table .cell {
+  white-space: pre-line;
 }
 </style>

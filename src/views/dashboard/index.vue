@@ -1,45 +1,76 @@
 <template>
-  <div class="dashboard-container" style="text-align:center;margin:0 auto;height:auto">
-    <!-- <component :is="currentRole"/> -->
-    <!-- <iframe src="http://prod.iotn2n.com:3000/d/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2" width="100%" height="100%" frameborder="0" align="center"/> -->
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=11" width="296" height="270" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=12" width="296" height="270" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=13" width="296" height="270" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=9" width="899" height="268" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=6" width="899" height="268" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=7" width="899" height="268" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=17" width="899" height="268" frameborder="0"></iframe>
-    <iframe src="http://prod.iotn2n.com:3000/d-solo/nRsfcC7Wk/shu-wa-wu-lian-wang-jian-kong-xi-tong?orgId=2&from=now-5m&to=now&refresh=5s&theme=dark&panelId=15" width="899" height="268" frameborder="0"></iframe>
+  <div class="dashboard-container" style="background:#1d1b1b;min-height: calc(100vh);">
+     <div class="variable" style="text-align:left;padding-left:20px;box-sizing:border-box;position:relative;top:20px" v-show="dashboardrul!=''">
+      <el-button-group>
+        <el-button type="info" size="mini" @click="selectval(timerefesh.val1,1)"  :class="{'active':categoryIndex==1}">{{timerefesh.val1}}</el-button>
+        <el-button type="info" size="mini" @click="selectval(timerefesh.val2,2)"  :class="{'active':categoryIndex==2}">{{timerefesh.val2}}</el-button>
+        <el-button type="info" size="mini" @click="selectval(timerefesh.val3,3)"  :class="{'active':categoryIndex==3}">{{timerefesh.val3}}</el-button>
+      </el-button-group>
+    </div>
+    <div style="text-align:center;margin:0 auto;height:100%;position:relative;background:rgb(29, 27, 27);top:20px">
+      <iframe
+        :src="dashboardrul"
+        width="100%"
+        height="800"
+        frameborder="0"
+        v-show="dashboardrul!=''"
+      ></iframe>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
+import { setTimeout } from 'timers';
 // import adminDashboard from './admin'
 
 export default {
-  name: 'Dashboard',
-  // components: { adminDashboard},
+  name: "Dashboard",
   data() {
     return {
-      currentRole: 'adminDashboard'
-    }
+      currentRole: "adminDashboard",
+      isshow: 0,
+      childshow: 0,
+      form: {
+        date1: "",
+        date2: ""
+      },
+      refresh: "",
+      dashboardrul:'',
+      timerefesh:{
+        val1:'15s',
+        val2:'30s',
+        val3:'60s'
+      },
+      categoryIndex:0,
+
+    };
   },
   computed: {
-    ...mapGetters([
-      'roles'
-    ])
+    ...mapGetters(["roles"])
   },
-  created() {
-    // if (!this.roles.includes('admin')) {
-    //   this.currentRole = 'editorDashboard'
-    // }
+  mounted() {
+      this.getDashboard()
+  },
+  methods: {
+    getDashboard(){
+      if(sessionStorage.getItem('dashboard')){
+         this.dashboardrul=sessionStorage.getItem('dashboard')
+      } 
+    
+     
+    },
+    selectval(val,index) {
+      var test = /(refresh=[^&]+)/;
+      this.dashboardrul=this.dashboardrul.replace(test, "refresh=" + val);
+      this.categoryIndex = index
+      console.log(this.dashboardrul)
+    }
   }
-}
+};
 </script>
 <style>
-/* iframe{
-height:1000px;
-} */
+
 </style>
+
 

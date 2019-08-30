@@ -2,9 +2,9 @@ import Vue from 'vue'
 
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/zh-CN' // lang i18n
+// import ElementUI from 'element-ui'
+// import 'element-ui/lib/theme-chalk/index.css'
+// import locale from 'element-ui/lib/locale/lang/zh-CN' // lang i18n
 // import Axios from 'axios'
 import '@/styles/index.scss' // global css
 import api from './api/index.js'
@@ -17,23 +17,34 @@ import echarts from 'echarts'
 import VueResource from 'vue-resource'
 import '@/icons' // icon
 import '@/permission' // permission control
-// import './mock'
-// import VideoPlayer from 'vue-video-player'
+import './assets/iconfont/iconfont.css'
+// 引入Animate.css
+import animate from "animate.css"
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
-// require('video.js/dist/video-js.css')
-// require('vue-video-player/src/custom-theme.css')
-// Vue.use(VideoPlayer)
+// import './mock'
 Vue.prototype.$echarts = echarts
 Vue.prototype.$axios = service
 Vue.prototype.$api = api
+Vue.prototype.$NProgress = NProgress
 Vue.use(VueResource)
-Vue.use(ElementUI, {
-  locale,
+
+Vue.use({
+  // locale,
+  animate,
   i18n: (key, value) => i18n.t(key, value)
 })
 
 Vue.config.productionTip = false
+router.beforeEach((to, from, next) => {
+  NProgress.start();
+  next()
+});
 
+router.afterEach(transition => {
+NProgress.done();
+});
 new Vue({
   el: '#app',
   router,

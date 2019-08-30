@@ -5,8 +5,8 @@
       :default-active="$route.path"
       mode="horizontal"
       background-color="#1063A7"
-      text-color="#bfcbd9"
-      active-text-color="#409EFF"
+      text-color="#ffffff"
+      active-text-color="#90d91b"
     >
       <sidebar-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path"/>
     </el-menu>
@@ -19,6 +19,7 @@ import SidebarItem from './SidebarItem'
  
 export default {
   components: { SidebarItem },
+ 
   data(){
     return{
       route:[],
@@ -41,16 +42,29 @@ export default {
       this.token = sessionStorage.getItem('token')
       // this.type = sessionStorage.getItem('type')
       if(!this.username||!this.token){
-        // if(this.type=="vcon"){
-           this.$router.push('/login')
-        // }else if(this.type=='pump'){
-        //   this.$router.push('/pumplogin')
-        // }
-       
+        this.$router.push('/login')
       }else{
-      this.originroute = this.$router.options.routes
+      // this.originroute = this.$router.options.routes
        
-      // let cloneData = JSON.parse(JSON.stringify(this.routes1)); // 对源数据深度克隆
+      let cloneData = JSON.parse(JSON.stringify(this.routes1)); // 对源数据深度克隆
+        cloneData.unshift({
+          name:'首页',
+          icon:'dashboard',
+          url:'/dashboard'
+        })
+      cloneData.map(items=>{
+        if(items.url=='/swagger/'){
+          items.url='http://'+location.host+'/swagger/'
+        }
+          if(items.name=='帮助中心'){
+            items.children.map(child=>{
+              if(child.url=='/swagger/'){
+                  child.url='http://'+location.host+'/swagger/'
+              }
+           })
+          }
+      })
+      return cloneData
       // return cloneData.filter(father => {
       //   let branchArr = cloneData.filter(
       //     child => father.objectId == child.parentId
@@ -60,27 +74,27 @@ export default {
       // });
   
       
-      this.routes1= JSON.parse(sessionStorage.getItem('list'))
-        this.originroute.map(item=>{
-         this.routes1.map(sideitem=>{
-           if(item.name===sideitem.name){
-              item.children.map(sonitem=>{
-                sonitem.hidden=true
-                this.routes1.map(sideitem=>{
-              if(sideitem.name===sonitem.name){
-                  sonitem.hidden=false
-                  return sonitem   
-              }
-              })
-              return item
-            })
-            this.routes2.push(item)
-           }
+      // this.routes1= JSON.parse(sessionStorage.getItem('list'))
+      //   this.originroute.map(item=>{
+      //    this.routes1.map(sideitem=>{
+      //      if(item.name===sideitem.name){
+      //         item.children.map(sonitem=>{
+      //           sonitem.hidden=true
+      //           this.routes1.map(sideitem=>{
+      //         if(sideitem.name===sonitem.name){
+      //             sonitem.hidden=false
+      //             return sonitem   
+      //         }
+      //         })
+      //         return item
+      //       })
+      //       this.routes2.push(item)
+      //      }
            
-         })
+      //    })
          
-        })
-      return this.routes2
+      //   })
+      // return this.routes2
       
       // return this.$router.options.routes
       
@@ -88,12 +102,13 @@ export default {
     },
     isCollapse() {
       return !this.sidebar.opened
-    }
+    },
+   
   },
   mounted(){
-  //  this.routes1= JSON.parse(sessionStorage.getItem('list'))
-
-  }
+   this.routes1= JSON.parse(sessionStorage.getItem('list'))
+  // console.log(this.routes)
+  },
 }
 </script>
 <style>
@@ -109,7 +124,6 @@ export default {
     margin: 0;
     border-bottom: 2px solid transparent;
     color: #909399;
-    width:150px;
 } 
 .el-submenu__icon-arrow{
   right:0 !important;

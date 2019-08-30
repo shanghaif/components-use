@@ -20,7 +20,10 @@
               <img :src='imgsrc3' style="width:20px;height:20px;" v-else-if="data.icon=='变压器'">
               <img :src='imgsrc4' style="width:20px;height:20px;" v-else-if="data.icon=='线路'">
               <img :src='imgsrc5' style="width:20px;height:20px;" v-else-if="data.icon=='电表'">
-              <span style="padding-left: 4px;">{{node.label}}</span>
+             
+               <span style="padding-left: 4px;" v-if="data.icon=='集中器'">(集中器){{node.label}}</span>
+              <span style="padding-left: 4px;" v-else-if="data.icon=='电表'">(电能表){{node.label+'[pn:'+data.pn+']'}}</span>
+              <span style="padding-left: 4px;" v-else>{{node.label}}</span>
             </span>
             </el-tree>
         </div>
@@ -43,7 +46,7 @@ export default {
          defaultProps: {
             isLeaf: 'leaf',
             children: "children",
-            label: "name"
+            label: "name",
       },
       data:[],
       }
@@ -76,12 +79,12 @@ export default {
        this.$emit('reset',this.search)
      },
      getOrgList(node,resolve) {
+       console.log(node)
                if (node.level === 0) {
                  this.data=[]
-                 var Department = Parse.Object.extend("Department");
+                var Department = Parse.Object.extend("Department");
                 var department = new Parse.Query(Department);
                 department.equalTo('ParentId','0')
-                department.limit(10000)
                 department.find().then(
                   resultes => {
                     resultes.map(items => {
@@ -94,20 +97,33 @@ export default {
                       obj.objectId = items.id;
                       obj.level = items.attributes.level;
                       obj.createtime = items.createtime;
-                      obj.alias = items.attributes.alias
-                      obj.leaf = items.attributes.leafnode
-                      obj.icon = items.attributes.org_type
+                      obj.alias = items.attributes.alias;
+                      obj.leaf = items.attributes.leafnode;
+                      obj.icon = items.attributes.org_type;
                       this.data.push(obj);
                     });
                      return resolve(this.data);
                   },
                   error => {
                     resolve([])
+                     if(error.code=='209'){
+                      this.$message({
+                      type: "warning",
+                      message: "登陆权限过期，请重新登录"
+                      });
+                      this.$router.push({
+                        path:'/login'
+                      })
+                    }else if(error.code==119){
+                        this.$message({
+                          type:'error',
+                          message:'没有操作权限'
+                        })
+                      }
                   }
                 );
-                 console.log(this.data)
                
-                }else{
+                }else if(node.level !== 0&&node.data.icon!=='集中器'){
                   this.data=[]
                 var Department = Parse.Object.extend("Department");
                 var department = new Parse.Query(Department);
@@ -125,111 +141,95 @@ export default {
                       obj.objectId = items.id;
                       obj.level = items.attributes.level;
                       obj.createtime = items.createtime;
-                      obj.alias = items.attributes.alias
-                      obj.leaf = items.attributes.leafnode
-                      obj.icon = items.attributes.org_type
+                      obj.alias = items.attributes.alias;
+                      obj.leaf = items.attributes.leafnode;
+                      obj.icon = items.attributes.org_type;
                       this.data.push(obj);
                     });
                      return resolve(this.data);
                   },
                   error => {
                     resolve([])
+                    if(error.code=='209'){
+                      this.$message({
+                      type: "warning",
+                      message: "登陆权限过期，请重新登录"
+                      });
+                      this.$router.push({
+                        path:'/login'
+                      })
+                    }else if(error.code==119){
+                        this.$message({
+                          type:'error',
+                          message:'没有操作权限'
+                        })
+                      }
                   }
                 );
         
+            }else if(node.level !== 0 && node.data.icon==='集中器'){
+              this.data=[]
+              console.log(node.data.name)
+                var devobjectId = [];
+                devobjectId.push(node.data.objectId);
+              var Smartmeter = Parse.Object.extend("Smartmeter");
+              var smartmeter = new Parse.Query(Smartmeter);
+              smartmeter.containedIn("organization", devobjectId)
+              smartmeter.greaterThan("pn",0);
+              smartmeter.ascending("pn");
+              smartmeter.limit(10000);
+              smartmeter.find().then(resultes=>{
+                 resultes.map(items => {
+                      var obj = {};
+                      items.createtime = new Date(
+                        items.attributes.createdAt
+                      ).toLocaleDateString();
+                      obj.objectId = items.id;
+                      obj.createtime = items.createtime;
+                      obj.alias = items.attributes.addr_web;
+                      obj.name = items.attributes.addr_web;
+                      obj.icon = '电表';
+                      obj.pn = items.attributes.pn;
+                      obj.leaf = true;
+                      if (items.attributes.jsondata.cur_status) {
+                        obj.cur_status = items.attributes.jsondata.cur_status;
+                      } else {
+                        obj.cur_status = 0;
+                      }
+                      this.data.push(obj);
+                    });
+                    console.log(this.data);
+                     return resolve(this.data);
+              },error=>{
+                      resolve([])
+                    if(error.code=='209'){
+                      this.$message({
+                      type: "warning",
+                      message: "登陆权限过期，请重新登录"
+                      });
+                      this.$router.push({
+                        path:'/login'
+                      })
+                    }else if(error.code==119){
+                        this.$message({
+                          type:'error',
+                          message:'没有操作权限'
+                        })
+                      }
+              })
             }
             },
         handleNodeClick(row) {
-            this.$emit('meterdetail',row)
+            this.$emit('meterdetail',row);
         },
-        // append(data){
-        //     console.log(data)
-        // },
-//         renderContent(h, {
-// 				node,
-// 				data,
-// 			}) {
-// 				return h('span', {
-// 					style: {
-// //						color: "red",
-// 					},
-// 					//这里添加hover事件
-// 					on: {
-// 						'mouseenter': () => {
-//                             data.is_show = true;
-// 						},
-// 						//鼠标离开
-// 						'mouseleave': () => {
-// 							data.is_show = false;
-// 						}
-// 					}
-// 				}, [
-// 					h('span', {
-// 						//显示名称
-// 					}, node.label),
-// 					h('span', {
-// 						style: {
-// 							display: data.is_show ? '' : 'none',
-// 						},
-// 					}, [
-// 						//添加
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-//                                 marginLeft:"10px",
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-//                                     // this.append(data)
-//                                     this.$emit('change',data)
-// 								}
-// 							}
-// 						}, "添加"),
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-// 									// this.amend(data)
-// 								}
-// 							}
-// 						}, "修改"),
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-// 									console.log(data)
-// 								}
-// 							}
-// 						}, "删除"),
-// 					]),
-// 				]);
-// 		}  
    }
 }
 </script>
 <style>
 .resource1 .el-input__inner{
-height: 26px;
-border-radius: 0;
-line-height: 26px;
-width: 150px;
+  height: 26px;
+  border-radius: 0;
+  line-height: 26px;
+  width: 150px;
 }
 </style>
-

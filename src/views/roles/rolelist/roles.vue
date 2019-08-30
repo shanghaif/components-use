@@ -139,7 +139,7 @@
         </p>
         <div class="menucontrol" style="margin-top:30px;">
           <el-tree
-            :data="data"
+            :data="menudata"
             show-checkbox
             node-key="objectId"
             defaultProps
@@ -194,7 +194,7 @@ export default {
         alias: "",
         desc: ""
       },
-      data: [],
+      data:[],
       dialogVisible: false,
       multipleSelection: [],
       search: "",
@@ -232,6 +232,16 @@ export default {
         branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
         return father.parent == 0; //返回第一层
       });
+    },
+    menudata(){
+      let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
+      return cloneData.filter(father => {
+        let branchArr = cloneData.filter(
+          child => father.objectId == child.parent
+        ); //返回每一项的子级数组
+        branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
+        return father.parent == 0; //返回第一层
+      });
     }
   },
   mounted() {
@@ -241,42 +251,34 @@ export default {
   },
 
   methods: {
-    getMenu() {
-      // cosnoe.log()
-      var Menu = Parse.Object.extend("Menu");
-      var menu = new Parse.Query(Menu);
-      menu.find().then(resultes => {
-        this.data = [];
-        this.orderresultes = resultes;
-        resultes.map(item => {
-          if (item.attributes.parentId == 0) {
-            this.data.push({
-              id: item.attributes.orderBy,
-              label: item.attributes.name,
-              parentId: item.attributes.parentId,
-              objectId: item.id,
-              children: []
+    getMenu(){
+        this.data=[]
+         var Menu = Parse.Object.extend("Menu");
+         var menu = new Parse.Query(Menu)
+         menu.find().then(resultes=>{
+            resultes.map(items=>{
+            var obj ={}
+            obj.label = items.attributes.name 
+            obj.objectId = items.id
+            obj.parent = items.attributes.parent.id
+            obj.createtime = new Date(items.attributes.createdAt).toLocaleDateString()
+            this.data.push(obj)
+            })
+        
+         },
+         (error=>{
+           console.log(error)
+           if(error.code=='209'){
+             this.$message({
+            type: "warning",
+            message: "登陆权限过期，请重新登录"
             });
-          }
-        });
-        this.Menus();
-      });
-    },
-    Menus() {
-      // console.log(this.orderresultes)
-      this.orderresultes.map(children => {
-        this.data.map(item => {
-          if (children.attributes.parentId == item.objectId) {
-            item.children.push({
-              id: children.attributes.orderBy,
-              label: children.attributes.name,
-              parentId: children.attributes.parentId,
-              objectId: children.id,
-              children: []
-            });
-          }
-        });
-      });
+            this.$router.push({
+              path:'/login'
+            })
+           }
+         }))
+          
     },
 
     diguiquchu(datas, arr, v, needdelarr) {
@@ -452,10 +454,13 @@ export default {
      
      var checkmenu = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys())
         UpdatedMenu(this.rolemenuname,checkmenu).then(resultes=>{
-            this.$message({
+          if(resultes){
+             this.$message({
               type: "success",
               message: "添加成功!"
             });
+          }
+           
         })
     
 
@@ -465,10 +470,13 @@ export default {
     controlroles() {
       var checkrole= this.$refs.tree1.getCheckedKeys().concat(this.$refs.tree1.getHalfCheckedKeys())
       UpdatedRole(this.rolemenuname,checkrole).then(resultes=>{
+        if(resultes){
            this.$message({
               type: "success",
               message: "添加成功!"
             });
+        }
+          
       })  
       // var roles = Parse.Object.extend("_Role");
       // var query = new Parse.Query(roles);
@@ -603,7 +611,6 @@ export default {
   width: 100%;
   min-height: 875px;
   padding: 20px;
-  margin-top: 20px;
   box-sizing: border-box;
   background: #ffffff;
 }

@@ -23,7 +23,7 @@
             type="text"
             auto-complete="on"
             :maxlength="11"
-            placeholder="请输入手机号/用户名"
+            placeholder="请输入手机号"
           />
         </el-form-item>
         <!-- <el-form-item label="手机号" prop="phone">
@@ -79,6 +79,15 @@
             <span v-if="!sendMsgDisabled">发送验证码</span>
           </el-button>
         </div> -->
+        <!-- <el-form-item prop="roles">
+          <span class="svg-container">
+            <svg-icon icon-class="pingtai"/>
+          </span>
+          <el-radio-group v-model="ruleForm2.roles" style="margin-left:10px">
+            <el-radio label="visitor_pump">水泵</el-radio>
+            <el-radio label="visitor">电网</el-radio>
+          </el-radio-group>
+        </el-form-item> -->
         <el-form-item style="margin-top:50px;">
           <el-button
             type="primary"
@@ -128,8 +137,10 @@ export default {
         username: "",
         password: "",
         email: "",
-        checkPass: ""
+        checkPass: "",
+        roles:'',
       },
+      protype:'',
       rules2: {
         account: [
           { required: true, message: "请输入账号", trigger: "blur" },
@@ -139,7 +150,7 @@ export default {
           { required: true, message: "请输入手机号", trigger: "blur" },
           {
             validator: function(rule, value, callback) {
-              var MobileRegex = /^1[34578]\d{9}$/;
+              var MobileRegex = /^1[3-9]\d{9}$/;
               if (!MobileRegex.test(value)) {
                 callback(new Error("手机号码格式不正确！"));
               } else {
@@ -166,11 +177,16 @@ export default {
             message: "请输入正确的邮箱地址",
             trigger: ["blur", "change"]
           }
-        ]
+        ],
+        roles: [
+            { required: true, message: '请选择平台', trigger: 'change' }
+          ],
       }
     };
   },
-  mounted() {},
+  mounted() {
+    this.protype = sessionStorage.getItem('roletype')
+  },
   methods: {
     showPwd() {
       if (this.pwdType === "password") {
@@ -189,10 +205,10 @@ export default {
         if (valid) {
           var user = new Parse.User();
           user.set("username", this.ruleForm2.phone.toString());
-          //   user.set("chinesename", this.ruleForm2.username);
           user.set("password", this.ruleForm2.password);
           user.set("phone", this.ruleForm2.phone.toString());
-          //   user.set("email", this.ruleForm2.email);
+          // user.set("role", this.ruleForm2.roles);
+          user.set('productId',this.protype)
           let acl = new Parse.ACL();
           user
             .save()
@@ -222,7 +238,7 @@ export default {
         } else {
           this.$message({
             message: "信息错误",
-            type: "danger"
+            type: "error"
           });
           return false;
         }
