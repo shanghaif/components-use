@@ -59,7 +59,7 @@ export default {
       this.loading=true
       Taskdetail(this.node, this.start, this.length, this.draw++, this.id,this.searchvalue).then(
         response => {
-          // if (response.result == true) {
+          if(response){
             response.data.map(item => {
               item.datetime = timestampToTime(item.datetime);
               item.success_rate = item.success_rate + "%";
@@ -67,9 +67,11 @@ export default {
             this.tableData = response.data;
             this.total = response.recordsTotal
             this.loading=false
-          // }
+          }
         }
-      );
+      ).catch(error=>{
+        this.$message.error(error.error)
+      });
     },
      handleSizeChange(val){
           this.length=val

@@ -32,3 +32,10 @@ export function addmeterforuser(meterdata) {
     }
   })
 }
+export function CountAll(path) {
+  return request({
+    url: '/count/'+path,
+    method: 'get',
+    data: {}
+  })
+}

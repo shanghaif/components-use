@@ -319,7 +319,6 @@ export default {
         var _this = this
         var ranNum = Math.ceil(Math.random() * 25)
         var operation = String.fromCharCode(65+ranNum)+Math.ceil(Math.random()*100000)
-      
         eventBus.$on(operation, data => {
           _this.tableData1=[]
           for(var key in data.data){

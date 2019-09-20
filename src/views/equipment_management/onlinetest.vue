@@ -136,17 +136,13 @@ export default {
             
        },
        sendTopic(){
-           console.log(this.devicesForm.devices)
-           var info={
-               topic:this.devicesForm.zlfs+'/post',
-               text:'',
-               qos:1
-           }
-            Websocket.sendMessage(info, function(res){
-                if(res.result){
-                    console.log('发送成功')
-                }
-            })
+           Websocket.sendInfo='{"topic":'+this.devicesForm.zlfs+',"text":1111,"qos":1}',
+          Websocket.send()
+            //   if(res){
+            //       console.log('发送成功')
+            //   }
+        //   })
+            
        },
        selectBlur(e){
            this.devicesForm.devices =e.target.value

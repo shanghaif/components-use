@@ -22,7 +22,10 @@ import './assets/iconfont/iconfont.css'
 import animate from "animate.css"
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-
+// import * as fundebug from "fundebug-javascript";
+// import fundebugVue from "fundebug-vue";
+// fundebug.apikey = "2a79df8192f2096e7172aa1a8f8fb37e2b9fcdb6d697def0461c1cd90fe4055c"
+// fundebugVue(fundebug, Vue);
 // import './mock'
 Vue.prototype.$echarts = echarts
 Vue.prototype.$axios = service

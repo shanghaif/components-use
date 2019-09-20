@@ -23,9 +23,10 @@ module.exports = {
       '/api': {
         // target: 'http://148.70.107.74:5080/iotapi',
         // target: 'http://ci.iotn2n.com:5080/iotapi',
-        target:'http://132.232.121.164:5080/iotapi',
-        // target: 'http://192.168.2.113:5080/iotapi',
-        // target: 'http://prod.iotn2n.com:5080/iotapi',
+        // target:'http://132.232.121.164:5080/iotapi',
+        target: 'http://192.168.2.113:5080/iotapi',
+        // target: 'http://prod.iotn2n.com/iotapi',
+        // target: 'http://148.70.50.192:5080/iotapi',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''

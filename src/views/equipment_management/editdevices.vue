@@ -134,6 +134,14 @@
                   <!-- <div><span>ID：</span><span>{{item.identifier}}</span></div> -->
                  <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='double'||item.dataType=='float'||item.dataType=='int'"><span >{{item.value}}</span><span v-if="item.specs.unit">{{item.specs.unit}}</span></div>
                  <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='enmu'||item.dataType=='bool'"><span >{{item.value}}</span><span>{{item.specs[item.value]}}</span></div>
+                 <div style="font-size:14px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='struct'">
+                    <i v-for="(key,index) in item.specs" :key="index" style="display:block;height:30px;font-style:normal">
+                       <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="key.dataType.type=='double'||key.dataType.type=='float'||key.dataType.type=='int'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span v-if="key.dataType.specs.unit">{{key.dataType.specs.unit}}</span></div>
+                        <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="key.dataType.type=='enmu'||key.dataType.type=='bool'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span>{{key.dataType.specs[key.value]}}</span></div>
+                   </i>
+                  
+                  
+                 </div>
                  <div><span>更新时间：</span><span v-if="item.time">{{timestampToTime(item.time)}}</span></div>
                 </li>
               </ul>
@@ -387,6 +395,7 @@ export default {
       allProudct:[],
       productDevices:[],
       ischange:false,
+      ischildren:false,
     };
   },
   mounted() {
@@ -452,7 +461,8 @@ export default {
     //初始化
     getDeviceDetail() {
       this.deviceid = this.$route.query.deviceid;
-      if(this.$route.query.nodeType==1){
+      this.ischildren=this.$route.query.ischildren
+      if(this.$route.query.nodeType==1&&this.ischildren==true){
           this.activeName = 'children'
           this.isshowchild = true
           this.getDevices()
@@ -461,6 +471,8 @@ export default {
           product.find().then(resultes=>{
             this.allProudct = resultes
           })
+      }else if(this.$route.query.nodeType==1&&this.ischildren==false){
+        this.isshowchild = true
       }else{
         this.isshowchild = false
       }

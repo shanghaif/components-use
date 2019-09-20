@@ -1,12 +1,10 @@
 <template>
   <div id="meter_reading">
-    <div class="menu">
       <Resource1
         @meterdetail="getRows"
       />
-    </div>
     <div class="content">
-      <el-form ref="form" :model="form">
+      <el-form ref="form" :model="form" label-width="100px" size="mini" :inline="true">
         <el-form-item label="集中器地址">
           <el-input v-model="form.vcaddr_web"></el-input>
         </el-form-item>
@@ -37,7 +35,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="抄表结果">
+         <el-form-item label="抄表结果">
           <el-select v-model="form.res" placeholder="请选择">
           <el-option label="全部" value="all"></el-option>
           <el-option label="成功" value="success"></el-option>
@@ -64,9 +62,14 @@
             :picker-options="form.pickerDisabled"
           ></el-date-picker>
         </el-form-item>
- 
+      <el-form-item label="选择库">
+        <el-radio-group v-model="form.resource">
+          <el-radio label="PG"></el-radio>
+          <el-radio label="TD"></el-radio>
+        </el-radio-group>
+      </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="query" size="mini">查询</el-button>
+          <el-button type="primary" @click="query(0)" size="mini">查询</el-button>
           <el-button type="primary" @click="reset" size="mini">重置</el-button>
         </el-form-item>
       </el-form>
@@ -74,13 +77,13 @@
         v-loading="loading" 
         element-loading-text="拼命加载中" 
         :data="table" 
-        height="650" 
+        height="750" 
         border 
         style="width: 100%">
-        <el-table-column prop="freeze_time" label="冻结时间" width="150"></el-table-column>
-        <el-table-column prop="addr_web" label="电能表地址" width="130"></el-table-column>
-        <el-table-column prop="vcaddr_web" label="集中器地址" width="130"></el-table-column>
-        <el-table-column prop="task" label="任务模板" width="100"></el-table-column>
+        <el-table-column prop="freeze_time" label="冻结时间" ></el-table-column>
+        <el-table-column prop="addr_web" label="电能表地址"></el-table-column>
+        <el-table-column prop="vcaddr_web" label="集中器地址"></el-table-column>
+        <el-table-column prop="task" label="任务模板" ></el-table-column>
         <el-table-column prop="data_type" label="数据类型" width="180"></el-table-column>
         <el-table-column prop="forward_power_total" label="正向有功电能总" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_1" label="正向有功费率1(尖)" width="120"></el-table-column>
@@ -92,6 +95,7 @@
       <PagingQuery
         :pager="pager"
         @setPager="getinformation"
+        @setPagerCount="getCount"
         @query="setup"
         @now_drive="setup2"
         @alldrive="getdeive"
@@ -106,8 +110,9 @@ import Resource1 from "@/components/resource/resource";
 import Parse from "parse";
 import { utc2beijing } from "@/utils/index";
 import PagingQuery from "@/components/Pagination";
-import { gettables } from "@/api/login";
+import { gettables, timestampToTime } from '@/api/login';
 import { eventBus } from '@/api/eventBus';
+
 export default {
   components: { Resource1,PagingQuery },
   data() {
@@ -118,7 +123,7 @@ export default {
         page: 1,
         rows: 25,
         name:"抄表结果展示",
-        pages:[25,50,75],
+        pages:[25,50,100],
         rest:0//至少还有几页
       },
       draw:1,
@@ -182,7 +187,7 @@ export default {
           new Date(new Date().getTime()-86400000*30).toLocaleDateString(), 
           new Date(new Date().getTime()).toLocaleDateString()
         ], //月时间
-        res:"all",//抄表结果
+        res:"",//抄表结果
         startTime:"",//开始时间
         endTime:"",//结束时间
         pickerDisabled:{
@@ -191,7 +196,8 @@ export default {
           }
         },
         // 导出条件,是否查询过
-        deriveWhere:false
+        deriveWhere:false,
+        resource:'PG'
       },
       // 表格
       table: [],
@@ -199,6 +205,7 @@ export default {
       // 选中电表（后续有特殊处理，接口查询不一样）
       isMeter:false,
       freeze:"05060101",//数据冻结
+      isshowround:true
     };
   },
   methods: {
@@ -224,9 +231,10 @@ export default {
     // 获取采集时间
     collTime(){
       let type=this.form.data_type_value;
+     
       let start,end;
-      // console.log(this.form.day_time);
-      if (type==1){
+      // console.log(this.form.day_time)
+      if (type=='05060101'){
           start=this.StartTime(this.form.day_time);
           end=this.EndTime(this.form.day_time);
       }else {
@@ -235,27 +243,37 @@ export default {
       }
       this.form.endTime=parseInt(end/1000);
       this.form.startTime=parseInt(start/1000);
-      // console.log(this.form.endTime,this.form.startTime);
     },
     // 查询
-    query() {
-      this.collTime();
-      if (!this.isMeter){
-        this.pager.page=1;
+    query(index) {
+      this.collTime(); 
+      this.isshowround = false
+      
+      if(this.form.resource=='PG'){
+        if(index==0){
+         this.pager.page=1
+         this.pager.count=0
       }
-      if(this.form.addr_web!=''){
-        this.isMeter=true
-      }
-      getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.form.res,this.freeze).then(res => {
-        this.search_res=res.results;
-        // console.log(res);
-        this.getForDate(res); 
-        if (this.pager.page==1){
-          this.incPage(res.rest);
+        getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime,this.freeze,this.form.resource).then(res => {
+        if(res){
+            this.search_res=res.results;
+            this.getForDate(res); 
+            this.incPage(res.rest,res.results.length)
+            this.loading=false;
         }
-        this.pageLoading(res.rest);
-        this.loading=false;
+      
       });
+      }else{
+        getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime,this.form.res,this.freeze).then(res=>{
+          if(res){
+             this.search_res=res.results;
+              this.getForDate(res); 
+             this.pager.count = res.count
+               this.loading=false;
+          }
+        })
+      }
+      
     },
     // 获取开始时间
     StartTime(time) {
@@ -264,19 +282,23 @@ export default {
     },
     // 获取结束时间
     EndTime(time) {
-      let end = new Date(time[1]).getTime();
+      
+      let end = new Date(time[1]).getTime()+24*60*60*1000-1;
       return end;
     },
     // 重置
     reset() {
       this.form.vcaddr_web = "";
       this.form.addr_web = "";
-      this.form.task_value = 1;
-      this.form.data_type_value = 1;
-      this.form.month_time = "";
+      this.form.task_value = "05060101";
+      this.form.data_type_value = "05060101";
+      this.form.month_time = [
+        new Date(new Date().getTime()-86400000*30).toLocaleDateString(), 
+          new Date(new Date().getTime()).toLocaleDateString()
+      ];
       this.form.day_time = [
-        new Date().toLocaleDateString(),
-        new Date().toLocaleDateString()
+        new Date(new Date().getTime()-86400000*3).toLocaleDateString() ,//开始时间
+          new Date(new Date().getTime()).toLocaleDateString()//结束时间
       ];
       this.form.month_time = "";
       this.form.res="all"
@@ -294,31 +316,11 @@ export default {
     getTree() {
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
-      department.limit(10000);
+      department.equalTo('ParentId',"0");
       department.find().then(
         resultes => {
-          this.data = [];
-          resultes.map(items => {
-            var obj = {};
-            items.createtime = utc2beijing(items.attributes.createdAt);
-            (obj.name = items.attributes.name),
-            (obj.ParentId = items.attributes.ParentId);
-            obj.objectId = items.id;
-            obj.createtime = items.createtime;
-            obj.icon = items.attributes.org_type;
-            obj.is_show =items.attributes.leafnode;
-            this.data.push(obj);
-            if(items.attributes.name=='省电力公司'){
-              this.objId=items.id;
-            }
-          });
-          getMeterListDate(this.freeze,(this.pager.page-1)*this.pager.rows,this.pager.rows,this.objId,946659661, 7258093261,this.form.res).then(res => {
-            // console.log(res);
-            // 获取初始页码
-            this.incPage(res.rest);
-            this.getForDate(res);
-            this.loading=false;
-          });
+          this.objId=resultes[0].id;
+          this.getinformation()
         },
         error => {
           if (error.code == "209") {
@@ -335,42 +337,45 @@ export default {
     },
     // 获取树id
     getRows(row) {
-      // 默认取所有信息
-      // console.log(row);
+      this.isshowround=true
+        this.pager.count=0,
+        this.pager.page=1,
+        this.pager.rows= 25,
+        this.pager.name="抄表结果展示",
+        this.pager.pages=[25,50,100],
+        this.pager.rest=0//至少还有几页
       this.loading=true;
       this.objId=row.objectId;
-      this.pager.page=1;
       this.collTime();
       this.form.addr_web="";
       this.form.vcaddr_web="";
       if (row.icon=="集中器"){
         this.form.vcaddr_web=row.name;
         this.form.addr_web="";
-        if(this.form.addr_web==''){
-             this.isMeter=false;
-          }else{
-             this.isMeter=true;
-             this.query()
-          }
       }else if (row.icon=="电表"){
         this.form.addr_web=row.name;
         this.form.vcaddr_web="";
-        this.isMeter=true;
-        this.query();
-        return;
       }
-      getMeterListDate(this.freeze,(this.pager.page-1)*this.pager.rows, this.pager.rows, this.objId,this.form.startTime, this.form.endTime+85399999,this.form.res).then(res => {
-        this.incPage(res.rest);
-        this.getForDate(res);
-        this.pager.page=1;
-        if (res.results.length==0){
-          setTimeout(()=>{
+      if(this.form.resource=='PG'){
+           getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.freeze,this.form.resource).then(res => {
+        if(res){
+            this.search_res=res.results;
+            this.getForDate(res); 
+            this.incPage(res.rest,res.results.length)
             this.loading=false;
-          },10000)
-          return;
         }
-        this.loading=false;
-      });
+      })
+      }else{
+        getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.addr_web,this.form.vcaddr_web,this.form.startTime, this.form.endTime+85399999,this.form.res,this.freeze).then(res=>{
+          if(res){
+             this.search_res=res.results;
+              this.getForDate(res); 
+              this.pager.count = res.count
+              this.loading=false;
+          }
+        })
+      }
+     
     },
     // 循环每个字段添加
     getForDate(res){
@@ -387,8 +392,8 @@ export default {
         obj.forward_work_rate_2 = r[i].data.rate2;
         obj.forward_work_rate_3 = r[i].data.rate3;
         obj.forward_work_rate_4 = r[i].data.rate4;
-        obj.freeze_time = this.dateFtt("yyyy-MM-dd",r[i].frozendate);
-        obj.gather_time = this.dateFtt("yyyy-MM-dd hh:mm:ss",r[i].date);
+        obj.freeze_time = timestampToTime(r[i].frozendate);
+        obj.gather_time = timestampToTime(r[i].date);
         obj.inversion_power_total = r[i].data.NotCount;
         obj.task_value = r[i].task;
         // 是否为空，是的话显示-
@@ -417,25 +422,29 @@ export default {
     setup(item) {
       this.getinformation(item);
     },
+    getCount(item){
+  
+      this.pager.rest=0
+      this.getinformation(item)
+    },
     // 获取数据
     getinformation(item) {
+     
+
       this.loading=true;
-      if (this.objId!=""){
-        if (this.isMeter){
-          this.query();
-        }else {
-          this.collTime();
-          getMeterListDate(this.freeze,(this.pager.page-1)*this.pager.rows, this.pager.rows, this.objId, this.form.startTime, this.form.endTime+85399999,this.form.res)
-          .then(res => {
-            // console.log(res)
-            this.getForDate(res);
-            this.pageLoading(res.rest);
-            this.loading=false;
-          }).catch(error => {
-            console.log(error);
-          });
-        }
-      } 
+      this.query(1)
+  //     this.collTime();
+  //     getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.form.res,this.freeze).then(res => {
+  //   if(res){
+  //       this.search_res=res.results;
+  //       this.getForDate(res); 
+  //       this.incPage(res.rest)
+  //       this.loading=false;
+  //   }
+  
+  // }).catch(error => {
+  //       console.log(error);
+  //     });
     },
     setup2(item) {
       this.get_now(item);
@@ -443,13 +452,16 @@ export default {
     // 导出当前
     get_now(data){
       this.collTime();
-       getMeterListDate(this.freeze,(this.pager.page-1)*this.pager.rows,this.pager.rows,this.objId,this.form.startTime, this.form.endTime,this.form.res)
+      getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.freeze,this.form.resource)
         .then(res => {
-          if (this.search_res){
+          if(res){
+             if (this.search_res){
             eventBus.$emit('drive',{json:this.search_res,obj:this.obj,name:this.pager.name});
           }else {
             eventBus.$emit('drive',{json:res.results,obj:this.obj,name:this.pager.name});
           }
+          }
+         
         })
         .catch(error => {
           console.log(error);
@@ -458,29 +470,47 @@ export default {
     // 分页导出
     getdeive(data){
       this.collTime();
-      getMeterListDate(this.freeze,data.start,this.pager.rows*(data.end-data.start+1),this.objId,this.form.startTime, this.form.endTime,this.form.res)
-        .then(res => {
-          // console.log(res);
-          if (this.search_res){
+     getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.freeze,this.form.resource).then(res => {
+       if(res){
+            if (this.search_res){
             eventBus.$emit('drive',{json:this.search_res,obj:this.obj,name:this.pager.name});
           }else {
             eventBus.$emit('drive',{json:res.results,obj:this.obj,name:this.pager.name});
           }
+          }
+          
         })
     },
     // 分页懒加载
     pageLoading(rest){
+      // console.log(rest)
       // 判断当前总数据/当前每页显示数量===当前页，如果一样代表最后一页，查看是否还有后续页数
-      // console.log(this.pager.count,this.pager.rows,this.pager.page);
-      if (this.pager.count/this.pager.rows===this.pager.page){
+      if (this.pager.count/this.pager.rows==this.pager.page){
         this.pager.rest+=rest;
         this.pager.count=this.pager.rest*this.pager.rows;
-      } 
+      }else if(this.pager.count/this.pager.rows>this.pager.page){
+
+      }
     },
     // 初始页码
-    incPage(rest){
-      this.pager.rest=rest;
-      this.pager.count=this.pager.rows*this.pager.rest;
+    incPage(rest,length){
+       if (this.pager.count/this.pager.rows==this.pager.page){
+        this.pager.rest+=rest;
+        this.pager.count=this.pager.rest*this.pager.rows;
+      }else if(this.pager.count/this.pager.rows>this.pager.page){
+
+      }else if(rest>0){
+         this.pager.rest=rest;
+         this.pager.count=this.pager.rows*this.pager.rest;
+      }else if(rest<0){
+         this.pager.rest=0
+         this.pager.cunt=0
+      }else if(rest==0){
+        this.pager.reset=0
+        this.pager.count = this.pager.count+length
+
+      }
+     
     },
     //隐藏总页数
     totalHide(){
@@ -489,9 +519,9 @@ export default {
     }
   },
   mounted() {
-    this.totalHide();
+    // this.totalHide();
     this.getTree();
-    this.getinformation();
+    // this.getinformation();
   }
 };
 </script>
@@ -503,22 +533,22 @@ export default {
   justify-content: space-between;
   .resource1 {
     width:360px;
+    height: 100vh;
     flex-shrink:0;
     overflow:scroll;
-    height: 800px;
     padding-top: 10px;
   }
   .content {
-    width: 80%;
+    width:calc(100% - 360px);
     padding:20px 0 0 20px;
     /deep/ .el-form {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      // display: flex;
+      // justify-content: space-between;
+      // flex-wrap: wrap;
       .el-form-item {
-        display: flex;
-        flex-wrap: wrap;
-        width: 20%;
+        // display: flex;
+        // flex-wrap: wrap;
+        // width: 20%;
         &:nth-child(6) {
           width: 40%;
         }

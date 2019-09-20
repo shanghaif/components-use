@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container" style="background:#1d1b1b;min-height: calc(100vh);">
+  <div class="dashboard-container" style="background:#1d1b1b;">
      <div class="variable" style="text-align:left;padding-left:20px;box-sizing:border-box;position:relative;top:20px" v-show="dashboardrul!=''">
       <el-button-group>
         <el-button type="info" size="mini" @click="selectval(timerefesh.val1,1)"  :class="{'active':categoryIndex==1}">{{timerefesh.val1}}</el-button>

@@ -88,6 +88,7 @@ export function updateApp(id,body) {
       config: {
         expires:body.expires
       },
+      dashboard:body.dashboard,
       secret:body.secret,
       scale: body.scale,
       category:body.category,

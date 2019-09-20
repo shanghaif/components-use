@@ -259,13 +259,12 @@ export default {
             }
         }
         .el-table {
-            // padding: 0 15px;
-            // th{
-            //     text-align: center;
-            // }
             .el-divider {
                 background-color:#409EFF;
                 width:2px;
+            }
+            .el-button+.el-button{
+                margin-left:0;
             }
         }
     }

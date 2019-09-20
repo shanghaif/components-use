@@ -211,6 +211,12 @@ export const constantRouterMap = [
         meta: { title: '智能电表', icon: 'smartmeter' }
       },
       {
+        path: '/devicemanage/zetatag',
+        name: '监控中心',
+        component: () => import('@/views/devicemanage/zetadevices'),
+        meta: { title: '监控中心', icon: 'csc' }
+      },
+      {
         path: '/devicemanage/devicepump',
         component: () => import('@/views/devicemanage/devicepump'),
         name:'采证设备列表',
@@ -277,7 +283,7 @@ export const constantRouterMap = [
         path: '/devicemanage/bulkImport',
         name: '批量导入',
         component: () => import('@/views/devicemanage/bulkImport'),
-        meta: { title: '批量导入', icon: 'enrollment' }
+        meta: { title: '批量导入', icon: 'piliangupload' }
       },
     ]
   },
@@ -301,6 +307,12 @@ export const constantRouterMap = [
         name: '主站连接监测',
         component: () => import('@/views/connectmanage/report'),
         meta: { title: '主站连接监测', icon: 'report' }
+      },
+      {
+        path: '/connectmanage/testbaidu',
+        name: '测试',
+        component: () => import('@/views/connectmanage/testbaidu'),
+        meta: { title: '测试', icon: 'report' }
       }
     ]
   },
@@ -564,6 +576,12 @@ export const constantRouterMap = [
         meta: { title: '插件管理', icon: 'appmanage' }
       },
       {
+        path: '/roles/tasklistmanage',
+        name: '任务管理',
+        component: () => import('@/views/equipment_management/tasklistmanage'),
+        meta: { title: '任务管理',icon:'tasklistmanage' }
+      },
+      {
         path: '/roles/thing',
         name: '设备管理',
         component: () => import('@/views/equipment_management/index'),
@@ -596,6 +614,14 @@ export const constantRouterMap = [
         meta: { title: '在线调试', icon:'onlinetest'}
        
       },
+      {
+        path: '/roles/nodes',
+        name: '节点管理',
+        component: () => import('@/views/installation/log'),
+        meta: { title: '节点管理', icon:'nodemgr'}
+       
+      },
+      
       {
         path: '/roles/channelManage',
         name: '服务通道管理',

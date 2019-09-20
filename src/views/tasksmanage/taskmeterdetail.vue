@@ -30,8 +30,7 @@
       <el-button type="primary" @click="Supplement">立即补抄</el-button>
     </div>
     <div class="devdetail">
-      <div class="detailtop">
-        <ul style="padding-left:0;width:60%">
+       <ul style="padding-left:0;width:60%">
           <li style="text-align:center;width:10%">
             <input type="checkbox" id="allselect">
             <span >全选</span>
@@ -40,6 +39,8 @@
           <li style="text-align:center;width:20%">数据项名称</li>
           <li style="text-align:center;width:20%">抄表结果</li>
         </ul>
+      <div class="detailtop">
+       
       </div>
     </div>
   </div>
@@ -99,7 +100,7 @@ export default {
       (this.vcaddr = this.$route.query.vcaddr),
         (this.datetime = this.$route.query.datetime);
          html=''
-      Taskmeterdetail(this.di, this.vcaddr,this.id).then(
+      Taskmeterdetail(this.di, this.vcaddr,Number(this.id),Number(this.datetime)).then(
         response => {
           if(response){
             $.each(response.data, function(key, value) {
@@ -122,6 +123,8 @@ export default {
                 item.addr +
                 '" di="' +
                 item.di +
+                '" pn="' +
+                item.pn +
                 '" ></td><td style="width:20%;text-align:center">' +
                 item.addr +
                 '</td><td style="width:20%;text-align:center">' +
@@ -159,20 +162,26 @@ export default {
     Supplement() {
       var sendup = [];
       var _this=this
+       var obj={
+          datetime:Number(_this.datetime),
+          taskid:Number(_this.id),
+          vcaddr:_this.vcaddr,
+          di:_this.di,
+          pn:[],
+          tattr:4
+        }
       $("input.meter:checked").each(function(index, item) {
-        sendup.push({
-          addr: item.getAttribute("addr"),
-          di: item.getAttribute("di"),
-          datetime: _this.datetime
-        });
+        obj.pn.push(
+         Number(item.getAttribute("pn")), 
+        );
       });
-       if(sendup.length==0){
+       if(obj.pn==0){
         _this.$message({
           type:'warning',
           message:'请勾选要补抄的电表'
         })
       }else{
-        Supporttask(sendup)
+        Supporttask(obj)
         .then(response => {
           if (response) {
             this.$message({
@@ -256,21 +265,13 @@ export default {
   width: 100%;
   height: 40px;
   line-height: 40px;
+  margin-top:40px;
 }
-.devdetail .detailtop ul li {
+.devdetail ul li {
   float: left;
   list-style: none;
   text-align: center;
 }
-/* .devdetail .detailtop ul li:nth-child(2) {
-  margin-left: 80px;
-}
-.devdetail .detailtop ul li:nth-child(3) {
-  margin-left: 300px;
-}
-.devdetail .detailtop ul li:last-child {
-  margin-left: 200px;
-} */
 .detailtop ul {
   height: 40px;
 }

@@ -217,9 +217,9 @@
             <el-table
               :data="wmxData.slice((wmxstart-1)*wmxlength,wmxstart*wmxlength)"
               border
-              row-key="index"
+              row-key="identifier"
               style="width: 100%;margin-top:10px;"
-              :default-expand-all="true"
+              :default-expand-all="false"
               :row-class-name="getRowClass"
             >
               <el-table-column type="expand">
@@ -268,6 +268,8 @@
                   <span
                     v-if="scope.row.dataType.specs&&(scope.row.dataType.type=='double'||scope.row.dataType.type=='float'||scope.row.dataType.type=='int')"
                   >{{'取值范围:'+scope.row.dataType.specs.min+'~'+scope.row.dataType.specs.max}}</span>
+                  <span v-else-if="scope.row.dataType.type=='string'">{{'数据长度:'+scope.row.dataType.size+'字节'}}</span>
+                  <span v-else-if="scope.row.dataType.type=='date'"></span>
                   <span v-else-if="scope.row.dataType.type!='struct'">{{scope.row.dataType.specs}}</span>
                   <span v-else></span>
                   <!--<span v-if="scope.row.dataType.specs&&scope.row.dataType.type=='text'">{{'长度:'+scope.row.dataType.specs.length}}</span> 
@@ -323,7 +325,7 @@
                   </el-table-column>
                 </el-table>
               </div>
-
+ 
               <div>
                 <el-pagination
                   style="margin-top:10px;"
@@ -352,13 +354,13 @@
           >
             <div class="wmxheader">
               <el-form ref="sizeForm" :model="sizeForm" size="small" :rules="sizerule">
-                <el-form-item label="功能类型" prop="resource">
+                <!-- <el-form-item label="功能类型" prop="resource">
                   <el-radio-group v-model="sizeForm.resource" size="medium">
                     <el-radio :label="1">属性</el-radio>
                     <el-radio :label="2">事件</el-radio>
                     <el-radio :label="3">复合型</el-radio>
                   </el-radio-group>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="功能名称" prop="name">
                   <el-input v-model="sizeForm.name"></el-input>
                 </el-form-item>
@@ -366,8 +368,8 @@
                   <el-input v-model="sizeForm.identifier"></el-input>
                 </el-form-item>
                 <el-form-item label="数据类型" prop="type">
-                  <el-select v-model="sizeForm.type" placeholder="请选择数据类型">
-                    <el-option label="整形" value="INT"></el-option>
+                  <el-select v-model="sizeForm.type" placeholder="请选择数据类型" @change="selectStruct">
+                    <el-option label="整型" value="INT"></el-option>
                     <el-option label="浮点型" value="FLOAT"></el-option>
                     <el-option label="双精度型" value="DOUBLE"></el-option>
                     <el-option label="布尔型" value="BOOL"></el-option>
@@ -377,6 +379,7 @@
                     <el-option label="时间型" value="DATE"></el-option>
                   </el-select>
                 </el-form-item>
+                <!--INT,FLOAT,DOUBLE数据类型添加模式-->
                 <div v-if="sizeForm.type=='INT'||sizeForm.type=='FLOAT'||sizeForm.type=='DOUBLE'">
                   <el-form-item required label="取值范围">
                     <el-col :span="9">
@@ -408,6 +411,7 @@
                       </el-select>
                   </el-form-item>
                 </div>
+                <!--BOOL数据类型添加格式-->
                   <div v-if="sizeForm.type=='BOOL'">
                     <el-form-item label="属性"  required>
                   <div style="height:40px;">
@@ -450,7 +454,7 @@
                   </div>
                 </el-form-item>
               </div>
-                
+                <!--枚举型添加格式-->
                 <div v-if="sizeForm.type=='ENUM'">
                   <el-form-item v-for="(item, index) in sizeForm.specs" :key="index" required>
                     <el-col :span="9">
@@ -483,6 +487,46 @@
                     :underline="false"
                   >添加枚举项</el-link>
                 </div>
+                <!--结构体类型添加格式-->
+                <div v-if="sizeForm.type=='STRUCT'">
+                      <el-form-item label="JSON对象" required>
+                          <ul style="margin:0;padding-left:20px;">
+                            <li v-for="(item,index) in sizeForm.struct" :key="index" value="item" style="list-style:none;display:flex;">
+                              <div>
+                                 <span>参数名称：</span>
+                                 <span>{{item.name}}</span>
+                              </div>
+                              <div>
+                                <el-link :underline="false" type="primary" style="margin-left:20px" @click="editStruct(item,index)">编辑</el-link>
+                                <el-link :underline="false" type="primary" @click="deleteStruct(index)">删除</el-link>
+                              </div> 
+                            </li>
+                          </ul>
+                          <el-link
+                    @click="addStruct('structform')"
+                    icon="el-icon-plus"
+                    type="primary"
+                    :underline="false"
+                  >新增参数</el-link>
+                    </el-form-item>
+                  </div>
+                  <!--字符串添加格式-->
+                  <div v-if="sizeForm.type=='STRING'">
+                    <el-form-item label="数据长度" prop="string" >
+                    <el-input  v-model.number="sizeForm.string" type="number">
+                      <template slot="append">
+                          字节
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                  </div>
+                  <!--date类型添加格式-->
+                   <div v-if="sizeForm.type=='DATE'">
+                    <el-form-item label="时间格式">
+                    <el-input  v-model="sizeForm.date" readonly>
+                    </el-input>
+                  </el-form-item>
+                  </div>
                 <el-form-item label="读写类型" prop="isread">
                   <el-radio-group v-model="sizeForm.isread" size="medium">
                     <el-radio label="rw">读写</el-radio>
@@ -494,6 +538,187 @@
             <span slot="footer" class="dialog-footer">
               <el-button @click="wmxdialogVisible = false">取 消</el-button>
               <el-button type="primary" @click="submitForm('sizeForm')">确 定</el-button>
+            </span>
+          </el-dialog>
+          <!--物模型结构体-->
+           <el-dialog
+            title="新增参数"
+            :visible.sync="structdialog"
+            width="40%"
+            top="15vh"
+            :before-close="structhandleClose"
+          >
+            <div class="structheader">
+              <el-form ref="structform" :model="structform" size="small" :rules="structrule">
+              <el-form-item label="功能名称" prop="name">
+                <el-input v-model="structform.name"></el-input>
+              </el-form-item>
+              <el-form-item label="标识符" prop="identifier">
+                <el-input v-model="structform.identifier"></el-input>
+              </el-form-item>
+              <el-form-item label="数据类型" prop="type">
+                <el-select v-model="structform.type" placeholder="请选择数据类型">
+                  <el-option label="整形" value="INT"></el-option>
+                  <el-option label="浮点型" value="FLOAT"></el-option>
+                  <el-option label="双精度型" value="DOUBLE"></el-option>
+                  <el-option label="布尔型" value="BOOL"></el-option>
+                  <el-option label="枚举型" value="ENUM"></el-option>
+                  <el-option label="字符串" value="STRING"></el-option>
+                  <el-option label="时间型" value="DATE"></el-option>
+                </el-select>
+              </el-form-item>
+              <div
+                v-if="structform.type=='INT'||structform.type=='FLOAT'||structform.type=='DOUBLE'"
+              >
+                <el-form-item required label="取值范围">
+                  <el-col :span="9">
+                    <el-form-item prop="startnumber">
+                      <el-input
+                        v-model.number="structform.startnumber"
+                        type="number"
+                        placeholder="最小值"
+                      ></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="2">-</el-col>
+                  <el-col :span="9">
+                    <el-form-item prop="endnumber">
+                      <el-input
+                        v-model.number="structform.endnumber"
+                        type="number"
+                        placeholder="最大值"
+                      ></el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-form-item>
+                <el-form-item label="步数" prop="step">
+                  <el-input
+                    v-model.number="structform.step"
+                    type="number"
+                    class="inputnumber"
+                    :precision="2"
+                    :step="0.1"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item label="单位">
+                  <el-select v-model="structform.unit" placeholder="单位">
+                    <el-option
+                      v-for="(item,index) in allunit"
+                      :label="item.attributes.data.Name+'/'+item.attributes.data.Symbol"
+                      :key="index"
+                      :value="item.attributes.data.Symbol"
+                    ></el-option>
+                  </el-select>
+                </el-form-item>
+              </div>
+              <div v-if="structform.type=='BOOL'">
+                <el-form-item label="属性" required>
+                  <div style="height:40px;">
+                    <el-col :span="11">
+                      <el-form-item>
+                        <el-input
+                          v-model="structform.truevalue"
+                          class="inputnumber"
+                          type="number"
+                          placeholder="属性值"
+                          readonly
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="2">-</el-col>
+                    <el-col :span="11">
+                      <el-form-item prop="true">
+                        <el-input v-model="structform.true" class="inputnumber" placeholder="例如：开"></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </div>
+                  <div style="margin-top:20px;">
+                    <el-col :span="11">
+                      <el-form-item>
+                        <el-input
+                          v-model="structform.falsevalue"
+                          class="inputnumber"
+                          type="number"
+                          placeholder="属性值"
+                          readonly
+                        ></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="2">-</el-col>
+                    <el-col :span="11">
+                      <el-form-item prop="true">
+                        <el-input v-model="structform.false" class="inputnumber" placeholder="例如：关"></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </div>
+                </el-form-item>
+              </div>
+              <div v-if="structform.type=='ENUM'">
+                <el-form-item v-for="(item, index) in structform.specs" :key="index" required>
+                  <el-col :span="9">
+                    <el-form-item
+                      :label="'属性'+index"
+                      :prop="'specs.'+index+'.attribute'"
+                      :rules="[{required: true, message: '输入属性'}]"
+                    >
+                      <el-input v-model="item.attribute" placeholder="例编号为'0''"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="line" :span="2">-</el-col>
+                  <el-col :span="9">
+                    <el-form-item
+                      :label="'属性值'+index"
+                      :prop="'specs.'+index+'.attributevalue'"
+                      :rules="[{required: true, message: '输入属性值'}]"
+                    >
+                      <el-input v-model="item.attributevalue" placeholder="对改枚举项的描述"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col class="line" :span="2"></el-col>
+                  <el-col class="line" :span="4">
+                   <el-link
+                        type="primary"
+                        @click.prevent="removeDomain1(item)"
+                        :underline="false"
+                        icon="el-icon-minus"
+                        style="margin-left:5px;margin-top:30px"
+                      >删除</el-link>
+                    </el-col>
+                  </el-form-item>
+                  <el-link
+                    @click="addDomain1"
+                    icon="el-icon-plus"
+                    type="primary"
+                    :underline="false"
+                  >添加枚举项</el-link>
+              </div>
+              <div v-if="structform.type=='STRING'">
+                    <el-form-item label="数据长度" prop="string" >
+                    <el-input  v-model.number="structform.string" type="number">
+                      <template slot="append">
+                          字节
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </div>
+                  <!--date类型添加格式-->
+                 <div v-if="structform.type=='DATE'">
+                    <el-form-item label="时间格式">
+                    <el-input  v-model="structform.date" readonly>
+                    </el-input>
+                  </el-form-item>
+                  </div>
+                <el-form-item label="读写类型" prop="isread">
+                    <el-radio-group v-model="structform.isread" size="medium">
+                      <el-radio label="rw">读写</el-radio>
+                      <el-radio label="r">只读</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-form>
+            </div>
+             <span slot="footer" class="dialog-footer">
+              <el-button @click="structdialog = false">取 消</el-button>
+              <el-button type="primary" @click="submitStruct('structform')">确 定</el-button>
             </span>
           </el-dialog>
         </el-tab-pane>
@@ -574,37 +799,38 @@
           </div>
           <div>
             <el-table :data="channelData" style="width: 100%;">
+               <el-table-column label="通道编号">
+                <template slot-scope="scope">
+                  <span>{{scope.row.id}}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="通道名称">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.name}}</span>
                 </template>
               </el-table-column>
               <el-table-column label="通道地址">
-                <template slot="header" slot-scope="scope">
-                  <span>
-                    <el-tooltip content="${addr}为对应的设备地址" placement="top">
-                      <span>
-                        通道路径
-                        <i class="el-icon-question"></i>
-                      </span>
-                    </el-tooltip>
-                  </span>
-                </template>
                 <template slot-scope="scope">
-                  <span>{{'channel/'+scope.row.attributes.name+'/'+productId+'/${addr}'}}</span>
+                  <span>{{'channel/'+scope.row.id}}</span>
+                </template>
+              </el-table-column>
+               <el-table-column label="通道类型">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.attributes.type==1">采集通道</span>
+                   <span v-else>资源通道</span>
                 </template>
               </el-table-column>
               <el-table-column label="服务类型">
                 <template slot-scope="scope">
-                  <span>{{scope.row.attributes.type}}</span>
+                  <span>{{scope.row.attributes.cType}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="侦听端口/TOPIC">
+              <!-- <el-table-column label="侦听端口/TOPIC">
                 <template slot-scope="scope">
                   <span v-if="scope.row.attributes.config.port">{{scope.row.attributes.config.port}}</span>
                 </template>
-              </el-table-column>
-              <el-table-column label="操作">
+              </el-table-column> -->
+              <el-table-column label="操作" >
                 <template slot-scope="scope">
                   <el-button type="danger" size="mini" @click="deleteRelation(scope.row)">移除通道</el-button>
                 </template>
@@ -624,29 +850,32 @@
             <el-dialog title="添加通道" :visible.sync="innerVisible" append-to-body>
               <div class="addchannel">
                 <el-table :data="allchannelData" height="400" style="width: 100%">
-                  <el-table-column label="通道名称">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.attributes.name}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="服务类型">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.attributes.type}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="侦听端口/TOPIC">
-                    <template slot-scope="scope">
-                      <span
-                        v-if="scope.row.attributes.config.port"
-                      >{{scope.row.attributes.config.port}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="通道状态">
-                    <template slot-scope="scope">
-                      <span v-if="scope.row.attributes.isEnable==true" style="color:green">已启用</span>
-                      <span v-else>已禁用</span>
-                    </template>
-                  </el-table-column>
+                  <el-table-column label="通道编号">
+                <template slot-scope="scope">
+                  <span>{{scope.row.id}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="通道名称">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.name}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="通道地址">
+                <template slot-scope="scope">
+                  <span>{{'channel/'+scope.row.id}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="通道类型">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.attributes.type==1">采集通道</span>
+                   <span v-else>资源通道</span>
+                </template>
+              </el-table-column>
+          <el-table-column label="服务类型">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.cType}}</span>
+            </template>
+          </el-table-column>
                   <el-table-column label="操作">
                     <template slot-scope="scope">
                       <el-button
@@ -697,8 +926,6 @@ var setdata = "";
 var isallchannel = false;
 import { Compile } from "@/api/systemmanage/system";
 import { getIndustry } from "@/api/applicationManagement";
-import $ from "jquery";
-import ScrollPane from "@/components/ScrollPane";
 import { setTimeout } from "timers";
 export default {
   data() {
@@ -710,37 +937,18 @@ export default {
         callback();
       }
     };
-    var checkFrequency = (rule, value, callback) => {
-      let minutes = this.$refs.frequencyMinute.value;
-      if (!value && !minutes) {
-        callback();
-      }
-      var reg = /^[1-9]\d*$/;
-      if (!reg.test(value) || !reg.test(minutes)) {
-        callback(new Error("请输入非零正整数"));
-      } else {
-        if (value > 1440 || minutes > 1440) {
-          callback(new Error("数值不能大于1440"));
-        } else {
-          callback();
-        }
-      }
-    };
     var validminnumber = (rule, value, callback) => {
-      let reg = /^[1-9]\d*$/;
-      if (!reg.test(value)) {
-        callback(new Error("必须为数字"));
-      } else if (value >= this.sizeForm.endnumber) {
+      
+      
+      if (value >= this.sizeForm.endnumber) {
         callback(new Error("最小值小于最大值"));
       } else {
         callback();
       }
     };
     var validmaxnumber = (rule, value, callback) => {
-      let reg = /^[1-9]\d*$/;
-      if (!reg.test(value)) {
-        callback(new Error("必须为数字"));
-      } else if (value <= this.sizeForm.startnumber) {
+     
+     if (value <= this.sizeForm.startnumber) {
         callback(new Error("最大值必须大于最小值"));
       } else {
         callback();
@@ -753,6 +961,29 @@ export default {
         callback()
       }
     }
+     var validstructminnumber = (rule, value, callback) => {
+     
+      if (value >= this.structform.endnumber) {
+        callback(new Error("最小值小于最大值"));
+      } else {
+        callback();
+      }
+    };
+    var validstructmaxnumber = (rule, value, callback) => {
+      
+       if (value <= this.structform.startnumber) {
+        callback(new Error("最大值必须大于最小值"));
+      } else {
+        callback();
+      }
+    };
+    var vailstructspecs = (rule, value, callback) => {
+      if (value >= this.structform.endnumber - this.structform.startnumber) {
+        callback(new Error("步长必须小于最大值和最小值的差值"));
+      } else {
+        callback();
+      }
+    };
     return {
       //topic数据
       topicdialogVisible: false,
@@ -798,28 +1029,25 @@ export default {
         truevalue: 1,
         false: "",
         falsevalue: 0,
-        isread: "",
+        isread: "r",
         unit:'',
+        string:'',
+        date:'String类型的UTC时间戳 (毫秒)',
         specs: [
           {
             attribute: "",
             attributevalue: ""
           }
-        ]
+        ],
+        struct:[]
       },
       sizerule: {
         step: [
           { required: true, trigger: "blur", validator: vailspecs, },
-          // {
-          //   validator: function (rule,value,callback){
-          //       if(value >= this.sizeForm.endnumber-this.sizeForm.startnumber){
-          //         callback(new  Error('步长必须小于最大值和最小值的差值'))
-          //       }else{
-          //         callback()
-          //       }
-          //     },
-          //   trigger: "blur"
-          // }
+        ],
+        string: [
+          { required: true, trigger: "blur", message:'请输入数据长度' },
+          { type: 'number', message: '数据长度必须为数字'}
         ],
         startnumber: [
           { validator: validminnumber, required: true, trigger: "blur" }
@@ -850,6 +1078,57 @@ export default {
         isread: [
             { required: true, message: '请选择读写类型', trigger: 'change' }
           ],
+      },
+        //结构体判断规则
+      structrule: {
+        string: [
+          { required: true, trigger: "blur", message:'请输入数据长度' },
+          { type: 'number', message: '数据长度必须为数字'}
+        ],
+        step: [{ required: true, trigger: "blur", validator: vailstructspecs }],
+        startnumber: [
+          { validator: validstructminnumber, required: true, trigger: "blur" }
+        ],
+        endnumber: [
+          { validator: validstructmaxnumber, required: true, trigger: "blur" }
+        ],
+        resource: [
+          { required: true, message: "请选择功能类型", trigger: "change" }
+        ],
+        true: [{ required: true, message: "请输入属性值", trigger: "blur" }],
+        false: [{ required: true, message: "请输入属性值", trigger: "blur" }],
+        name: [{ required: true, message: "请输入属性名称", trigger: "blur" }],
+        identifier: [
+          { required: true, message: "请输入标识符", trigger: "blur" }
+        ],
+        type: [
+          { required: true, message: "请选择数据类型", trigger: "change" }
+        ],
+        attribute: [{ required: true, message: "请输入属性", trigger: "blur" }],
+        attributevalue: [
+          { required: true, message: "请输入属性值", trigger: "blur" }
+        ],
+        isread: [
+          { required: true, message: "请选择读写类型", trigger: "change" }
+        ]
+      },
+      structdialog:false,
+      structform: {
+        resource: 1,
+        identifier: "",
+        type: "INT",
+        startnumber: "",
+        endnumber: "",
+        step: "",
+        true: "",
+        truevalue: 1,
+        false: "",
+        falsevalue: 0,
+        isread: "r",
+        unit: "",
+        date:'String类型的UTC时间戳 (毫秒)',
+        string:'',
+        specs: []
       },
       tableData: [],
       activeName: "first",
@@ -905,7 +1184,8 @@ export default {
       warningeditror: [],
       channellength: 10,
       channelstart: 0,
-      channeltotal: 0
+      channeltotal: 0,
+      isupdatedstruct:-1,
     };
   },
   computed: {
@@ -1115,14 +1395,24 @@ export default {
         name: ""
       });
     },
+     removeDomain1(item) {
+      var index = this.structform.specs.indexOf(item);
+      if (index !== -1) {
+        this.structform.specs.splice(index, 1);
+      }
+    },
+    addDomain1() {
+      this.structform.specs.push({
+        value: "",
+        name: ""
+      });
+    },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
           var obj={}
-          console.log(this.sizeForm)
            var Product = Parse.Object.extend("Product");
            var product = new Parse.Query(Product);
-           
           product.get(this.productId).then(response => {
                 if(this.sizeForm.type=='FLOAT'||this.sizeForm.type=='DOUBLE'||this.sizeForm.type=='INT'){
                     obj= {
@@ -1155,21 +1445,52 @@ export default {
                    "accessMode": this.sizeForm.isread,
                     "identifier": this.sizeForm.identifier
                   }
-                }else if(this.sizeForm.type="ENUM") {
-                  console.log(this.sizeForm.specs)
+                }else if(this.sizeForm.type=="ENUM") {
                   var specs={}
                   this.sizeForm.specs.map(items=>{
-                    
                       var newkey = items['attribute']
                       specs[newkey] = items['attributevalue']
                     
                   })
-                  console.log(specs)
                     obj={
                       "name": this.sizeForm.name,
                       "dataType": {
                         "type": this.sizeForm.type.toLowerCase(),
                         "specs":specs
+                      },
+                      "required": true,
+                        "accessMode": this.sizeForm.isread,
+                        "identifier": this.sizeForm.identifier
+                    }
+                }
+                else if(this.sizeForm.type=="STRUCT"){
+                  obj = {
+                    name: this.sizeForm.name,
+                    dataType: {
+                      type: this.sizeForm.type.toLowerCase(),
+                      specs: this.sizeForm.struct
+                    },
+                    required: true,
+                    accessMode: this.sizeForm.isread,
+                    identifier: this.sizeForm.identifier
+                  };
+                }else if(this.sizeForm.type=='STRING'){
+                  obj={
+                      "name": this.sizeForm.name,
+                      "dataType": {
+                        "type": this.sizeForm.type.toLowerCase(),
+                        "size":this.sizeForm.string
+                      },
+                      "required": true,
+                        "accessMode": this.sizeForm.isread,
+                        "identifier": this.sizeForm.identifier
+                    }
+                }
+                else if(this.sizeForm.type=='DATE'){
+                  obj={
+                      "name": this.sizeForm.name,
+                      "dataType": {
+                        "type": this.sizeForm.type.toLowerCase(),
                       },
                       "required": true,
                         "accessMode": this.sizeForm.isread,
@@ -1186,6 +1507,7 @@ export default {
                           })
                           this.getProDetail();
                           this.$refs[formName].resetFields()
+                          
                           this.wmxdialogVisible=false
                         }
                       })
@@ -1196,6 +1518,164 @@ export default {
           return false;
         }
       });
+    },
+     //物模型结构体
+    submitStruct(formName){
+         this.$refs[formName].validate(valid => {
+          if (valid) {
+            var obj={}
+            if (
+              this.structform.type == "FLOAT" ||
+              this.structform.type == "DOUBLE" ||
+              this.structform.type == "INT"
+            ) {
+              obj = {
+                name: this.structform.name,
+                dataType: {
+                  type: this.structform.type.toLowerCase(),
+                  specs: {
+                    max: this.structform.endnumber,
+                    min: this.structform.startnumber,
+                    step: this.structform.step,
+                    unit: this.structform.unit == "" ? "" : this.structform.unit
+                  }
+                },
+                required: true,
+                accessMode: this.structform.isread,
+                identifier: this.structform.identifier
+              };
+            } else if (this.structform.type == "BOOL") {
+              obj = {
+                name: this.structform.name,
+                dataType: {
+                  type: this.structform.type.toLowerCase(),
+                  specs: {
+                    "0": this.structform.false,
+                    "1": this.structform.true
+                  }
+                },
+                required: false,
+                accessMode: this.structform.isread,
+                identifier: this.structform.identifier
+              };
+            } else if(this.structform.type == "ENUM") {
+             
+              var specs = {};
+              this.structform.specs.map(items => {
+                var newkey = items["attribute"];
+                specs[newkey] = items["attributevalue"];
+              });
+              obj = {
+                name: this.structform.name,
+                dataType: {
+                  type: this.structform.type.toLowerCase(),
+                  specs: specs
+                },
+                required: true,
+                accessMode: this.structform.isread,
+                identifier: this.structform.identifier
+              };
+            }
+            else if(this.structform.type=='STRING'){
+                  obj={
+                      "name": this.structform.name,
+                      "dataType": {
+                        "type": this.structform.type.toLowerCase(),
+                        "size":this.structform.string
+                      },
+                      "required": true,
+                        "accessMode": this.structform.isread,
+                        "identifier": this.structform.identifier
+                    }
+                }
+                else if(this.structform.type=='DATE'){
+                  obj={
+                      "name": this.structform.name,
+                      "dataType": {
+                        "type": this.structform.type.toLowerCase(),
+                      },
+                      "required": true,
+                        "accessMode": this.structform.isread,
+                        "identifier": this.structform.identifier
+                    }
+                }
+                console.log(obj)
+            if(this.isupdatedstruct==-1){
+              this.sizeForm.struct.push(obj)
+            }else{
+              this.sizeForm.struct.splice(this.isupdatedstruct,1,obj)
+              this.isupdatedstruct=-1
+            }
+              this.$refs[formName].resetFields();
+              this.structdialog=false
+          }else{
+            
+          }
+        })
+    },
+    //选择结构体
+    //  selectStruct(val){
+    //   if(val=='STRUCT'){
+    //     this.structdialog = true
+    //   }else{
+    //     this.structdialog = false
+    //   }
+      
+    // },
+    //新增结构体
+    addStruct(formName){
+        this.structdialog=true
+        this.structform={
+        resource: 1,
+        identifier: "",
+        type: "INT",
+        startnumber: "",
+        endnumber: "",
+        step: "",
+        true: "",
+        truevalue: 1,
+        false: "",
+        falsevalue: 0,
+        isread: "r",
+        unit: "",
+        specs: [],
+        date:'String类型的UTC时间戳 (毫秒)',
+        string:''
+      }
+    },
+    editStruct(item,index){
+      console.log(item,index)
+      this.isupdatedstruct = index
+      this.structdialog = true
+      this.structform.type=item.dataType.type.toUpperCase()
+      this.structform.name = item.name
+      this.structform.identifier = item.identifier
+      this.structform.isread = item.accessMode
+      if(item.dataType.type == "float" ||
+        item.dataType.type == "double" ||
+        item.dataType.type == "int"){
+          this.structform.startnumber = item.dataType.specs.min
+          this.structform.endnumber = item.dataType.specs.max
+          this.structform.step = item.dataType.specs.step
+          this.structform.unit = item.dataType.specs.unit
+        }else if(item.dataType.type=='bool'){
+          this.structform.true = item.dataType.specs['1']
+          this.structform.false = item.dataType.specs['0']
+        }else if(item.dataType.type=="enum"){
+          this.structform.specs=[]
+          var obj={}
+          Object.keys(item.dataType.specs).forEach((value,index)=>{
+             obj.attribute = value
+              obj.attributevalue = item.dataType.specs[value]
+             this.structform.specs.push(obj)
+          })
+        }else if(item.dataType.type=='string'){
+          this.structform.string = item.dataType.size
+        }
+    },
+    //删除结构体
+     deleteStruct(index){
+      this.sizeForm.struct.splice(index,1)
     },
     preserve() {
       var Product = Parse.Object.extend("Product");
@@ -1347,11 +1827,11 @@ export default {
             } else {
               this.wmxData = this.productdetail.thing.properties.concat([]);
             }
-
+ 
             editor.setValue(Base64.decode(setdata));
             var Devices = Parse.Object.extend("Devices");
             var devices = new Parse.Query(Devices);
-
+ 
             devices.equalTo("product", this.productId);
             devices.skip(0);
             devices.count().then(count => {
@@ -1402,7 +1882,7 @@ export default {
     //    updateisshow(isshow){
     //     this.$set(this.productdetail,'isshow',isshow)
     //     console.log(this.productdetail)
-
+ 
     //    }
     wmxhandleClose() {
       this.wmxdialogVisible = false;
@@ -1574,7 +2054,7 @@ export default {
           } else {
             console.log("此选项没有属性功能");
           }
-
+ 
           // let obj = {}
           // this. productdetail.thing.properties = this.productdetail.thing.properties.reduce((cur,next) => {
           //         obj[next.identifier] ? "" : obj[next.identifier] = true && cur.push(next);
@@ -1852,5 +2332,10 @@ export default {
 .editproduct .el-table__expanded-cell .el-table th.is-leaf {
   background: #ced7de9c;
 }
+/* .editproduct ul{
+  margin:0;
+}
+.editproduct ul li{
+  list-style: none;
+} */
 </style>
-

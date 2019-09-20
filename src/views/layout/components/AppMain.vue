@@ -49,9 +49,9 @@ export default {
   mounted() {
       // Websocket.cInfo.host='148.70.107.74'
       // Websocket.cInfo.host='prod.iotn2n.com'
-      // Websocket.cInfo.host='ci.iotn2n.com'
+      Websocket.cInfo.host='ci.iotn2n.com'
       // Websocket.cInfo.host='132.232.121.164'
-      Websocket.cInfo.host = location.hostname;
+      // Websocket.cInfo.host = location.hostname;
       Websocket.subInfo = {
         topic: "web/"+sessionStorage.getItem('token'), 
         qos: 2,

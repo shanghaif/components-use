@@ -3,7 +3,7 @@
     <el-pagination
       small
       class="fn-right"
-      layout="total, sizes, prev, pager, next, jumper,slot"
+      layout="total, sizes, prev, pager, next"
       background
       :pager-count="7"
       :total="pager[props.total]"
@@ -115,11 +115,9 @@ export default {
       this.json = data.json;
       this.obj = data.obj;
       if (this.json!=[] && this.obj!=[]){
-        // console.log(this.test);
       }
       this.derive(this.json,this.obj);
     })
-    
   },
   watch: {
     total() {
@@ -194,12 +192,14 @@ export default {
     },
     // 每页条数
     onChangeSize(rows) {
-      // console.log(this.pager.count)
+      console.log(this.pager.count)
+      console.log(this.pager.page)
       const temp = {
         [this.props.rows]: rows,
         // 当显示条数小于或等于总条数时，重置页数
         [this.props.page]: rows <= this.total ? 1 : this.pager[this.props.page],
       };
+      this.$emit('setPagerCount', Object.assign(this.pager, temp));
       this.$emit('setPager', Object.assign(this.pager, temp));
       this.pager[this.props.total] = this.pager.count;
     },

@@ -17,7 +17,7 @@
             align="center"
             >
             <template slot-scope="scope">
-                <span>{{scope.row.attributes.vcaddr_web}}</span>
+                <span>{{scope.row.attributes.vcaddr}}</span>
             </template>
             </el-table-column>
             <el-table-column
@@ -25,7 +25,7 @@
             align="center"
             >
                 <template slot-scope="scope">
-                <span>{{scope.row.attributes.addr_web}}</span>
+                <span>{{scope.row.attributes.addr}}</span>
             </template>
             </el-table-column>
             <el-table-column
@@ -60,14 +60,14 @@
                 <span>{{scope.row.attributes.yhmc}}</span>
             </template>
             </el-table-column>
-            <el-table-column
+            <!-- <el-table-column
             label="用户地址"
             align="center"
             >
                 <template slot-scope="scope">
                 <span>{{scope.row.attributes.addr}}</span>
             </template>
-            </el-table-column>
+            </el-table-column> -->
             <el-table-column
                 prop=""
                 label="操作"
@@ -88,7 +88,7 @@
             @current-change="handleCurrentChange"
             :page-sizes="[10, 25, 50, 100]"
             :page-size="length"
-            layout="total, sizes, prev, pager, next, jumper"
+            layout="total, sizes, prev, pager, next"
             :total="total"
             style="margin-top:30px;">
             </el-pagination>
@@ -99,6 +99,7 @@
 import {timestampToTime} from '@/api/login'
 import Parse from 'parse'
 import NProgress from 'nprogress'
+import { CountAll } from "@/api/filemanage";
 export default {
    data() {
       return {
@@ -114,9 +115,9 @@ export default {
         //详细信息
         meterdetail:{
             attributes:{
-                vcaddr_web:'',
+                vcaddr:'',
                 pn:'', 
-                addr_web:'',
+                addr:'',
                 jldbh:'',
                 addr:'',
                 yhlb:'',
@@ -167,21 +168,21 @@ export default {
                 div.setAttribute("class","NewDiv");
                 let count=0;
                 let info=scope.row.attributes;
-                console.log(info);
+                // console.log(info);
                 div.innerHTML=`
-                    <p><span>集中器地址:</span>${info.vcaddr}</p>
-                    <p><span>PN:</span>${info.pn}</p>
-                    <p><span>电表地址:</span>${info.addr_web}</p>
-                    <p><span>用户编号:</span>${info.yhabh}</p>
-                    <p><span>用户地址:</span>${info.addr}</p>
-                    <p><span>用户类别:</span>${info.yhlb}</p>
-                    <p><span>供电单位:</span>${info.gddw}</p>
-                    <p><span>生产厂商:</span>${info.sccs}</p>
-                    <p><span>设备类型:</span>${info.sblx}</p>
-                    <p><span>通信规约:</span>${info.txgy}</p>
-                    <p><span>台区:</span>${info.tq}</p>
-                    <p><span>地理位置:</span>${info.yhdz}</p>
-                    <p><span>出厂编号:</span>${info.ccbh}</p>
+                    <p><span>集中器地址:</span>${info.vcaddr ? info.vcaddr :''}</p>
+                    <p><span>PN:</span>${info.pn ? info.pn:''}</p>
+                    <p><span>电表地址:</span>${info.addr ? info.addr:''}</p>
+                    <p><span>用户编号:</span>${info.yhabh ? info.yhabh: ''}</p>
+                    <p><span>用户地址:</span>${info.addr ? info.addr :''}</p>
+                    <p><span>用户类别:</span>${info.yhlb ? info.yhlb : ''}</p>
+                    <p><span>供电单位:</span>${info.gddw ? info.gddw : ''}</p>
+                    <p><span>生产厂商:</span>${info.sccs ? info.sccs :''}</p>
+                    <p><span>设备类型:</span>${info.sblx ? info.sblx : ''}</p>
+                    <p><span>通信规约:</span>${info.txgy ? info.txgy : ''}</p>
+                    <p><span>台区:</span>${info.tq ? info.tq : ''}</p>
+                    <p><span>地理位置:</span>${info.yhdz ? info.yhdz : ''}</p>
+                    <p><span>出厂编号:</span>${info.ccbh ? info.ccbh : ''}</p>
                 `;
                 td.appendChild(div);
                 tr.appendChild(td);
@@ -221,17 +222,18 @@ export default {
             var smartmeter = new Parse.Query(Smartmeter)
                 smartmeter.limit(this.length)
                 smartmeter.skip(this.start)
-                smartmeter.greaterThan('pn',0)
                 if(this.metersearch!=''){
-                    smartmeter.equalTo('addr_web',this.metersearch)
+                    smartmeter.equalTo('addr',this.metersearch)
                 }
-                smartmeter.count().then(count=>{
-                    this.total = count
+               
                     smartmeter.find().then(resultes=>{
                         this.tableData=resultes
                         this.loading=false
                         NProgress.done();
+                    CountAll('Smartmeter').then(resultes=>{
+                         this.total = resultes.count
                     })
+                   
                 },error=>{
                     if(error.code=='209'){
                         this.$message({
@@ -316,5 +318,8 @@ export default {
 }
 .smartmeter .el-table .NewDiv p span {
     color: #1b88e7;
+}
+.smartmeter .number:last-child{
+    display:none;
 }
 </style>

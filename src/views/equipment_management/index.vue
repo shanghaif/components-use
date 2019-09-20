@@ -1004,7 +1004,8 @@ export default {
         path: "/roles/editdevices",
         query: {
           deviceid: row.id,
-          nodeType:row.nodeType
+          nodeType:row.nodeType,
+          ischildren:false,
         }
       });
     },
@@ -1035,7 +1036,8 @@ export default {
         path: "/roles/editdevices",
         query: {
           deviceid: row.id,
-          nodeType:row.nodeType    
+          nodeType:row.nodeType,
+          ischildren:true,    
         }
       });
     }

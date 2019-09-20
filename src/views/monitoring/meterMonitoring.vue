@@ -1,10 +1,8 @@
 <template>
     <div id="monitoring">
-        <div class="menu">
-            <Resource1
-             @meterdetail="getRows"
-            />
-        </div>
+        <Resource1 class="resource1"
+            @meterdetail="getRows"
+        />
         <div class="content">
             <div class="form">
                 <el-form ref="form" :model="form" label-width="80px">
@@ -266,6 +264,8 @@ export default {
                         this.vcon.push(obj);
                     }
                     this.noData=true;
+                }).catch(error=>{
+                    this.$message.error(error.error)
                 })
             }else {
                 let Mtype="all";
@@ -294,6 +294,8 @@ export default {
                         this.electricity.push(obj);
                     }
                     this.noData=true;
+                }).catch(error=>{
+                    this.$message.error(error.error)
                 })
             }
         },
@@ -403,9 +405,11 @@ export default {
         getTree(){
             var Department = Parse.Object.extend("Department");
             var department = new Parse.Query(Department);
-                department.limit(10000);
+                // department.limit(10000);
+                department.equalTo('ParentId',"0")
                 department.find().then(resultes => {
                     this.data=[]
+                    this.objId = resultes[0].id
                     resultes.map(items => {
                         var obj = {};
                         items.createtime = utc2beijing(items.attributes.createdAt)
@@ -416,9 +420,7 @@ export default {
                         obj.icon = items.attributes.org_type;
                         obj.is_show =items.attributes.leafnode;
                         this.data.push(obj);
-                        if (items.attributes.name=="省电力公司"){
-                            this.objId=items.id;
-                        }
+                        
                     });
                     this.list_loading=false;
                     this.getVconData(this.objId);
@@ -453,11 +455,11 @@ export default {
                     this.form.terminal_addr=row.name;
                 }
                 if (this.form.terminal_type=="1"){
-                    this.getVconData(row.objectId);
+                    this.query();
                 }else {
                     this.getElectricityData(row.objectId);
                 }
-                this.getData(row.objectId,this.time);
+                // this.query();
             }
         },
         // 修改统计数据
@@ -493,7 +495,9 @@ export default {
                         }
                     },1);
                 }
-            });
+            }).catch(error=>{
+                    this.$message.error(error.error)
+                })
         },
         // 获取电表信息
         getElectricityData(objId){
@@ -533,7 +537,9 @@ export default {
                     if (obj.freeze_month===null) obj.freeze_month=0;
                     this.electricity.push(obj);
                 }
-            })
+            }).catch(error=>{
+                    this.$message.error(error.error)
+                })
         },
         // 获取集中器信息
         getVconData(objId){
@@ -595,7 +601,9 @@ export default {
                     }, 1000)
                     this.vcon.push(obj);
                 }
-            })
+            }).catch(error=>{
+                    this.$message.error(error.error)
+                })
         },
         // 清除定时器
         clearTimer(){
@@ -644,9 +652,9 @@ export default {
     display:flex;
     .resource1 {
         width:360px;
-        flex-shrink:0;
+        height:100vh;
         overflow:scroll;
-        height: 900px;
+        flex-shrink:0;
         padding-top: 10px;
     }
     .menu {
@@ -654,7 +662,8 @@ export default {
         margin-right: 20px;
     }
     .content {
-        width:80%;
+        // flex-grow:1;
+        width:calc(100% - 360px);
         .noData {
             text-align: center;
             margin:100px 0;

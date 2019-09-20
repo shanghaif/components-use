@@ -219,7 +219,12 @@ export default {
                 this.form.productIdentifier=this.argu.productIdentifier;
                 this.content.objectId=this.argu.objectId;
                 this.form.category = this.argu.category.split('/')
-                this.form.dashboard = this.argu.dashboard.substr(7)
+                if(this.argu.dashboard){
+                    this.form.dashboard = this.argu.dashboard.substr(7)
+                }else{
+                    this.form.dashboard=''
+                }   
+                
                 if(this.argu.logo!=''){
                      this.form.fileList.push({
                     name:'logo.png',
@@ -290,7 +295,11 @@ export default {
             obj.img=this.form.img;
             obj.secret=this.form.secret;
             obj.expires=this.form.time;
-            obj.dashboard = "http://"+this.form.dashboard
+            if(this.form.dashboard!=''){
+                obj.dashboard = "http://"+this.form.dashboard
+            }else{
+                obj.dashboard=''
+            }
             addApp(obj).then(res=>{
                 // console.log(res);
                 if (res.objectId){
@@ -308,6 +317,7 @@ export default {
         },
         // 修改
         handleClickUpdate(){
+            console.log(this.form.dashboard)
             if (!this.isSubmit()){
                 return;
             }
@@ -322,8 +332,13 @@ export default {
             obj.img=this.form.img;
             obj.secret=this.form.secret;
             obj.expires=this.form.time;
-            obj.dashboard = "http://"+this.form.dashboard
-            // console.log(obj);
+            if(this.form.dashboard!=''){
+                obj.dashboard = "http://"+this.form.dashboard
+            }else{
+                obj.dashboard=''
+            }
+            
+            console.log(obj);
             updateApp(id,obj).then(res=>{
               
                 if (res.updatedAt){

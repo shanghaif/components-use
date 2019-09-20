@@ -73,6 +73,7 @@ var Websocket = {
   send: function () {
     var _this = this
     var sendInfo = JSON.parse(_this.sendInfo)
+    console.log(sendInfo)
     _this.sendMessage(sendInfo)
   },
   log: function (Msg) {

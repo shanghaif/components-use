@@ -97,7 +97,6 @@
       getTitle() {
         let pro = window.location.pathname;
         pro = pro.slice(5, pro.length);
-        // console.log(pro);
         pro = pro == '' ? 'develop' : pro
         Parse.User.logOut();
         Sitepro(pro).then(resultes => {
@@ -137,7 +136,6 @@
                         this.routes.push(items)
                       }
                     })
- 
                     sessionStorage.setItem("username", user.attributes.username);
                     sessionStorage.setItem("roles", user.attributes.roles[0].alias);
                     sessionStorage.setItem("list", JSON.stringify(this.routes));
@@ -324,7 +322,6 @@
     border: 1px solid #cccccc;
     border-radius: 5px;
   }
- 
   .login-container .loginbanner .el-input input {
     color: black;
   }

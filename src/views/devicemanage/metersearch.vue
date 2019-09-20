@@ -1,12 +1,11 @@
 <template>
   <div id="metersearch" style="display:flex;">
-    <div class="left">
+    
       <Resource1
         @meterdetail="handleNodeClick"
       />
-    </div>
-    <div style="margin:10px 0 0 10px;width:80%;">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+    <div style="width:calc(100% - 360px);">
+      <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
         <el-form-item label="用户编号">
           <el-input v-model="formInline.userId" placeholder="请输入用户编号" @change="handleUserChange"></el-input>
         </el-form-item>
@@ -25,10 +24,7 @@
         <div>
           <el-form-item>
             <el-button type="primary" size="small" @click="inquire">查询</el-button>
-            <el-button type="primary" size="small" @click="dialogFormVisibleAdd=true">新增</el-button>
-            <el-button type="primary" size="small" @click="derive_tmp">导出模板</el-button>
-            <el-button type="primary" size="small" @click="handleBatchClick">批量导入</el-button>
-            <input type="file" ref="file" v-show="false" @change="handleFileChange(file)"/>
+            <el-button type="primary" size="small" @click="addsmartmeter">新增</el-button>
           </el-form-item>
         </div>
       </el-form>
@@ -43,7 +39,7 @@
           class="tb-edit"
           border
           stripe
-          height="500"
+          height="750"
           id="out-table"
         >
           <el-table-column type="selection" width="40"></el-table-column>
@@ -72,13 +68,13 @@
 
           <el-table-column label="集中器地址" align="center" show-overflow-tooltip>
             <template slot-scope="scope">
-              <span>{{scope.row.vcaddr_web}}</span>
+              <span>{{scope.row.vcaddr}}</span>
             </template>
           </el-table-column>
 
           <el-table-column label="电能表地址" align="center" show-overflow-tooltip>
             <template slot-scope="scope">
-              <span>{{scope.row.addr_web}}</span>
+              <span>{{scope.row.addr}}</span>
             </template>
           </el-table-column>
 
@@ -112,7 +108,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop label="操作" align="center" show-overflow-tooltip>
+          <el-table-column prop label="操作" align="center" width="150">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -150,10 +146,10 @@
               <el-input v-model="mod_form.tq" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="集中器地址" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.vcaddr_web" autocomplete="off" :disabled="true"></el-input>
+              <el-input v-model="mod_form.vcaddr" autocomplete="off" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="电能表地址" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.addr_web" autocomplete="off" :disabled="true"></el-input>
+              <el-input v-model="mod_form.addr" autocomplete="off" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="PN值" :label-width="formLabelWidth">
               <el-input v-model="mod_form.pn" autocomplete="off"></el-input>
@@ -368,10 +364,10 @@
               <el-input v-model="add_form.tq" autocomplete="off" placeholder="请输入台区名称"></el-input>
             </el-form-item>
             <el-form-item label="集中器地址" prop="addr" :label-width="formLabelWidth">
-              <el-input v-model="add_form.vcaddr_web" :disabled="isvcaddr" autocomplete="off" placeholder="请输入集中器地址"></el-input>
+              <el-input v-model="add_form.vcaddr" :disabled="isvcaddr" autocomplete="off" placeholder="请输入集中器地址"></el-input>
             </el-form-item>
             <el-form-item label="电能表地址" prop="addr" :label-width="formLabelWidth">
-              <el-input v-model="add_form.addr_web" :disabled="isaddr" autocomplete="off" placeholder="请输入电能表地址"></el-input>
+              <el-input v-model="add_form.addr" :disabled="isaddr" autocomplete="off" placeholder="请输入电能表地址"></el-input>
             </el-form-item>
             <el-form-item label="PN值" :label-width="formLabelWidth">
               <el-input v-model="add_form.pn" autocomplete="off" placeholder="请输入PN值"></el-input>
@@ -549,9 +545,6 @@
                 </el-select>
               </el-form-item>
             </div>
-            
-            
-            
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
@@ -651,7 +644,7 @@ import {
 } from "@/api/login";
 // 引入element-china-area-data地址三级联动
 import { regionData, CodeToText } from "element-china-area-data";
-import { addmeterforuser } from "@/api/filemanage";
+import { addmeterforuser,CountAll } from "@/api/filemanage";
 import Parse from "parse";
 import FileSaver from "file-saver";
 import XLSX from "xlsx";
@@ -689,12 +682,12 @@ export default {
         dbmm:"",
         gsmc: "", //公司名称
         yhabh: "",
-        vcaddr_web: "",
+        vcaddr: "",
         deveui: "",
         tq: "",
         yhmc: "",
         pn: "",
-        addr_web: "",
+        addr: "",
         yhdz: "",
         cblx: "",
         cblx_arr: [{ label: "虚拟通道", value: 1 },{ label: "物理通道", value: 2 }],
@@ -748,8 +741,8 @@ export default {
         tq: "台区名称",
         yhabh: "用户编号",
         yhmc: "用户名称",
-        vcaddr_web: "集中器地址",
-        addr_web: "电能表地址",
+        vcaddr: "集中器地址",
+        addr: "电能表地址",
         pn: "PN值",
         yhlb:"用户类别",
         cblx: "通道类型",
@@ -790,8 +783,8 @@ export default {
         tq: "广东南利嘉投资有限公司（小区1）",
         yhabh: "0305420166778469,用户编号不能相同",
         yhmc: "南澳县南利嘉物业管理有限公司",
-        vcaddr_web: "集中器地址为12位,集中器地址不能相同",
-        addr_web: "电表地址为12位,电表地址不能相同",
+        vcaddr: "集中器地址为12位,集中器地址不能相同",
+        addr: "电表地址为12位,电表地址不能相同",
         pn: "0-2000,同一个集中器pn不能相同",
         yhlb:"[公变普通用户][公变大客户][专变用户]",
         cblx: "[虚拟通道][物理通道]",
@@ -836,12 +829,12 @@ export default {
       // 修改内容
       mod_form: {
         yhabh: "",
-        vcaddr_web: "",
+        vcaddr: "",
         deveui: "",
         tq: "",
         yhmc: "",
         pn: "",
-        addr_web: "",
+        addr: "",
         yhdz: "",
         cblx: "",
         cblx_arr: [{ label: "虚拟通道", value: 1 },{ label: "物理通道", value: 2 }],
@@ -935,7 +928,7 @@ export default {
         country: "",
         province: "",
         city: "",
-        departmentid: [],
+        departmentid: '',
         organization: "",
         mode: "vconcentrator",
         version: "v1"
@@ -964,19 +957,8 @@ export default {
       deriveWhere:[],//导出条件
       addShow:false,//新增隐藏
       updateShow:false,//修改隐藏
+      isshowonce:false
     };
-  },
-  computed: {
-    treeData() {
-      let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
-      return cloneData.filter(father => {
-        let branchArr = cloneData.filter(
-          child => father.objectId == child.ParentId
-        ); //返回每一项的子级数组
-        branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
-        return father.ParentId == 0; //返回第一层
-      });
-    }
   },
   mounted() {
     this.getTree();
@@ -1026,7 +1008,7 @@ export default {
         // 解析json
         let json=JSON.parse(JSON.stringify(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{blankrows:true,defval:""})));
         console.log(json);
-        let head=["tq","yhabh","yhmc","vcaddr_web","addr_web","pn","yhlb","cblx","deveui","appeui","yhdz","zcbh","sb","sblx","sccj","ccbh","txfs","txgw","ljdz","dbmm","btl","zhbl","eddy","bddl","zqd","dhpc","tysj","cbqd","xl","cz","jlzzfl","jlfs","zfbbz","jldbh","jldwz","jlddz","scjyrq","dbmjlbxm","xgwzh"];
+        let head=["tq","yhabh","yhmc","vcaddr","addr","pn","yhlb","cblx","deveui","appeui","yhdz","zcbh","sb","sblx","sccj","ccbh","txfs","txgw","ljdz","dbmm","btl","zhbl","eddy","bddl","zqd","dhpc","tysj","cbqd","xl","cz","jlzzfl","jlfs","zfbbz","jldbh","jldwz","jlddz","scjyrq","dbmjlbxm","xgwzh"];
         let arr=[];
         for (let i=0;i<json.length;i++){
           let obj={};
@@ -1059,11 +1041,11 @@ export default {
       }
       addMeter(
         {
-          addr:arr[i].addr_web,
+          addr:arr[i].addr,
           yhdz:arr[i].yhdz,
           organization:this.gsmc,
           pn:arr[i].pn,
-          vcaddr:arr[i].vcaddr_web,
+          vcaddr:arr[i].vcaddr,
           gddw:arr[i].gddw,
           tq:arr[i].tq,
           yhmc:arr[i].yhmc,
@@ -1174,10 +1156,10 @@ export default {
           }else if (this.add_form.gddw==""){
             this.$message.error('请选择供电单位');
             return;
-          }else if (!/^[0-9A-Z]{8,12}$/.test(this.add_form.vcaddr_web)){
+          }else if (!/^[0-9A-Z]{8,12}$/.test(this.add_form.vcaddr)){
             this.$message.error('请输入正确的集中器地址8-12位');
             return;
-          }else if (!/^[0-9]{12}$/.test(this.add_form.addr_web)){
+          }else if (!/^[0-9]{12}$/.test(this.add_form.addr)){
             this.$message.error('请输入正确的12位电能表地址');
             return;
           }else if (!/^[0-9]+$/.test(this.add_form.yhabh)){
@@ -1189,11 +1171,11 @@ export default {
           }
           addMeter(
             {
-              addr:this.add_form.addr_web,
+              addr:this.add_form.addr,
               yhbh:this.add_form.provinces + " " + this.add_form.yhdz,
               organization:this.gsmc,
               pn:this.add_form.pn,
-              vcaddr:this.add_form.vcaddr_web,
+              vcaddr:this.add_form.vcaddr,
               gddw: this.add_form.gddw,
               tq:this.add_form.tq,
               yhmc:this.add_form.yhmc,
@@ -1232,12 +1214,12 @@ export default {
             console.log(res);
             this.dialogFormVisibleAdd = false;
             this.getTree();
-            this.add_form.addr_web="";
+            this.add_form.addr="";
             this.add_form.provinces="";
             this.add_form.yhdz="";
             this.gsmc="";
             this.add_form.pn="";
-            this.add_form.vcaddr_web="";
+            this.add_form.vcaddr="";
             this.add_form.gddw="";
             this.add_form.tq="";
             this.add_form.yhmc="";
@@ -1316,11 +1298,11 @@ export default {
       }
       if (this.formInline.electricityId){
         this.formInline.electricityId = this.Reg(this.formInline.electricityId);
-        this.deriveWhere.push({addr_web: { $regex: this.formInline.electricityId, $options: "i" }});
+        this.deriveWhere.push({addr: { $regex: this.formInline.electricityId, $options: "i" }});
       }
       if (this.formInline.cost){
         this.formInline.cost = this.Reg(this.formInline.cost);
-        this.deriveWhere.push({vcaddr_web: { $regex: this.formInline.cost, $options: "i" }});
+        this.deriveWhere.push({vcaddr: { $regex: this.formInline.cost, $options: "i" }});
       }
       if (this.formInline.yhdz){
         this.formInline.yhdz = this.Reg(this.formInline.yhdz);
@@ -1334,8 +1316,8 @@ export default {
           res.map(items => {
             let obj = {};
             obj.objectId = items.id;
-            obj.vcaddr_web = items.attributes.vcaddr_web;
-            obj.addr_web = items.attributes.addr_web;
+            obj.vcaddr = items.attributes.vcaddr;
+            obj.addr = items.attributes.addr;
             obj.deveui = items.attributes.deveui;
             obj.tq = items.attributes.tq;
             obj.yhabh = items.attributes.yhabh;
@@ -1405,24 +1387,28 @@ export default {
       this.yhmxFordepartment4(
         this.pagesize * (end - start + 1),
         start,
-        this.departmentid
+        this.departmentid,
+        this.deriveWhere
       );
     },
     // 刷新
     reload() {
-      this.yhmxFordepartment(this.pagesize, this.start, this.gsmc_child);
+      this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+    },
+    addsmartmeter(){
+      this.dialogFormVisibleAdd = true
     },
     // 修改
     editorMeter(row) {
       console.log(row);
       this.now_row = row;
       this.mod_form.yhabh = this.now_row.yhabh;
-      this.mod_form.vcaddr_web = this.now_row.vcaddr_web;
+      this.mod_form.vcaddr = this.now_row.vcaddr;
       this.mod_form.deveui = this.now_row.deveui;
       this.mod_form.tq = this.now_row.tq;
       this.mod_form.yhmc = this.now_row.yhmc;
       this.mod_form.pn = this.now_row.pn;
-      this.mod_form.addr_web = this.now_row.addr_web;
+      this.mod_form.addr = this.now_row.addr;
       this.mod_form.yhdz = this.now_row.yhdz;
       this.mod_form.gddw = this.now_row.gddw;
       this.mod_form.yhlb=this.now_row.yhlb;
@@ -1456,6 +1442,7 @@ export default {
       this.mod_form.deveui=this.now_row.deveui;
       this.mod_form.appeui=this.now_row.appeui;
       this.mod_form.cblx=this.now_row.cblx;
+      this.smartmeterid = row.id
     },
     // 确定修改
     sure() {
@@ -1469,12 +1456,12 @@ export default {
           let query = new Parse.Query(Yhmx);
           query.get(this.now_row.objectId).then(object => {
             object.set("yhabh", this.mod_form.yhabh);
-            object.set("vcaddr_web", this.mod_form.vcaddr_web);
+            object.set("vcaddr", this.mod_form.vcaddr);
             object.set("deveui", this.mod_form.deveui);
             object.set("tq", this.mod_form.tq);
             object.set("yhmc", this.mod_form.yhmc);
             object.set("pn", parseInt(this.mod_form.pn));
-            object.set("addr_web", this.mod_form.addr_web);
+            object.set("addr", this.mod_form.addr);
             object.set("yhdz", this.mod_form.provinces + this.mod_form.yhdz);
             object.set("gddw",this.mod_form.gddw);
             object.set("yhlb",this.mod_form.yhlb);
@@ -1512,7 +1499,7 @@ export default {
                   type: "success",
                   message: "修改成功!"
                 });
-                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid);
+                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
                 this.dialogFormVisible = false;
               },
               error=>{
@@ -1562,7 +1549,7 @@ export default {
                   message: "删除成功!"
                 });
                 this.getTree();
-                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid);
+                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
               },
               error => {
                 console.error("Error while deleting User", error);
@@ -1576,22 +1563,19 @@ export default {
             message: "已取消删除"
           });
         });
-      // console.log(row)
     },
-    queryList(json, arr) {
-      for (let i = 0; i < json.length; i++) {
-        let sonList = json[i].children;
-        if (!sonList) {
-          arr.push(json[i].objectId);
-        } else {
-          arr.push(json[i].objectId);
-          this.queryList(sonList, arr);
+    queryList(nodeId, origindata,arr) {
+      origindata.map(items=>{
+        if(nodeId==items.ParentId&&items.icon=='集中器'){
+           arr.push(items.objectId)
+           this.queryList(items.objectId,origindata,arr)
+        }else if(nodeId==items.ParentId&&items.icon!='集中器'){
+          this.queryList(items.objectId,origindata,arr)
         }
-      }
+      })
       return arr;
     },
     submitForm(formName) {
-      // console.log(this.ruleForm.departmentid)
       this.$refs[formName].validate(valid => {
         if (valid) {
           this.ruleForm.organization = this.ruleForm.departmentid[
@@ -1614,41 +1598,55 @@ export default {
     },
     handleSizeChange(val) {
       this.pagesize = val;
-      if (arr.length == 0) {
-        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid);
-      } else {
-        this.yhmxFordepartment(this.pagesize, this.start, arr);
-      }
+      // console.log(arr.length,this.isshowonce)
+      // if (arr.length == 0) {
+      //   this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      // } else {
+        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      // }
     },
     handleCurrentChange(val) {
       this.start = (val - 1) * this.pagesize;
-      if (arr.length == 0) {
-        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid);
-      } else {
-        this.yhmxFordepartment(this.pagesize, this.start, arr);
-      }
+      // if (arr.length == 0) {
+      //   this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      // } else {
+        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      // }
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
     // table3
-    yhmxFordepartment(pagesize, start, departments) {
+     yhmxFordepartment(pagesize, start, departments,ishsow) {
       this.tableData3 = [];
       let Yhmx = Parse.Object.extend("Smartmeter");
       let query = new Parse.Query(Yhmx);
       query.limit(pagesize);
       query.skip(start);
-      query.greaterThan("pn", 0);
-      query.containedIn("organization", departments);
-      query.count().then(count => {
-        if (count) {
-          this.total = count;
+      if(ishsow){
+         query.equalTo("vcaddr", departments);
+         query.count().then(count => {
+            if (count) {
+              this.total = count;
+                } else {
+                  this.total = 0;
+                  setTimeout(() => {
+                    this.loading = false;
+                  }, 3000);
+                }
+          });
+      }else{
+        CountAll('Smartmeter').then(response=>{
+          this.total =response.count
+        })
+      }
+     
           query.find().then(results => {
             results.map(items => {
               let obj = {};
               obj.objectId = items.id;
-              obj.vcaddr_web = items.attributes.vcaddr_web;
-              obj.addr_web = items.attributes.addr_web;
+              obj.vcaddr = items.attributes.vcaddr;
+              obj.addr = items.attributes.addr;
               obj.deveui = items.attributes.deveui;
               obj.appeui = items.attributes.appeui;
               obj.tq = items.attributes.tq;
@@ -1661,14 +1659,7 @@ export default {
               this.tableData3.push(obj);
             });
             this.loading = false;
-          });
-        } else {
-          this.total = 0;
-          setTimeout(() => {
-            this.loading = false;
-          }, 3000);
-        }
-      });
+       });
     },
     // table4
     yhmxFordepartment4(pagesize, start, departments,where) {
@@ -1678,7 +1669,10 @@ export default {
       if (where.length>0){
         query.equalTo("$and", where);
       }
-      query.containedIn("organization", departments);
+      if(this.departmentid!=''){
+         query.equalTo("vcaddr", departments);
+      }
+     
       query.count().then(count => {
         if (count) {
           this.total = count;
@@ -1697,41 +1691,45 @@ export default {
     },
     // 获取资源树
     getTree() {
-      let Department = Parse.Object.extend("Department");
-      let department = new Parse.Query(Department);
-      department.limit(20000);
-      department.find().then(
-        resultes => {
-          this.data = [];
-          resultes.map(items => {
-            let obj = {};
-            items.createtime = utc2beijing(items.attributes.createdAt);
-            (obj.name = items.attributes.name),
-              (obj.ParentId = items.attributes.ParentId);
-            obj.objectId = items.id;
-            obj.createtime = items.createtime;
-            obj.icon = items.attributes.org_type;
-            obj.is_show = items.attributes.leafnode;
-            this.data.push(obj);
-            this.departmentid.push(items.id);
-          });
-          this.yhmxFordepartment(this.pagesize, this.start, this.departmentid);
-          this.gsmc_child=this.departmentid;
-        },
-        error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          }
-        }
-      );
+      // let Department = Parse.Object.extend("Department");
+      // let department = new Parse.Query(Department);
+      // department.limit(20000);
+      // department.find().then(
+      //   resultes => {
+      //     this.data = [];
+      //     resultes.map(items => {
+      //       let obj = {};
+      //       items.createtime = utc2beijing(items.attributes.createdAt);
+      //       obj.name = items.attributes.name,
+      //       obj.ParentId = items.attributes.ParentId;
+      //       obj.objectId = items.id;
+      //       obj.createtime = items.createtime;
+      //       obj.icon = items.attributes.org_type;
+      //       obj.is_show = items.attributes.leafnode;
+      //       this.data.push(obj);
+      //       if(items.attributes.org_type=='集中器'){
+      //         this.departmentid.push(items.id);
+      //       } 
+      //     });
+          this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+          
+      //     this.gsmc_child=this.departmentid;
+      //   },
+      //   error => {
+      //     if (error.code == "209") {
+      //       this.$message({
+      //         type: "warning",
+      //         message: "登陆权限过期，请重新登录"
+      //       });
+      //       this.$router.push({
+      //         path: "/login"
+      //       });
+      //     }
+      //   }
+      // );
     },
     //树联动父级
+    //原数组data2 nodeId2点击树元素的parentId，arrRes新的数组 
     getParent(data2, nodeId2, arrRes) {
       data2.map(items => {
         if (items.objectId == nodeId2) {
@@ -1752,23 +1750,20 @@ export default {
         if (icon=="集中器"){
           this.add_form.gddw=res[0].attributes.name;
         }else if (icon=="电表"){
-          this.add_form.vcaddr_web=res[0].attributes.name;
+          this.add_form.vcaddr=res[0].attributes.name;
           this.getParentId("objectId",res.ParentId,"集中器")
         }
       })
     },
     // 获取子级
     handleNodeClick(row) {
-      console.log(row);
       this.loading = true;
+      this.isshowonce = true
       // 判断点击的层级
-      if (row.icon == "集中器"){
-        this.add_form.vcaddr_web = row.name;
-        this.getParentId("objectId",row.ParentId,"集中器");
-        this.isaddr=false;
-        this.isvcaddr=true;
-      }else if (row.icon == "电表"){
-        this.add_form.addr_web = row.name;
+      //  console.log(row)
+     if (row.icon == "电表"){
+      
+        this.add_form.addr = row.name;
         this.getParentId("objectId",row.ParentId,"电表");
         this.isaddr=true;
         this.isvcaddr=true;
@@ -1779,45 +1774,16 @@ export default {
       }
       this.add_form.gsmc = row.objectId;
       this.gsmc = row.objectId;
-      if (row.leaf == false) {
-        let row1 = [];
-        arr = [];
+      if (row.leaf == true) {
         let arr1 = [row.objectId];
-        row1.push(row);
-        this.queryList(row1, arr);
         this.gsmc_child = arr;
-        this.departmentid = arr;
+        this.departmentid = row.alias;
         if (row.icon == "集中器") {
           this.formInline.cost = row.name;
           this.formInline.electricityId = "";
+        
         }
-        this.yhmxFordepartment(this.pagesize, this.start, arr);
-      } else {
-        let Yhmx = Parse.Object.extend("Smartmeter");
-        let query = new Parse.Query(Yhmx);
-        query.equalTo("addr_web", row.name);
-        query.find().then(res => {
-          console.log(res);
-          this.formInline.cost = res[0].attributes.vcaddr_web;
-          this.formInline.electricityId = row.name;
-          let obj = {};
-          this.tableData3 = [];
-          obj.objectId = res[0].id;
-          obj.vcaddr_web = res[0].attributes.vcaddr_web;
-          obj.addr_web = res[0].attributes.addr_web;
-          obj.deveui = res[0].attributes.deveui;
-          obj.tq = res[0].attributes.tq;
-          obj.yhabh = res[0].attributes.yhabh;
-          obj.yhmc = res[0].attributes.yhmc;
-          obj.yhdz = res[0].attributes.yhdz;
-          obj.pn = res[0].attributes.pn;
-          obj.gddw = res[0].attributes.gddw;
-          this.tableData3.push(obj);
-        });
-        this.loading = false;
-        if (row.icon == "电表"){
-          this.formInline.electricityId=row.name;
-        }
+        this.yhmxFordepartment(this.pagesize, this.start, row.alias,this.isshowonce);
       }
     },
     handleClose() {
@@ -1845,9 +1811,9 @@ export default {
 }
 #metersearch .resource1 {
   width:360px;
+  height:100vh;
   flex-shrink:0;
   overflow:scroll;
-  height: 800px;
   padding-top: 10px;
 }
 </style>
@@ -1885,9 +1851,9 @@ export default {
 .el-button--mini.is-round {
   padding: 6px;
 }
-#metersearch .el-table {
+/* #metersearch .el-table {
   height: 650px !important;
-}
+} */
 #metersearch .el-table .cell {
   line-height: 30px;
 }
@@ -1987,6 +1953,12 @@ export default {
 }
 #metersearch .el-date-editor {
   width: auto;
+}
+#metersearch .number:last-child{
+  display: none;
+}
+#metersearch .el-pagination__jump{
+  display:none;
 }
 /* 切换页数图标 */
 .btn-prev:before {

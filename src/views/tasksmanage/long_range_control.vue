@@ -2,11 +2,12 @@
   <div class="longcontrol">
     <!--第一个tree树-->
     <Resource1
+      
       style="width:360px;height:100vh;overflow:scroll;flex-shrink:0;padding:10px;"
       @meterdetail="meterdetail"
     />
     <!--第三个返回数据展示-->
-    <div class="second">
+    <div class="second" :style="{'height':resource1}">
       <div style="width:100%;height:auto;padding:20px;box-sizing:border-box;">
         <div class="secondheader">
           <el-form
@@ -66,10 +67,6 @@
             <el-form-item label="当前状态">
               <el-input v-if="ruleform.cur_status==0" value="合闸"></el-input>
               <el-input v-else value="拉闸"></el-input>
-              <!-- <el-select v-model="ruleform.control" placeholder="请选择操作类型">
-                <el-option label="拉闸" value="switch_off"></el-option>
-                <el-option label="合闸" value="switch_on"></el-option>
-              </el-select> -->
             </el-form-item>
             <el-form-item label="测量点号" prop="pn">
               <el-input v-model="ruleform.pn" type="number" :min="1" :max="2048" readonly></el-input>
@@ -92,6 +89,7 @@
             :data="tableData"
             tooltip-effect="dark"
             style="width: 100%;text-align:center"
+            height="650"
             border
             @selection-change="handleSelectionChange"
           >
@@ -145,6 +143,9 @@
         border
         v-loading="loading1"
       >
+      <el-table-column prop="round" label="轮次">
+      
+      </el-table-column>
         <el-table-column prop="vcaddr_web" label="终端地址" width="150" align="center"></el-table-column>
         <el-table-column prop="pn" label="测量点号" align="center"></el-table-column>
         <el-table-column prop="meteraddr" label="电表地址" width="150" align="center"></el-table-column>
@@ -363,11 +364,20 @@ export default {
         starttime: "",
         endtime: "",
         control: "9"
-      }
+      },
+      heightforresource:false
     };
   },
-  computed: {},
+  computed: {
+    resource1(){
+      if(this.heightforresource){
+         return document.getElementsByClassName("second")[0].offsetHeight + "px";
+      }
+    }
+  },
   mounted() {
+    this.heightforresource=true
+    // document.getElementsByClassName("resource1")[0].style.height = 
     this.session = Parse.User.current().attributes.sessionToken;
   },
   methods: {
@@ -478,12 +488,21 @@ export default {
                 this.tableData.push(obj);
               });
             });
-          },
-          error => {
-            this.$message({
-              type: "error",
-              message: error.message
-            });
+          },error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            }
           }
         );
       }

@@ -54,7 +54,7 @@ export function Alltasks(start, length, draw, searchvalue) {
     }
   })
 }
-export function Addtasks(name, frozendate, downchannel,starttime, meter, freq, unit) {
+export function Addtasks(name, frozendate, downchannel,starttime,endtime, meter, freq, unit,upchannel) {
   return request({
     url: '/shuwa_task/task',
     method: 'post',
@@ -62,11 +62,12 @@ export function Addtasks(name, frozendate, downchannel,starttime, meter, freq, u
       name: name,
       frozendate: frozendate,
       downchannel: downchannel,
-      // upchannel: upchannel,
       starttime: starttime,
+      endtime:endtime,
       meter: meter,
       freq: freq,
-      unit: unit
+      unit: unit,
+      upchannel:upchannel
     }
   })
 }
@@ -84,14 +85,15 @@ export function Taskdetail(node, start, length, draw, id, searchvalue) {
     }
   })
 }
-export function Taskmeterdetail(di,vcaddr, id) {
+export function Taskmeterdetail(di,vcaddr, id,datetime) {
   return request({
     url: 'shuwa_task/meter',
     method: 'post',
     data:{
       dis:di,
       vcaddr:vcaddr,
-      id:id
+      id:id,
+      datetime:datetime
     }
   })
 }
@@ -110,7 +112,12 @@ export function Supporttask(data) {
     url: '/shuwa_task/readMeter',
     method: 'post',
     data: {
-      data: data
+      datetime: data.datetime,
+      di: data.di,
+      pn: data.pn,
+      taskid: data.taskid,
+      vcaddr: data.vcaddr,
+      tattr:data.tattr
     }
   })
 }

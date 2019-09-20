@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 // 获取抄表数据
-export function getMeterDate(skip,limit,vcaddr,addr,start_date,end_date,type,di) {
+export function getMeterDate(skip,limit,vcaddr,addr,start_date,end_date,di,resource) {
   return request({
     url: '/meter/hisdata',
     method: 'get',
@@ -12,24 +12,23 @@ export function getMeterDate(skip,limit,vcaddr,addr,start_date,end_date,type,di)
         addr,
         start_date,
         end_date,
-        type,
-        di
+        di,
+        resource
     }
   })
 }
-
-export function getMeterListDate(di,skip,limit,objectId,start_date,end_date,type) {
+export function getMeterListDate(skip,limit,vcaddr,start_date,end_date,type,di) {
   return request({
-    url: '/org/meter/hisdata',
+    url: '/tdengine/meter/hisdata',
     method: 'get',
     params:{
-        di,
         skip,
         limit,
-        objectId,
+        vcaddr,
         start_date,
         end_date,
-        type
+        type, 
+        di,
     }
   })
 }

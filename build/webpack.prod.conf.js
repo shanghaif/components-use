@@ -120,6 +120,11 @@ const webpackConfig = merge(baseWebpackConfig, {
           name: 'chunk-axios', // 单独将 elementUI 拆包
           priority: 30, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
           test: /[\\/]node_modules[\\/]axios[\\/]/
+        },
+        animate: {
+          name: 'chunk-animate', // 单独将 elementUI 拆包
+          priority: 22, // 权重要大于 libs 和 app 不然会被打包进 libs 或者 app
+          test: /[\\/]node_modules[\\/]animate.css[\\/]/
         }
       }
     },
@@ -147,7 +152,7 @@ if (config.build.productionGzip) {
 
   webpackConfig.plugins.push(
     new CompressionWebpackPlugin({
-      asset: '[path].gz[query]',
+      filename: '[path].gz[query]',
       algorithm: 'gzip',
       test: new RegExp(
         '\\.(' + config.build.productionGzipExtensions.join('|') + ')$'

@@ -3,7 +3,7 @@
         <div class="devsreporttop">
             <label for="">采集器：</label>
             <el-input v-model="devsreport" placeholder="请输入采集器地址"></el-input>
-            <el-button type="primary" style="margin-left:20px;" @click="information">查询</el-button>
+            <el-button type="primary" style="margin-left:20px;" @click="information(0)">查询</el-button>
         </div>
         <div class="devsreportsection">
             <template>
@@ -19,34 +19,35 @@
                     align="center"
                     show-overflow-tooltip>
                      <template slot-scope="scope">
-                        <div v-if="scope.row.is_online==true" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div><span v-if="scope.row.is_online==true" style="color:#00cc33">运行中</span>
-                        <div v-if="scope.row.is_online==false" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"></div><span v-if="scope.row.is_online==false" style="color:#f00">未运行</span>
+                        <div v-if="scope.row.attributes.isEnable==true" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div><span v-if="scope.row.attributes.isEnable==true" style="color:#00cc33">运行中</span>
+                        <div v-if="scope.row.attributes.isEnable==false" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"></div><span v-if="scope.row.attributes.isEnable==false" style="color:#f00">未运行</span>
                     </template>
                     </el-table-column>
                     <el-table-column
-                    prop="deveui"
                     label="DevEUI"
                     align="center"
                     >
+                    <template slot-scope="scope">
+                       <span>{{scope.row.attributes.devaddr}}</span>
+                    </template>
                     </el-table-column>
                     <el-table-column
-                    prop="appeui"
                     label="AppEUI"
                     align="center"
                     >
+                    <template slot-scope="scope">
+                       <span>{{scope.row.attributes.basedata.appeui}}</span>
+                    </template>
                     </el-table-column>
                     
                     <el-table-column
-                    prop="devaddr"
+                  
                     label="采集器地址"
                     align="center"
                     show-overflow-tooltip>
-                        <!-- <template slot-scope="scope">
-                            <el-button
-                            size="mini"
-                            type="primary"
-                            @click="handledetail(scope.$index, scope.row.deveui)">查看详情</el-button>
-                        </template> -->
+                        <template slot-scope="scope">
+                           <span>{{scope.row.attributes.devaddr}}</span>
+                        </template>
                     </el-table-column>
                 </el-table>
             </template>
@@ -66,7 +67,7 @@
     </div>
 </template>
 <script>
-import {getdevsreport} from '@/api/login'
+import Parse from 'parse'
 export default {
    data() {
       return {
@@ -81,7 +82,7 @@ export default {
       }
    },
    mounted(){
-       this.information()
+       this.information(1)
    },
    methods:{
        handleSelectionChange(val) {
@@ -89,24 +90,48 @@ export default {
       },
       handleSizeChange(val) {
         this.length=val
-        this.information()
+        this.information(1)
        
       },
       handleCurrentChange(val) {
         this.start=(val-1)*this.length
-        this.information()
+        this.information(1)
       },
       //初始化数据
-      information(){
+      information(index){
+          if(index==0){
+              this.start=0
+          }
           this.loading=true
-          getdevsreport(this.start,this.length,this.draw,this.devsreport).then(res=>{
-              console.log(res)
-                  this.tableData3 =res.data
-                  this.total = res.recordsFiltered
-                  this.loading=false
-                  
-          }).catch(error=>{
-              console.log(error)
+           var Devices = Parse.Object.extend('Devices')
+           var devices = new Parse.Query(Devices)
+           devices.equalTo('basedata.devtype','lorawan')
+           devices.skip(this.start)
+           devices.limit(this.length)
+           if(this.devsreport!=''){
+              devices.equalTo('devaddr',this.devsreport) 
+           }
+           devices.count().then(count=>{
+               this.total = count
+                devices.find().then(resultes=>{
+                     this.tableData3 =resultes
+                     this.loading=false
+                })
+           },error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            }
           })
       },
         //编辑
@@ -148,83 +173,4 @@ export default {
 }
 </style>
 
-<script>
-import {getdevsreport} from '@/api/login'
-export default {
-   data() {
-      return {
-          start:0,
-          length:10,
-          total:0,
-          draw:1,
-          devsreport:'',
-          tableData3: [],
-        multipleSelection: []
-      }
-   },
-   mounted(){
-       this.information()
-   },
-   methods:{
-       handleSelectionChange(val) {
-           console.log(val)
-        this.multipleSelection = val;
-      },
-      handleSizeChange(val) {
-        this.length=val
-        this.information()
-       
-      },
-      handleCurrentChange(val) {
-        this.start=(val-1)*10
-        this.information()
-      },
-      //初始化数据
-      information(){
-          getdevsreport(this.start,this.length,this.draw,this.devsreport).then(res=>{
-              console.log(res)
-                  this.tableData3 =res.data
-                  this.total = res.recordsFiltered
-          }).catch(error=>{
-              console.log(error)
-          })
-      },
-        //编辑
-       handleEdit(index, row){
-
-       }, 
-       //查看详情
-       handledetail(index,val){
-           this.devsreport = val
-           this.$router.push({path:'/devicemanage/devsdetail',query:{devsreport:val}})
-       },
-       //查询
-    //    search(){
-    //        getdevsreport()
-    //    }
-   },
-}
-</script>
-<style scoped>
-.devsreport{
-    background:#ffffff;
-    padding-left:20px;
-    padding-top:20px;
-    box-sizing: border-box;
-    min-height:100%;
-}
-.devsreportsection{
-    margin-top:30px;
-}
-</style>
-<style>
-    .devsreporttop .el-input{
-        width:200px;
-    }
-    .devsreport .el-table th{
-    background:#fafafa;
-    color:#666666;
-    font-weight:600;
-}
-</style>
 

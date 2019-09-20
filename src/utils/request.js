@@ -9,7 +9,7 @@ axios.defaults.withCredentials =true
 
 const service = axios.create({
   baseURL: process.env.BASE_API,
-  timeout: 20000
+  timeout: 200000
 })
 
 // request拦截器

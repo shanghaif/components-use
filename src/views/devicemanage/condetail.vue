@@ -18,45 +18,59 @@
                    >
                     </el-table-column>
                     <el-table-column
-                    prop="deveui"
+                   
                     label="DEVEUI"
                     >
-                    
+                    <template slot-scope="scope">
+                        <span>{{scope.row.attributes.deveui}}</span>
+                    </template>
                     </el-table-column>
                     <el-table-column
-                    prop="appeui"
                     label="APPEUI"
                     >
+                    <template slot-scope="scope">
+                        <span>{{scope.row.attributes.appeui}}</span>
+                    </template>
                     </el-table-column>
                     <el-table-column
-                    prop="devaddr"
+                   
                     label="电表地址"
                     show-overflow-tooltip>
+                     <template slot-scope="scope">
+                        <span>{{scope.row.attributes.addr}}</span>
+                    </template>
                     </el-table-column>
                      <el-table-column
-                    prop="pn"
+                   
                     label="PN值"
                     >
+                     <template slot-scope="scope">
+                        <span>{{scope.row.attributes.pn}}</span>
+                    </template>
                    </el-table-column>
                      <el-table-column
                     label="电表状态"
                     >
                    <template slot-scope="scope">
-                        <div v-if="scope.row.is_online==true" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div><span v-if="scope.row.is_online==true" style="color:#00cc33">运行中</span>
-                        <div v-if="scope.row.is_online==false" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"></div><span v-if="scope.row.is_online==false" style="color:#f00">未运行</span>
+                        <div  style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div><span  style="color:#00cc33">运行中</span>
+                        <!-- <div v-if="scope.row.is_online==false" style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"></div><span v-if="scope.row.is_online==false" style="color:#f00">未运行</span> -->
                     </template>
                     </el-table-column>
                      <el-table-column
-                    prop="vcaddr"
+                   
                     label="集中器"
                     >
+                     <template slot-scope="scope">
+                        <span>{{scope.row.attributes.vcaddr}}</span>
+                    </template>
                     </el-table-column>
                      <el-table-column
                     label="通道类型"
                     >
-                    <template slot-scope="scope">
-                        <span v-if="scope.row.usercase==1">载波通道</span>
-                        <span v-if="scope.row.usercase!=1">虚拟通道</span>
+                     <template slot-scope="scope">
+                        <span v-if="scope.row.attributes.channel.chs==1">主站</span>
+                        <span v-if="scope.row.attributes.channel.chs==2">postgres</span>
+                        <span v-if="scope.row.attributes.channel.chs==3">tdengine</span>
                     </template>
                     </el-table-column>
                     <el-table-column
@@ -85,10 +99,9 @@
                     </el-pagination>
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="实时任务" name="second">
+            <!-- <el-tab-pane label="实时任务" name="second">
                  <div class="secondsearch">
-                     <!-- <el-button type="primary">配置任务</el-button>
-                     <el-button type="primary">立即补抄</el-button> -->
+                    
                      <el-input placeholder="请输入内容" v-model="input6" style="margin-left:30px;width:300px">
                         <el-button slot="append" icon="el-icon-search"></el-button>
                      </el-input>
@@ -162,13 +175,14 @@
                     style="margin-top:30px;">
                     </el-pagination>
                 </div>
-            </el-tab-pane>
+            </el-tab-pane> -->
         </el-tabs>
     </div>
 </template>
 <script>
 import {getcondetail,timestampToTime,detailforcon,getmeterinfo,gettables1} from '@/api/login'
 import {Parse} from 'parse'
+import { SearchMeter } from '@/api/searchMeter';
 export default {
    data() {
       return {
@@ -216,14 +230,15 @@ export default {
             // 显示的时候，先隐藏之前所有
             this.delNewTrs();
             // 获取当前电表地址
-            this.addr=scope.row.devaddr;
+            this.addr=scope.row.attributes.addr;
             var Smartmeter = Parse.Object.extend('Smartmeter')
             var smartmeter = new Parse.Query(Smartmeter)
-            smartmeter.equalTo('addr_web',this.addr)
+            smartmeter.equalTo('addr',this.addr)
+            smartmeter.equalTo('vcaddr',this.vcaddr)
             smartmeter.find().then(resultes=>{
                 let info=resultes[0].attributes;
                 // 对象解构，取出需要的属性
-                let { vcaddr_web="",pn="",addr_web="",jldbh="",jlddz="",yhlb="",gddw="",ccbh="",sccj="",sblx="",txgy="",tq="",yhdz="" }=info;
+                let { vcaddr="",pn="",addr="",jldbh="",jlddz="",yhlb="",gddw="",ccbh="",sccj="",sblx="",txgy="",tq="",yhdz="" }=info;
                 let row=document.getElementsByClassName("el-table__row")[this.index];
                 let tr=document.createElement("tr");
                 tr.setAttribute("class","NewTr");
@@ -233,9 +248,9 @@ export default {
                 div.setAttribute("class","NewDiv")
                 // 对应放个容器中
                 div.innerHTML=`
-                    <p>集中器地址:${vcaddr_web}</p>
+                    <p>集中器地址:${vcaddr}</p>
                     <p>信息点标识PN:${pn}</p>
-                    <p>电表地址:${addr_web}</p>
+                    <p>电表地址:${addr}</p>
                     <p>用户编号:${jldbh}</p>
                     <p>用户地址:${jlddz}</p>
                     <p>用户类别:${yhlb}</p>
@@ -311,14 +326,44 @@ export default {
         this.detail()
     },
     detail(){
-        detailforcon(this.start,this.length,this.vcaddr, ++this.draw).then(res=>{
-           if(res){
-               this.tableData = res.data
-               this.total=res.recordsFiltered
-           }
-        }).catch(err=>{
-            console.log(err)
-        })
+        var Smartmeter = Parse.Object.extend('Smartmeter')
+        var smartmeter = new Parse.Query(Smartmeter)
+        smartmeter.equalTo('vcaddr',this.vcaddr)
+        if(this.input5!=''){
+            smartmeter.equalTo('addr',this.input5)
+        }
+        smartmeter.skip(this.start)
+        smartmeter.limit(this.length)
+        smartmeter.count().then(count=>{
+            this.total = count
+            smartmeter.find().then(resultes=>{
+                    this.tableData = resultes
+                })
+        },error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            }
+          })
+       
+        // detailforcon(this.start,this.length,this.vcaddr, ++this.draw).then(res=>{
+        //    if(res){
+        //        this.tableData = res.data
+        //        this.total=res.recordsFiltered
+        //    }
+        // }).catch(err=>{
+        //     console.log(err)
+        // })
     },
     //电表详情
     getMeterInfo(val){
@@ -327,14 +372,9 @@ export default {
     },
     //电表搜索
     searchformeter(){
-        gettables1(this.input5,this.start,this.length,++this.draw).then(res=>{
-           if(res){
-              this.tableData = res.data
-              this.total = res.recordsFiltered
-           }
-        }).catch(error=>{
-            console.log(error)
-        })
+        this.start = 0
+        this.length=10
+        this.detail()
     },
     //实时任务补抄
     supplementarycopy(val){

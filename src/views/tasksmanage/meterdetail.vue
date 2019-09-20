@@ -30,8 +30,7 @@
       <el-button type="primary" @click="Supplement">立即补抄</el-button>
     </div>
     <div class="devdetail">
-      <div class="detailtop">
-        <ul style="width:60%;padding-left:0;">
+      <ul style="width:60%;padding-left:0;">
           <li style="text-align:center;width:10%">
             <input type="checkbox" id="allselect">
             <span>全选</span>
@@ -39,8 +38,9 @@
           <li style="text-align:center;width:20%">表地址</li>
           <li style="text-align:center;width:20%">数据项名称</li>
           <li style="text-align:center;width:20%">抄表结果</li>
-          <!-- <li style="text-align:center;width:20%">采集时间</li> -->
         </ul>
+      <div class="detailtop">
+        
       </div>
     </div>
   </div>
@@ -121,6 +121,8 @@ export default {
                 item.addr +
                 '" di="' +
                 item.di +
+                '" pn="' +
+                item.pn +
                 '" ></td><td style="width:20%;text-align:center">' +
                 item.addr +
                 '</td><td style="width:20%;text-align:center">' +
@@ -160,20 +162,24 @@ export default {
      
       var sendup = [];
       var _this=this
+       var _this=this
+       var obj={
+          datetime:Number(_this.datetime),
+          vcaddr:_this.vcaddr,
+          di:_this.di,
+          pn:[],
+          tattr:4
+        }
       $("input.meter:checked").each(function(index, item) {
-        sendup.push({
-          addr: item.getAttribute("addr"),
-          di: item.getAttribute("di"),
-          datetime: _this.datetime
-        });
+       obj.pn.push(Number(item.getAttribute("pn")));
       });
-      if(sendup.length==0){
+      if(obj.pn.length==0){
         _this.$message({
           type:'warning',
           message:'请勾选要补抄的电表'
         })
       }else{
-        Supporttask(sendup)
+        Supporttask(obj)
         .then(response => {
           if (response) {
             this.$message({
@@ -257,8 +263,9 @@ export default {
   width: 100%;
   height: 40px;
   line-height: 40px;
+  margin-top:40px;
 }
-.devdetail .detailtop ul li {
+.devdetail  ul li {
   float: left;
   list-style: none;
   text-align: center;
