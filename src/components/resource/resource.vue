@@ -143,8 +143,10 @@ export default {
                       obj.alias = items.attributes.alias;
                       if(items.attributes.leafnode==true){
                         obj.isvcon =true 
+                        // obj.leaf = false;
                       }else{
                         obj.isvcon =false
+                        // obj.leaf =true;
                       }
                       obj.leaf = false;
                       obj.icon = items.attributes.org_type;

@@ -62,27 +62,26 @@
             :picker-options="form.pickerDisabled"
           ></el-date-picker>
         </el-form-item>
-      <el-form-item label="选择库">
+      <!-- <el-form-item label="选择库">
         <el-radio-group v-model="form.resource">
           <el-radio label="PG"></el-radio>
           <el-radio label="TD"></el-radio>
         </el-radio-group>
-      </el-form-item>
+      </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="query(0)" size="mini">查询</el-button>
           <el-button type="primary" @click="reset" size="mini">重置</el-button>
         </el-form-item>
       </el-form>
       <el-table 
-        v-loading="loading" 
-        element-loading-text="拼命加载中" 
         :data="table" 
         height="750" 
         border 
         style="width: 100%">
-        <el-table-column prop="freeze_time" label="冻结时间" ></el-table-column>
-        <el-table-column prop="addr_web" label="电能表地址"></el-table-column>
-        <el-table-column prop="vcaddr_web" label="集中器地址"></el-table-column>
+        <el-table-column prop="freeze_time" label="冻结时间" width="150"></el-table-column>
+       
+        <el-table-column prop="vcaddr_web" label="集中器地址" width="150"></el-table-column>
+         <el-table-column prop="pn" label="pn" width="150"></el-table-column>
         <el-table-column prop="task" label="任务模板" ></el-table-column>
         <el-table-column prop="data_type" label="数据类型" width="180"></el-table-column>
         <el-table-column prop="forward_power_total" label="正向有功电能总" width="120"></el-table-column>
@@ -197,7 +196,7 @@ export default {
         },
         // 导出条件,是否查询过
         deriveWhere:false,
-        resource:'PG'
+        resource:'TD'
       },
       // 表格
       table: [],
@@ -262,6 +261,8 @@ export default {
             this.loading=false;
         }
       
+      }).catch(error=>{
+        this.$message.error(error.error)
       });
       }else{
         getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime,this.form.res,this.freeze).then(res=>{
@@ -271,7 +272,9 @@ export default {
              this.pager.count = res.count
                this.loading=false;
           }
-        })
+        }).catch(error=>{
+        this.$message.error(error.error)
+      });
       }
       
     },
@@ -364,7 +367,9 @@ export default {
             this.incPage(res.rest,res.results.length)
             this.loading=false;
         }
-      })
+      }).catch(error=>{
+        this.$message.error(error.error)
+      });
       }else{
         getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.addr_web,this.form.vcaddr_web,this.form.startTime, this.form.endTime+85399999,this.form.res,this.freeze).then(res=>{
           if(res){
@@ -373,7 +378,9 @@ export default {
               this.pager.count = res.count
               this.loading=false;
           }
-        })
+        }).catch(error=>{
+        this.$message.error(error.error)
+      });
       }
      
     },
@@ -385,6 +392,7 @@ export default {
       for (let i = 0; i < r.length; i++) {
         let obj = {};
         obj.addr_web = r[i].addr;
+        obj.pn = r[i].pn;
         obj.vcaddr_web = r[i].vcaddr;
         obj.data_type = r[i].datatype;
         obj.forward_power_total = r[i].data.count;
@@ -463,9 +471,9 @@ export default {
           }
          
         })
-        .catch(error => {
-          console.log(error);
-        });
+        .catch(error=>{
+        this.$message.error(error.error)
+      });
     },
     // 分页导出
     getdeive(data){
@@ -479,7 +487,9 @@ export default {
           }
           }
           
-        })
+        }).catch(error=>{
+        this.$message.error(error.error)
+      });
     },
     // 分页懒加载
     pageLoading(rest){

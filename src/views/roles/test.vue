@@ -113,7 +113,7 @@
     </el-dialog>
   </div>
 </template>
-
+ 
 <script>
 import treeTable from "@/components/TreeTable";
 import data from "./data";
@@ -290,7 +290,7 @@ export default {
         }
       }
     },
-
+ 
     updatemenu() {
       var Menu = Parse.Object.extend("Menu");
       var menu = new Parse.Query(Menu);
@@ -355,7 +355,7 @@ export default {
           return this.isaddmenu;
         }
       });
-
+ 
       if (this.menuid == "" && this.isaddmenu) {
         var Object = Parse.Object.extend("Menu");
         var object = new Object();
@@ -381,7 +381,7 @@ export default {
             message: "新增成功",
             type: "success"
           });
-
+ 
           this.dialogVisible = false;
           this.menuid = "";
           this.getMenu();
@@ -414,7 +414,7 @@ export default {
             message: "新增成功",
             type: "success"
           });
-
+ 
           this.dialogVisible = false;
           this.getMenu();
         }),
@@ -422,7 +422,7 @@ export default {
             console.log("error");
           };
       }
-
+ 
       // this.parentid=obj.id;
       // this.originrole.push(obj)
     },
@@ -540,7 +540,7 @@ export default {
                 obj.showobjectId.push(navshow.roleId);
               });
               obj.showtopmenu = obj.isshowtop.join(",");
-
+ 
               this.data.push(obj);
             } else {
               this.data.push(obj);
@@ -565,7 +565,7 @@ export default {
   }
 };
 </script>
-
+ 
 <style scoped>
 .test {
   width: 100%;
@@ -587,4 +587,3 @@ export default {
   width: 300px;
 }
 </style>
-

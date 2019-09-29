@@ -248,19 +248,19 @@ export default {
                 div.setAttribute("class","NewDiv")
                 // 对应放个容器中
                 div.innerHTML=`
-                    <p>集中器地址:${vcaddr}</p>
-                    <p>信息点标识PN:${pn}</p>
-                    <p>电表地址:${addr}</p>
-                    <p>用户编号:${jldbh}</p>
-                    <p>用户地址:${jlddz}</p>
-                    <p>用户类别:${yhlb}</p>
-                    <p>供电单位:${gddw}</p>
-                    <p>出厂编号:${ccbh}</p>
-                    <p>生产厂商:${sccj}</p>
-                    <p>设备类型:${sblx}</p>
-                    <p>通信规约:${txgy}</p>
-                    <p>台区:${tq}</p>
-                    <p>地理位置:${yhdz}</p>
+                    <p>集中器地址:<sapn>${vcaddr}</span></p>
+                    <p>信息点标识PN:<span>${pn}</span></p>
+                    <p>电表地址:<span>${addr}</span></p>
+                    <p>用户编号:<span>${jldbh}</span></p>
+                    <p>用户地址:<span>${jlddz}</span></p>
+                    <p>用户类别:<span>${yhlb}</span></p>
+                    <p>供电单位:<span>${gddw}</span></p>
+                    <p>出厂编号:<span>${ccbh}</span></p>
+                    <p>生产厂商:<span>${sccj}</span></p>
+                    <p>设备类型:<span>${sblx}</span></p>
+                    <p>通信规约:<span>${txgy}</span></p>
+                    <p>台区:<span>${tq}</sapn></p>
+                    <p>地理位置:<span>${yhdz}</span></p>
                 `;
                 td.appendChild(div);
                 tr.appendChild(td);
@@ -414,9 +414,14 @@ export default {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    color:#1b88e7;
 }
 .condetail .el-table .NewDiv p {
     width: 25%;
     text-align: left;
 }
+.condetail .el-table .NewDiv p span{
+    color:#921aff
+}
+
 </style>

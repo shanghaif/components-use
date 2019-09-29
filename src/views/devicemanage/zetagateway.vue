@@ -1,0 +1,238 @@
+<template>
+    <div class="gateway">
+        <div class="gatewayheader">
+          <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small" label-width="120px">
+            <el-form-item label="终端类型">
+              <el-select v-model="formInline.gatetype" placeholder="终端类型">
+                <el-option label="网关" value="net"></el-option>
+              </el-select>
+              <el-form-item label="终端型号">
+                <el-select v-model="formInline.gate" placeholder="终端型号">
+                  <el-option label="APZ1ZT" value="APZ1ZT"></el-option>
+                  <!-- <el-option label="ZETAG C1" value="C1"></el-option>
+                  <el-option label="ZETAG C2" value="C2"></el-option>
+                  <el-option label="ZETAG P1" value="P1"></el-option> -->
+                </el-select>
+              </el-form-item>
+            </el-form-item>
+            <el-form-item label="终端地址">
+              <el-input v-model="formInline.address" placeholder="终端地址"></el-input>
+            </el-form-item>
+            <el-form-item label="在线状态">
+              <el-select v-model="formInline.status" placeholder="设备状态">
+                <el-option label="全部" :value="9"></el-option>
+                <el-option label="在线" :value="1"></el-option>
+                <el-option label="离线" :value="0"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="getZetaGateway(1)">查 询</el-button>
+              <el-button type="primary" @click="resetForm">重 置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="gatecontent">
+          <div class="gatedevices" v-for="(item,index) in gatedata" :key="index">
+              <div class="imgurl">
+                <img :src="gatewayurl" alt="">
+              </div>
+              <div class="content">
+                <!--ZETA网关-->
+                <p><span>ZETA网关:<span style="color:green">{{'('+item.attributes.devaddr+')'}}</span></span><span style="float:right" :style="{'color':item.status ==  1 ? 'green':'red'}">{{item.status==1 ? '正常运行':'未运行'}}</span></p>
+                <p>型号:<span style="color:#409EFF">{{'APA1ZT'}}</span><span style="float:right;display:inline-block;width:60%;">终端地址:<span style="color:#409EFF">{{item.attributes.ip}}</span></span></p>
+                <p>网络环境:<span style="color:#409EFF">{{item.attributes.rssi==-255 ? (item.attributes.rssi==-99 ? '无信号': '网线' ): '无线网络'}}</span><span style="float:right;display:inline-block;width:60%;">网络格式:<span style="color:#409EFF">{{item.attributes.basedata.WCDMA}}</span></span></p>
+                <!--SIM卡号-->
+                <p><span>SIM卡号:</span><span style="color:#409EFF">{{item.attributes.basedata.tel}}</span></p>
+                <!--ICCID-->
+                 <p><span>ICCID:{{item.attributes.basedata.ICCID}}</span></p>
+                <!--服务器连接状态-->
+                <p><span>服务器连接状态：</span><span style="float:right;display:inline-block;width:60%;">本地时钟：</span></p>
+                <p><span :style="{'color':item.attributes.status=='ONLINE' ? 'green':'red'}">{{item.attributes.status=='ONLINE' ? '已连接':'未连接'}}</span><span style="float:right;color:rgb(75, 139, 244);display:inline-block;width:60%;">{{readtime}}</span></p>
+                <!--RSSI-->
+                <p><span>最新RSSI:<span style="color:#666">{{item.attributes.basedata.rssi+'dbm'}}</span></span>
+                <!-- <span style="float:right">GPS状态:<span :style="{'color':item.status==1 ? 'green':'red'}">{{item.status==1 ? '正常运行':'未运行'}}</span></span> -->
+                </p>
+                 <!--当前位置-->
+                <p><span>位置:</span><span>N：-22.123456</span><span style="margin-left:10px">E：-11.002233</span></p>
+                <p></p>
+              </div>
+          </div>
+        </div>
+        <!--分页-->
+       <div class="block">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :page-sizes="[12]"
+            :page-size="pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+          ></el-pagination>
+      </div>
+    </div>
+</template>
+<script>
+import Parse from 'parse'
+import { getApp } from '@/api/applicationManagement';
+export default {
+   data() {
+      return {
+          formInline:{
+              gatetype:'net',
+              gate:'APZ1ZT',
+              address:'',
+              status:9
+          },
+          gatewayurl:require('../../imgages/zetag.png'),
+          readtime:'',
+          start:0,
+          pagesize:12,
+          total:0,
+          gatedata:[],
+          productid:''
+      }
+   },
+   mounted() {
+     this.$nextTick(function () {
+            setInterval(this.nowtime, 1000);
+        })
+        this.getGateway()
+   },
+   methods: {
+     //本地时钟
+     nowtime(){
+            var timestamp3 = Date.parse(new Date());
+            var date = new Date(timestamp3) 
+            var Y = date.getFullYear() + '-';
+            var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+            var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
+            var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
+            var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+            this.readtime=(Y+M+D+h+m+s); 
+      },
+      getGateway(){
+        var Proudct = Parse.Object.extend('Product')
+        var product = new Parse.Query(Proudct)
+        product.equalTo('devType','zeta')
+       
+        product.find().then(resultes=>{
+          if(resultes.length!=0){
+             this.productid = resultes[0].id
+             this.getZetaGateway()
+          }else{
+            this.$message.warning('暂无数据')
+          }
+         
+        },error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            }
+          })
+      },
+      getZetaGateway(index){
+        var Devices = Parse.Object.extend('Devices')
+        var devices = new Parse.Query(Devices)
+        if(this.formInline.address!=''){
+          devices.equalTo('devaddr',this.formInline.address)
+        }
+        if(index==1){
+          this.start=0
+        }
+        devices.equalTo('product',this.productid)
+         devices.ascending('-createdAt')
+        devices.exists('basedata')
+        devices.skip(this.start)
+        devices.limit(this.pagesize)
+        devices.count().then(count=>{
+          this.total = count
+          devices.find().then(response=>{
+            this.gatedata = response
+          })
+        },
+      error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            }
+          })
+      },
+      //分页
+      handleSizeChange(val) {
+       this.pagesize = val
+       this.getZetaGateway()
+      },
+      handleCurrentChange(val) {
+       this.start = (val-1)*this.pagesize
+       this.getZetaGateway()
+      },
+   }
+}
+</script>
+<style lang="scss" scoped>
+.gateway{
+    height:100%;
+    width:100%;
+    padding:20px;
+    box-sizing: border-box;
+    background:#fff;
+    .gatecontent{
+      display:flex;
+      flex-wrap: wrap;
+      .gatedevices{
+        display:flex;
+        width:430px;
+        height:220px;
+        border:1px solid #cccccc;
+        border-radius: 4px;
+        margin-left:20px;
+        margin-bottom:10px;
+        .imgurl{
+          line-height:220px;
+          
+          img{
+            display: inline-block;
+            vertical-align: middle;
+            border-right:1px solid #cccccc;
+            width:100px;
+          }
+        }
+        .content{
+          width:330px;
+          padding:0 5px;
+          margin-left:5px;
+          box-sizing: border-box;
+           p{
+            margin:6px 0;
+            font-size:14px;
+          }
+        }
+       
+      }
+    }
+    .block{
+      margin-top:10px;
+    }
+}
+</style>

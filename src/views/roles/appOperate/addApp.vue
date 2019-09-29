@@ -218,6 +218,7 @@ export default {
                 this.form.secret=this.argu.secret;
                 this.form.productIdentifier=this.argu.productIdentifier;
                 this.content.objectId=this.argu.objectId;
+                
                 this.form.category = this.argu.category.split('/')
                 if(this.argu.dashboard){
                     this.form.dashboard = this.argu.dashboard.substr(7)
@@ -226,6 +227,7 @@ export default {
                 }   
                 
                 if(this.argu.logo!=''){
+                    this.form.img = this.argu.logo
                      this.form.fileList.push({
                     name:'logo.png',
                     url:this.argu.logo
@@ -261,7 +263,7 @@ export default {
                 message: '上传成功！',
                 type: 'success'
             });
-            document.getElementsByClassName('el-upload-list__item.is-success')[0].setAttribute('display','block')
+            // document.getElementsByClassName('el-upload-list__item .is-success')[0].setAttribute('display','block')
              document.getElementsByClassName('el-icon-close')[0].setAttribute('display','none')
         },
         // 上传失败

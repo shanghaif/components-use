@@ -210,12 +210,7 @@ export const constantRouterMap = [
         component: () => import('@/views/devicemanage/smartmeter'),
         meta: { title: '智能电表', icon: 'smartmeter' }
       },
-      {
-        path: '/devicemanage/zetatag',
-        name: '监控中心',
-        component: () => import('@/views/devicemanage/zetadevices'),
-        meta: { title: '监控中心', icon: 'csc' }
-      },
+      
       {
         path: '/devicemanage/devicepump',
         component: () => import('@/views/devicemanage/devicepump'),
@@ -311,7 +306,7 @@ export const constantRouterMap = [
       {
         path: '/connectmanage/testbaidu',
         name: '测试',
-        component: () => import('@/views/connectmanage/testbaidu'),
+        component: () => import('@/views/connectmanage/baidumap'),
         meta: { title: '测试', icon: 'report' }
       }
     ]
@@ -334,6 +329,18 @@ export const constantRouterMap = [
         name: '运行监控',
         component: () => import('@/views/monitoring/meterMonitoring'),
         meta: { title: '运行监控', icon: 'piliang' }
+      },
+      {
+        path: '/monitoring/zetatag',
+        name: '终端监测',
+        component: () => import('@/views/devicemanage/zetadevices'),
+        meta: { title: '监控中心', icon: 'csc' }
+      },
+      {
+        path: '/monitoring/gateway',
+        name: '网关监测',
+        component: () => import('@/views/devicemanage/zetagateway'),
+        meta: { title: '网关监测', icon: 'gateway' }
       },
     ]
   },

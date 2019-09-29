@@ -30,24 +30,21 @@
               <el-input v-model="ruleform.vcaddr"></el-input>
             </el-form-item>
             <el-form-item label="电表地址" prop="meteraddr">
-              <el-input v-model="ruleform.meteraddr"></el-input>
-              <!-- <el-select
-                v-model=""
+              <!-- <el-input v-model="ruleform.meteraddr"></el-input> -->
+              <el-select
+                v-model="ruleform.meteraddr"
                 placeholder="请选择电表地址"
                 filterable
                 clear
-                v-loading="loading"
-                element-loading-text="正在加载电表,请稍后"
-                element-loading-spinner="el-icon-loading"
-                element-loading-background="rgba(0, 0, 0, 0.8)"
+                @change="sleslectmeter"
               >
                 <el-option
                   v-for="(item,index) in smartmeterlist"
-                  :label="item.attributes.addr_web"
-                  :value="item.attributes.addr_web"
+                  :label="item.attributes.addr"
+                  :value="item.attributes.addr"
                   :key="index"
                 ></el-option>
-              </el-select>-->
+              </el-select>
             </el-form-item>
             <el-form-item label="数据类型" prop="datatype">
               <el-select v-model="ruleform.datatype" placeholder="请选择数据类型">
@@ -68,8 +65,8 @@
               <el-input v-if="ruleform.cur_status==0" value="合闸"></el-input>
               <el-input v-else value="拉闸"></el-input>
             </el-form-item>
-            <el-form-item label="测量点号" prop="pn">
-              <el-input v-model="ruleform.pn" type="number" :min="1" :max="2048" readonly></el-input>
+            <el-form-item label="测量点号">
+              <el-input v-model.number="ruleform.pn" type="number" :min="1" :max="2048" :placeholder="'取值范围'+start+'~'+end" readonly></el-input>
             </el-form-item>
 
             <el-form-item>
@@ -288,6 +285,7 @@ var operation = "";
 var ranNum = "";
 var icon,val
 import { timestampToTime } from "@/api/login";
+import { addReport } from '@/api/reportmodule/reportmodule';
 export default {
   components: {
     Resource1
@@ -311,13 +309,14 @@ export default {
       loading1: true,
       dialogTableVisible: false,
       dialogTableVisible1: false,
-
+      first:0,
+      end:10,
       rules: {
         vcaddr: [
           { required: true, message: "请在左侧树选择", trigger: "blur" }
         ],
         meteraddr: [
-          { required: true, message: "请在左侧树选择", trigger: "blur" }
+          { required: true, message: "请在选择电表", trigger: "change" }
         ],
         pn: [{ validator: checkPn, trigger: "blur" }],
         datatype: [
@@ -331,6 +330,9 @@ export default {
         ],
         control: [
           { required: true, message: "请选择操作类型", trigger: "change" }
+        ],
+        pn: [
+          { required: true, message: "请输入测量点号", trigger: "blur" }
         ]
       },
       operation: "",
@@ -342,7 +344,7 @@ export default {
         datatype: "A.17",
         protocol: "30",
         route: "tcp",
-        pn: 1,
+        pn: '',
         resource: "",
         starttime: "",
         endtime: "",
@@ -388,81 +390,89 @@ export default {
     meterdetail(val) {
       icon=val
       this.tableData=[]
-      if (val.icon != "电表" && val.icon != "集中器") {
+      if ( val.icon != "集中器") {
         this.$message({
           type: "error",
-          message: "请勾选电表"
+          message: "请勾选集中器"
         });
-      } else if (val.icon == "电表") {
-        this.loading = true;
-        var Smartmeter = Parse.Object.extend("Smartmeter");
-        var smartmeter = new Parse.Query(Smartmeter);
-        smartmeter.get(val.objectId).then(
-          resultes => {
-            this.ruleform = {
-              name: "",
-              vcaddr: "",
-              meteraddr: "",
-              datatype: "A.17",
-              protocol: "30",
-              route: "tcp",
-              pn: 1,
-              resource: "",
-              starttime: "",
-              endtime: "",
-              icon: "电表",
-              cur_status:val.cur_status
-            };
-            this.smartmeterlist = resultes;
-            this.ruleform.pn = resultes.attributes.pn;
-            this.ruleform.vcaddr = resultes.attributes.vcaddr_web;
-            this.ruleform.meteraddr = resultes.attributes.addr_web;
-            this.ruleform.yhmc = resultes.attributes.yhmc;
-            this.ruleform.yhabh = resultes.attributes.yhabh;
-            this.ruleform.gddw = resultes.attributes.gddw;
-            this.loading = false;
-            this.resetForm1(val.icon, val.name);
-          },
-          error => {
-            if (error.code == "209") {
-              this.$message({
-                type: "warning",
-                message: "登陆权限过期，请重新登录"
-              });
-              this.$router.push({
-                path: "/login"
-              });
-            } else if (error.code == 119) {
-              this.$message({
-                type: "error",
-                message: "没有操作权限"
-              });
-            }
-          }
-        );
-      } else if (val.icon == "集中器") {
+      }
+      // } else if (val.icon == "电表") {
+      //   this.loading = true;
+      //   var Smartmeter = Parse.Object.extend("Smartmeter");
+      //   var smartmeter = new Parse.Query(Smartmeter);
+      //   smartmeter.get(val.objectId).then(
+      //     resultes => {
+      //       this.ruleform = {
+      //         name: "",
+      //         vcaddr: "",
+      //         meteraddr: "",
+      //         datatype: "A.17",
+      //         protocol: "30",
+      //         route: "tcp",
+      //         pn: 1,
+      //         resource: "",
+      //         starttime: "",
+      //         endtime: "",
+      //         icon: "电表",
+      //         cur_status:val.cur_status
+      //       };
+      //       this.smartmeterlist = resultes;
+      //       this.ruleform.pn = resultes.attributes.pn;
+      //       this.ruleform.vcaddr = resultes.attributes.vcaddr_web;
+      //       this.ruleform.meteraddr = resultes.attributes.addr_web;
+      //       this.ruleform.yhmc = resultes.attributes.yhmc;
+      //       this.ruleform.yhabh = resultes.attributes.yhabh;
+      //       this.ruleform.gddw = resultes.attributes.gddw;
+      //       this.loading = false;
+      //       this.resetForm1(val.icon, val.name);
+      //     },
+      //     error => {
+      //       if (error.code == "209") {
+      //         this.$message({
+      //           type: "warning",
+      //           message: "登陆权限过期，请重新登录"
+      //         });
+      //         this.$router.push({
+      //           path: "/login"
+      //         });
+      //       } else if (error.code == 119) {
+      //         this.$message({
+      //           type: "error",
+      //           message: "没有操作权限"
+      //         });
+      //       }
+      //     }
+      //   );
+      // } 
+      else if (val.icon == "集中器") {
         this.devobjectId = [];
         this.loading = true;
         this.devobjectId.push(val.objectId);
-       
         this.tableData=[]
-        var Smartmeter = Parse.Object.extend("Smartmeter");
-        var smartmeter = new Parse.Query(Smartmeter);
-        smartmeter.containedIn("organization", this.devobjectId);
-        smartmeter.skip(this.start);
-        smartmeter.limit(this.length);
-        smartmeter.count().then(
+        this.ruleform.icon='集中器'
+        var Vcon = Parse.Object.extend('Vcon')
+        var vcon = new Parse.Query(Vcon)
+        vcon.get(val.objectId).then(response=>{
+          var Smartmeter = Parse.Object.extend("Smartmeter");
+          var smartmeter = new Parse.Query(Smartmeter);
+          smartmeter.equalTo('vcaddr', val.alias);
+          smartmeter.skip(this.start);
+          smartmeter.limit(this.length);
+          smartmeter.ascending('pn')
+          smartmeter.count().then(
           count => {
             this.total = count;
             smartmeter.find().then(resultes => {
+              this.smartmeterlist=resultes
               this.ruleform = {
+                gddw:response.attributes.organization.attributes.name,
                 name: "",
                 vcaddr: val.name,
                 meteraddr: "",
                 datatype: "A.17",
                 protocol: "30",
                 route: "tcp",
-                pn: 1,
+                pn: '',
                 resource: "",
                 starttime: "",
                 endtime: "",
@@ -476,9 +486,9 @@ export default {
                 obj.yhbh = item.attributes.yhbh;
                 obj.yhmc = item.attributes.yhmc;
                 obj.gddw = item.attributes.gddw;
-                obj.meteraddr = item.attributes.addr_web;
+                obj.meteraddr = item.attributes.addr;
                 obj.pn = item.attributes.pn;
-                obj.vcaddr = item.attributes.vcaddr_web;
+                obj.vcaddr = item.attributes.vcaddr;
                 if (item.attributes.jsondata.cur_status) {
                   obj.cur_status = item.attributes.jsondata.cur_status;
                 } else {
@@ -487,6 +497,8 @@ export default {
 
                 this.tableData.push(obj);
               });
+              this.first = resultes[0].attributes.pn
+              this.end = resultes[resultes.length-1].attributes.pn
             });
           },error => {
             if (error.code == "209") {
@@ -505,6 +517,8 @@ export default {
             }
           }
         );
+        })
+        
       }
     },
     //table 分页函数
@@ -526,11 +540,18 @@ export default {
     },
     sleslectmeter(val) {
       this.smartmeterlist.map((items, index) => {
-        if (items.attributes.addr_web == val) {
+        if (items.attributes.addr == val) {
           this.ruleform.pn = items.attributes.pn;
-          this.ruleform.vcaddr = items.attributes.vcaddr_web;
+          this.ruleform.vcaddr = items.attributes.vcaddr;
           this.ruleform.yhmc = items.attributes.yhmc;
           this.ruleform.yhabh = items.attributes.yhabh;
+          this.ruleform.gddw = items.attributes.gddw;
+          console.log(items.attributes.jsondata.cur_status)
+          if (items.attributes.jsondata.cur_status) {
+              this.ruleform.cur_status= items.attributes.jsondata.cur_status;
+            } else {
+              this.ruleform.cur_status = 0;
+            }
         }
       });
     },
@@ -581,58 +602,9 @@ export default {
     //查询按钮
     resetForm1(icon, val) {
       this.tableData = [];
-      if (icon == "电表") {
         var Smartmeter = Parse.Object.extend("Smartmeter");
         var smartmeter = new Parse.Query(Smartmeter);
-        smartmeter.skip(0);
-        smartmeter.limit(10);
-        smartmeter.equalTo("addr_web", val);
-        smartmeter.count().then(
-          count => {
-            this.total = count;
-            smartmeter.find().then(resultes => {
-              resultes.map(item => {
-                var obj = {};
-                obj.tq = item.attributes.tq;
-                obj.yhabh = item.attributes.yhabh;
-                obj.yhbh = item.attributes.yhbh;
-                obj.yhmc = item.attributes.yhmc;
-                obj.gddw = item.attributes.gddw;
-                obj.meteraddr = item.attributes.addr_web;
-                obj.pn = item.attributes.pn;
-                obj.vcaddr = item.attributes.vcaddr_web;
-                if (item.attributes.jsondata.cur_status) {
-                  obj.cur_status = item.attributes.jsondata.cur_status;
-                } else {
-                  obj.cur_status = 0;
-                }
-
-                this.tableData.push(obj);
-              });
-            this.ruleform.pn = resultes[0].attributes.pn;
-            this.ruleform.vcaddr = resultes[0].attributes.vcaddr_web;
-            this.ruleform.meteraddr = resultes[0].attributes.addr_web;
-            this.ruleform.yhmc = resultes[0].attributes.yhmc;
-            this.ruleform.yhabh = resultes[0].attributes.yhabh;
-            this.ruleform.gddw = resultes[0].attributes.gddw;
-            if (resultes[0].attributes.jsondata.cur_status) {
-                  this.ruleform.cur_status = resultes[0].attributes.jsondata.cur_status;
-                } else {
-                  this.ruleform.cur_status = 0;
-                }
-            });
-          },
-          error => {
-            this.$message({
-              type: "error",
-              message: error.message
-            });
-          }
-        );
-      } else if (icon == "集中器") {
-        var Smartmeter = Parse.Object.extend("Smartmeter");
-        var smartmeter = new Parse.Query(Smartmeter);
-        smartmeter.containedIn("organization", this.devobjectId);
+        smartmeter.equalTo('addr', this.ruleform.meteraddr);
         smartmeter.skip(this.start);
         smartmeter.limit(this.length);
         smartmeter.count().then(
@@ -646,15 +618,14 @@ export default {
                 obj.yhbh = item.attributes.yhbh;
                 obj.yhmc = item.attributes.yhmc;
                 obj.gddw = item.attributes.gddw;
-                obj.meteraddr = item.attributes.addr_web;
+                obj.meteraddr = item.attributes.addr;
                 obj.pn = item.attributes.pn;
-                obj.vcaddr = item.attributes.vcaddr_web;
+                obj.vcaddr = item.attributes.vcaddr;
                 if (item.attributes.jsondata.cur_status) {
                   obj.cur_status = item.attributes.jsondata.cur_status;
                 } else {
                   obj.cur_status = 0;
                 }
-
                 this.tableData.push(obj);
               });
             });
@@ -666,7 +637,7 @@ export default {
             });
           }
         );
-      }
+      // }
     },
     searchMeter(val) {
       this.dialogTableVisible1 = true;

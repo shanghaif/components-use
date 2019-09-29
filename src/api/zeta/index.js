@@ -19,3 +19,14 @@ export function ZetaEtagHistroy(tag,limit,timestamp) {
     }
   })
 }
+
+export function ZetaEtagTopn(limit,skip) {
+  return request({
+    url: 'zeta/etag/tag/topn',
+    method: 'get',
+    params:{
+    limit:limit,
+    skip:skip
+    }
+  })
+}

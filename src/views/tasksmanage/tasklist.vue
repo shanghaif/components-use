@@ -24,16 +24,16 @@
         @selection-change="handleSelectionChange"
         v-loading="loading"
       >
-        <el-table-column type="selection" width="55" ></el-table-column>
-        <el-table-column label="任务名称" >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column label="任务名称">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.name}}</span>
           </template>
         </el-table-column>
-        
-        <el-table-column  label="采集开始时间">
+
+        <el-table-column label="采集开始时间">
           <template slot-scope="scope">
-          <span>{{timestampToTime(scope.row.attributes.args.starttime)}}</span>
+            <span>{{timestampToTime(scope.row.attributes.args.starttime)}}</span>
           </template>
         </el-table-column>
         <el-table-column label="数据项名称">
@@ -41,15 +41,15 @@
             <span>{{scope.row.attributes.args.dis.join(',')}}</span>
           </template>
         </el-table-column>
-        <el-table-column  label="周期单位">
+        <el-table-column label="周期单位">
           <template slot-scope="scope">
-          <span>{{scope.row.attributes.args.freq}}</span>
-          <span v-if="scope.row.attributes.args.unit=='day'">天</span>
-          <span v-else-if="scope.row.attributes.args.unit=='minute'">分</span>
-          <span v-else-if="scope.row.attributes.args.unit=='hour'">时</span>
+            <span>{{scope.row.attributes.args.freq}}</span>
+            <span v-if="scope.row.attributes.args.unit=='day'">天</span>
+            <span v-else-if="scope.row.attributes.args.unit=='minute'">分</span>
+            <span v-else-if="scope.row.attributes.args.unit=='hour'">时</span>
           </template>
         </el-table-column>
-        <el-table-column  label="下发通道">
+        <el-table-column label="下发通道">
           <template slot-scope="scope">
             <span v-if="scope.row.attributes.args.downchannel=='1'">虚拟集中器</span>
             <span v-else>物理集中器</span>
@@ -57,7 +57,7 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-             <el-button size="mini" type="primary" @click="editcrond(scope.row.id)">编 辑</el-button>
+            <el-button size="mini" type="primary" @click="editcrond(scope.row.id)">编 辑</el-button>
             <el-button size="mini" type="primary" @click="Meterdetail(scope.row)">详 情</el-button>
           </template>
         </el-table-column>
@@ -75,140 +75,168 @@
       ></el-pagination>
     </div>
     <!--弹窗-->
-    <el-dialog title="配置任务" :visible.sync="dialogVisible" width="50%" :before-close="handleClose" top="5vh">
-      <div class="dialog" style="display:flex;flex-wrap:wrap">
-        <div class="children">
-          <label for>任务名称：</label>
-          <el-input type="text" style="width:200px" v-model="name" placeholder="请输入任务名称"></el-input>
-        </div>
-          <div class="children">
-          <label for>终端类型：</label>
-          <el-select v-model="ftype" placeholder="请选择">
-            <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </div>
-        <div class="children">
-          <label for>采集开始时间：</label>
-          <el-date-picker
-            v-model="starttime"
+    <el-dialog
+      title="配置任务"
+      :visible.sync="dialogVisible"
+      width="50%"
+      :before-close="handleClose"
+      top="5vh"
+    >
+      <div class="dialog">
+        <el-form ref="taskform" :model="taskform" label-width="120px" :rules="taskformrules">
+       
+        <el-form-item label="任务名称" prop="name">
+          <el-input type="text" v-model="taskform.name" placeholder="请输入任务名称"></el-input>
+        </el-form-item>
+        <el-form-item label="终端类型" prop="ftype">
+        <el-select v-model="taskform.ftype" placeholder="请选择">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <!--采集开始时间-->
+      <el-form-item label="采集开始时间" prop="starttime">
+           <el-date-picker
+            v-model="taskform.starttime"
             type="datetime"
-            placeholder="选择日期时间"
+            placeholder="选择开始时间"
             @change="testdata"
             :picker-options="pickerOptionsStart"
           ></el-date-picker>
-        </div>
-         <div class="children">
-          <label for>终端逻辑地址：</label>
-          <el-input
+      </el-form-item>
+      <!--终端地址-->
+        <el-form-item label="终端逻辑地址" prop="meteraddress">
+           <el-input
             type="text"
-            style="width:200px"
-            v-model="meteraddress"
+            v-model="taskform.meteraddress"
             placeholder="A终端逻辑地址,B终端逻辑地址"
           ></el-input>
-          <p style="color:black;margin:5px 0 0 100px;position:absolute">(all代表全部)(注意:逗号为英文逗号)</p>
-        </div>
-         <div class="children">
-          <label for>采集结束时间：</label>
+          <p style="color:black;margin:0;position:absolute;top:25px">(all代表全部)(注意:逗号为英文逗号)</p>
+        </el-form-item>
+      <!--采集结束时间-->
+      <el-form-item label="采集结束时间" prop="endtime">
           <el-date-picker
-            v-model="endtime"
+            v-model="taskform.endtime"
             type="datetime"
-            placeholder="选择日期时间"
+            placeholder="选择结束时间"
             @change="enddata"
             :picker-options="pickerOptionsEnd"
           ></el-date-picker>
-        </div>
-         <div class="children">
-           <label for>冻结日期：</label>
-          <el-date-picker
-            v-model="frozendate"
+      </el-form-item>
+      <!--冻结日期-->
+      <el-form-item label="冻结日期">
+        <el-date-picker
+            v-model="taskform.frozendate"
             type="date"
             placeholder="当天"
             value-format="timestamp"
           ></el-date-picker>
-        </div>
-      
-        <div class="starttime">
-          <label for>采样间隔时间：</label>
-          <el-select v-model="unit" placeholder="请选择" @change="selectchange">
-            <el-option
-              v-for="item in date"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
+      </el-form-item>
+      <!--采集间隔时间-->
+      <el-form-item label="采集间隔时间" required>
+          <el-col :span="11">
+              <el-form-item prop="unit">
+                <el-select v-model="taskform.unit" placeholder="请选择" @change="selectchange">
+                    <el-option
+                      v-for="item in date"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col class="line" :span="2">-</el-col>
+            <el-col :span="11">
+              <el-form-item prop="freq">
+                <el-select v-model="taskform.freq" placeholder="请选择">
+                    <el-option
+                      v-for="item in spacing"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    ></el-option>
+                  </el-select>
+              </el-form-item>
+            </el-col>
+      </el-form-item>
+      <!--上报通道-->
+      <el-form-item label="上报通道" prop="upchannel">
+          <el-select v-model="taskform.upchannel" placeholder="上报通道可多选" multiple>
+            <el-option label="主站" :value="1"></el-option>
+            <el-option label="postgres" :value="2"></el-option>
+            <el-option label="tdengine" :value="3"></el-option>
           </el-select>
-          <el-select v-model="freq" placeholder="请选择">
-            <el-option
-              v-for="item in spacing"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-        </div>
-         <div class="children">
-           <label for>上报通道：</label>
-           <el-select v-model="upchannel" placeholder="上报通道可多选" multiple>
-             <el-option label="主站" :value="1"></el-option>
-             <el-option label="postgres" :value="2"></el-option>
-             <el-option label="tdengine" :value="3"></el-option>
-             <!-- <el-option label="2" value="2"></el-option>
-             <el-option label="3" value="3"></el-option> -->
-          </el-select>
-        </div> 
-       
-        <div class="notchildren" >
-          <label for class="notfloat">采集策略：</label>
-          <div v-for="(item,index) in downchannel" :key="index" style="margin-left:50px;margin-bottom:10px;">
-            <label for>{{'采集轮次'+(index+1)}}</label>
-           
-          <el-select v-model="item.type" placeholder="请选择通道类型">
-             <el-option
-              v-for="item in channel"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select>
-          <el-input v-model.number="item.interval" type="number" :min='1' style="width:100px;" placeholder="本轮时长"></el-input>
-          <el-select v-model="item.unit" style="width:100px" placeholder="选择单位">
-            <el-option label="时" value="hours"></el-option>
-            <el-option label="分" value="minutes"></el-option>
-            <el-option label="秒" value="seconds"></el-option>
-          </el-select>
-          <el-link
-            type="primary"
-            @click.prevent="removeDomain(item)"
-            :underline="false"
-            icon="el-icon-minus"
-            style="margin-left:5px;"
-          >删除</el-link>
+      </el-form-item>
+      <!--采集策略-->
+      <el-form-item label="采集策略" class="lineone" label-width="100px">
+            <div class="flexg" v-for="(item, index) in taskform.downchannel" :key="index">
+              <el-form-item
+                :label="'轮次'+(index+1)"
+                class="elformcontent"
+                label-width="60px"
+                :prop="'downchannel.'+index+'.type'"
+                :rules="[{required: true, message: '选择通道类型',trigger: 'change'}]"
+              >
+                <el-select v-model="item.type" placeholder="请选择通道类型">
+                  <el-option
+                    v-for="item in channel"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item
+                :prop="'downchannel.'+index+'.interval'"
+                :rules="[{required: true, message: '输入时长',type:'number'}]"
+              >
+                <el-input v-model.number="item.interval" type="number" :min="1" placeholder="本轮时长"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-select v-model="item.unit" placeholder="选择单位">
+                  <el-option label="时" value="hours"></el-option>
+                  <el-option label="分" value="minutes"></el-option>
+                  <el-option label="秒" value="seconds"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-link
+                  type="primary"
+                  @click.prevent="removeDomain1(item)"
+                  :underline="false"
+                  icon="el-icon-minus"
+                >删除</el-link>
+              </el-form-item>
+            </div>
+          </el-form-item>
+          <div style="width: 100%;
+    margin-left: 50px">
+            <el-link @click="addDomain1" icon="el-icon-plus" type="primary" :underline="false">添加采集策略</el-link>
           </div>
-           
-        </div>
-        <div class="children">
-          <el-link
-            @click="addDownChannel"
-            icon="el-icon-plus"
-            type="primary"
-            :underline="false"
-            style="margin-bottom:20px"
-          >添加采集策略</el-link>
-        </div>
-         <div class="di" style="width:100%;">
-        <label for>数据项标识：</label>
-        <el-transfer v-model="diselect" :data="data" :titles="['数据项标识', '数据项标识']" :button-texts="['删除', '添加']"></el-transfer>
+      </el-form>
+      
       </div>
-      </div>
-     
+      
+        <div class="di" style="width:100%;">
+          <label for>数据项标识：</label>
+          <el-transfer
+            v-model="diselect"
+            :data="data"
+            :titles="['数据项标识', '数据项标识']"
+            :button-texts="['删除', '添加']"
+            filterable
+            filter-placeholder="请输入搜索内容"
+          ></el-transfer>
+        </div>
+
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
-        <el-button @click="convartion" style="float:right" type="primary">保 存</el-button>
+        <el-button @click="convartion('taskform')" style="float:right" type="primary">保 存</el-button>
       </span>
     </el-dialog>
   </div>
@@ -222,24 +250,84 @@ import {
   Taskdetail
 } from "@/api/historytask";
 import { timestampToTime, timetounix } from "@/api/login";
-import $ from 'jquery'
-import Parse from 'parse'
- var taskid = Math.floor(Math.random()*128+1)
+import $ from "jquery";
+import Parse from "parse";
+var taskid = "";
 export default {
   data() {
     const generateData = _ => {
       const data = [];
-      Diselect().then(response => {
-        response.data.map(item => {
-          data.push({
-            key: item.di,
-            label: `${item.di + "--" + item.name}`
+      var Mainstation = Parse.Object.extend("MainStationIndex");
+      var mainstation = new Parse.Query(Mainstation);
+      mainstation.startsWith("name", "C.");
+      mainstation.exists("leafs");
+      mainstation.ascending("name");
+      mainstation.find().then(resultes => {
+        var arr = [];
+        resultes.map(items => {
+          items.attributes.leafs.map(children => {
+            arr.push(children);
+          });
+        });
+        var DataItem = Parse.Object.extend("DataItem");
+        var dataitem = new Parse.Query(DataItem);
+        dataitem.containedIn("leafname", arr);
+        dataitem.limit(1000);
+        dataitem.ascending("itemCode");
+        dataitem.find().then(res => {
+          res.map(item => {
+            data.push({
+              key: item.attributes.itemCode,
+              label: `${item.attributes.itemCode +
+                "--" +
+                item.attributes.itemName}`
+            });
           });
         });
       });
       return data;
     };
     return {
+      taskform: {
+        name: "",
+        ftype: "vcaddr",
+        downchannel: [
+          {
+            type: 1,
+            interval: 20,
+            unit: "seconds"
+          }
+        ],
+        upchannel: [],
+        starttime: "",
+        endtime: "",
+        unit: "",
+        freq: "",
+        meteraddress: "all",
+        frozendate:''
+      },
+      taskformrules: {
+        name: [{ required: true, message: "请输入任务名称", trigger: "blur" }],
+         ftype: [
+          { required: true, message: "请选择终端类型", trigger: "change" }
+        ],
+        starttime:[
+           { type: 'date', required: true, message: '请选择开始时间', trigger: 'change' }
+        ],
+        endtime:[
+           { type: 'date', required: true, message: '请选择结束时间', trigger: 'change' }
+        ],
+        meteraddress:[{ required: true, message: "请输入终端逻辑地址", trigger: "blur" }],
+         unit: [
+          { required: true, message: "请选择间隔类型", trigger: "change" }
+        ],
+         freq: [
+          { required: true, message: "请选择间隔时长", trigger: "change" }
+        ],
+        upchannel: [
+          { required: true, message: "请选择上报通道", trigger: "change" }
+        ]
+      },
       node: null,
       total: 0,
       start: 0,
@@ -252,26 +340,31 @@ export default {
       dialogVisible: false,
       valueforsearch: "",
       pickerOptionsStart: {
-           disabledDate: time => {
-             let endDateVal = this.endtime;
-             if (endDateVal) {
-                return time.getTime() > new Date(endDateVal).getTime() && time.getTime() > Date.now();
-             }else{
-               return time.getTime() <Date.now()- 8.64e7; 
-             }
-           }
-        },
-      pickerOptionsEnd: {
-           disabledDate: time => {
-             let beginDateVal = this.starttime;
-             if (beginDateVal) {
-               return (time.getTime()<new Date(beginDateVal).getTime()-1*24*60*60*1000
-             );
-           }else{
-               return time.getTime() <Date.now()- 8.64e7; 
-             }
+        disabledDate: time => {
+          let endDateVal = this.taskform.endtime;
+          if (endDateVal) {
+            return (
+              time.getTime() > new Date(endDateVal).getTime() ||
+              time.getTime() < Date.now() - 8.64e7
+            );
+          } else {
+            return time.getTime() < Date.now() - 8.64e7;
+          }
         }
-    },
+      },
+      pickerOptionsEnd: {
+        disabledDate: time => {
+          let beginDateVal = this.taskform.starttime;
+          if (beginDateVal) {
+            return (
+              time.getTime() <
+              new Date(beginDateVal).getTime() - 1 * 24 * 60 * 60 * 1000
+            );
+          } else {
+            return time.getTime() < Date.now() - 8.64e7;
+          }
+        }
+      },
       options: [
         {
           value: "vcaddr",
@@ -321,47 +414,37 @@ export default {
           label: "虚拟通道"
         }
       ],
-      name: "",
-      frozendate: "",
-      downchannel:[
+      downchannel: [
         {
-          type:'',
-          interval:'',
-          unit:'seconds',
+          type: 1,
+          interval: 20,
+          unit: "seconds"
         }
       ],
-     
-      channel:[
+
+      channel: [
         {
-          label:'物理集中器',
-          value:1
+          label: "物理集中器",
+          value: 1
         },
         {
-          label:'GPRS',
-          value:2
+          label: "GPRS",
+          value: 2
         },
-         {
-          label:'LoRa',
-          value:3
+        {
+          label: "LoRa",
+          value: 3
         },
-         {
-          label:'NB',
-          value:4
+        {
+          label: "NB",
+          value: 4
         }
       ],
-      channeltype:'',
-      starttime: "",
-      meteraddress: "all",
-      freq: "",
-      unit: "",
-      ftype: "vcaddr",
-      today:'today',
+      today: "today",
       idselete: [],
-      lunci:'',
-      endtime:'',
-       upchannel:'',
-      loading:true,
-      taskobjectid:''
+      lunci: "",
+      loading: true,
+      taskobjectid: ""
     };
   },
   mounted() {
@@ -369,15 +452,43 @@ export default {
   },
   methods: {
     timestampToTime(timestamp) {
-    var date = new Date(timestamp * 1000) 
-    var Y = date.getFullYear() + '-';
-    var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
-    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
-    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
-    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
-    return Y+M+D+h+m+s;
-  },
+      var date = new Date(timestamp * 1000);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 <= 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D =
+        (date.getDate() + 1 <= 10 ? "0" + date.getDate() : date.getDate()) +
+        " ";
+      var h =
+        (date.getHours() + 1 <= 10 ? "0" + date.getHours() : date.getHours()) +
+        ":";
+      var m =
+        (date.getMinutes() + 1 <= 10
+          ? "0" + date.getMinutes()
+          : date.getMinutes()) + ":";
+      var s =
+        date.getSeconds() + 1 <= 10
+          ? "0" + date.getSeconds()
+          : date.getSeconds();
+      return Y + M + D + h + m + s;
+    },
+    //取到dilist
+
+    removeDomain1(item) {
+          var index = this.form.downchannel.indexOf(item);
+          if (index !== -1) {
+            this.taskform.downchannel.splice(index, 1);
+          }
+        },
+        addDomain1() {
+          this.taskform.downchannel.push({
+            type: "",
+            interval: "",
+            unit: "seconds"
+          });
+        },
     //删除采集轮次
     removeDomain(item) {
       var index = this.downchannel.indexOf(item);
@@ -386,86 +497,108 @@ export default {
       }
     },
     //增加采集轮次
-    addDownChannel(){
+    addDownChannel() {
       this.downchannel.push({
-          type:'',
-          interval:'',
-          unit:'seconds'
-        })
+        type: "",
+        interval: "",
+        unit: "seconds"
+      });
     },
     handleClose() {
       this.dialogVisible = false;
+      this.taskform.name = "";
+      this.taskform.frozendate = "";
+      this.taskform.starttime = "";
+      this.taskform.endtime = "";
+      this.taskform.freq = "";
+      this.taskform.unit = "";
+      taskid = Math.floor(Math.random() * 128 + 1);
+      this.taskobjectid = "";
+      this.taskform.downchannel = [
+        {
+          type: 1,
+          interval: 20,
+          unit: "seconds"
+        }
+      ];
+      this.diselect = [];
+      this.taskform.upchannel = [];
     },
     search() {
-      this.loading = true
-      var Crond = Parse.Object.extend('Crond')
-      var querycround = new Parse.Query(Crond)
-      
-      if(this.valueforsearch!=''){
-        querycround.equalTo('name',this.valueforsearch)
+      this.loading = true;
+      var Crond = Parse.Object.extend("Crond");
+      var querycround = new Parse.Query(Crond);
+      if (this.valueforsearch != "") {
+        querycround.equalTo("name", this.valueforsearch);
       }
-      querycround.equalTo('type',4)
-     querycround.ascending('-updatedAt')
-      querycround.skip(this.start)
-      querycround.limit(this.length)
-      querycround.count().then(count=>{
-        if(count){
-          this.total = count
-        }
-         
-         querycround.find().then(res=>{
-          if(res){
-            this.tableData3 = res
-            this.loading=false
+      querycround.equalTo("type", 4);
+      querycround.ascending("-updatedAt");
+      querycround.skip(this.start);
+      querycround.limit(this.length);
+      querycround.count().then(
+        count => {
+          if (count) {
+            this.total = count;
           }
-        })
-      },error=>{
-            if (error.code == "209") {
-                    this.$message({
-                      type: "warning",
-                      message: "登陆权限过期，请重新登录"
-                    });
-                    this.$router.push({
-                      path: "/login"
-                    });
-                  } else if (error.code == 119) {
-                    this.$message({
-                      type: "error",
-                      message: "没有操作权限"
-                    });
-                  }
-      })
+          querycround.find().then(res => {
+            if (res) {
+              this.tableData3 = res;
+              this.loading = false;
+            }
+          });
+        },
+        error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          }
+        }
+      );
     },
     //编辑操作
-    editcrond(id){
-       var Crond = Parse.Object.extend('Crond')
-        var querycround = new Parse.Query(Crond)
-        querycround.get(id).then(response=>{
-          this.dialogVisible = true
-          this.name = response.attributes.name
-          this.unit = response.attributes.args.unit
-          this.type = response.attributes.args.pns
-          this.freq = response.attributes.args.freq
-          this.starttime = response.attributes.args.starttime*1000
-          this.endtime = response.attributes.args.endtime*1000
-          this.downchannel = response.attributes.args.downchannel
-          this.diselect = response.attributes.args.dis
-          this.upchannel = response.attributes.args.upchannel
-          this.frozendate = response.attributes.args.frozendate*1000
-          this.taskobjectid = response.id
-          taskid=response.attributes.tid
-          this.selectchange()
-        })
+    editcrond(id) {
+      var Crond = Parse.Object.extend("Crond");
+      var querycround = new Parse.Query(Crond);
+      querycround.get(id).then(response => {
+        this.dialogVisible = true;
+        this.taskform.name = response.attributes.name;
+        this.taskform.unit = response.attributes.args.unit;
+        if (typeof response.attributes.args.pns == "string") {
+          this.type = response.attributes.args.pns;
+        } else {
+          this.type = response.attributes.args.pns.join(",");
+        }
+        this.taskform.freq = response.attributes.args.freq;
+        this.taskform.starttime = response.attributes.args.starttime * 1000;
+        this.taskform.endtime = response.attributes.args.endtime * 1000;
+        this.taskform.downchannel = response.attributes.args.downchannel;
+        this.diselect = response.attributes.args.dis;
+        this.taskform.upchannel = response.attributes.args.upchannel;
+        this.taskform.frozendate = response.attributes.args.frozendate * 1000;
+        this.taskobjectid = response.id;
+        taskid = response.attributes.tid;
+        this.selectchange();
+      });
     },
     selectchange() {
-      if (this.unit == "month" || this.unit == "day") {
+      if (this.taskform.unit == "month" || this.taskform.unit == "day") {
         this.spacing = [
           {
             value: "1",
             label: "1"
           }
         ];
-      } else if (this.unit == "hour") {
+      } else if (this.taskform.unit == "hour") {
         this.spacing = [
           { value: "1", label: "1" },
           { value: "2", label: "2" },
@@ -496,259 +629,283 @@ export default {
       this.start = (val - 1) * this.length;
       this.search();
     },
-    enddata(){
-      if(this.endtime<=this.starttime){
-        this.$message.warning('采集结束时间要小于开始时间')
-        this.endtime=''
+    enddata() {
+      if (this.taskform.endtime <= this.taskform.starttime) {
+        this.$message.warning("采集结束时间要小于开始时间");
+        this.taskform.endtime = "";
       }
-      if(this.endtime < Date.now()-2000){
-        this.$message.warning('采集结束时间要大于当前时间')
-        this.endtime=''
+      if (this.taskform.endtime < Date.now() - 2000) {
+        this.$message.warning("采集结束时间要大于当前时间");
+        this.taskform.endtime = "";
       }
     },
-    testdata(){
-      if(this.endtime <= this.starttime &&this.endtime!='' &&this.endtime!=null){
-        this.$message.warning('采集结束时间要小于开始时间')
-        this.starttime=''
+    testdata() {
+      if (
+        this.taskform.endtime <= this.taskform.starttime &&
+        this.taskform.endtime != "" &&
+        this.taskform.endtime != null
+      ) {
+        this.$message.warning("采集结束时间要小于开始时间");
+        this.taskform.starttime = "";
       }
-      if(this.starttime < Date.now()-2000){
-        this.$message.warning('采集开始时间要大于当前时间')
-        this.starttime=''
+      if (this.taskform.starttime < Date.now() - 2000) {
+        this.$message.warning("采集开始时间要大于当前时间");
+        this.taskform.starttime = "";
       }
     },
     Meterdetail(row) {
       this.$router.push({
         path: "/tasksmanage/schedule",
-        query: { id: row.attributes.tid }
+        query: {
+          name: row.attributes.name,
+          id: row.attributes.tid,
+          starttime: row.attributes.args.starttime,
+          freq: row.attributes.args.freq,
+          unit: row.attributes.args.unit,
+          downchannel: JSON.stringify(row.attributes.args.chs),
+          di: JSON.stringify(row.attributes.args.dis),
+          frozendate: row.attributes.args.frozendate
+        }
       });
     },
-    convartion() {
-      var meter = [];
-      var vcaddr = this.meteraddress.split(",");
-      if (this.ftype == "vcaddr") {
-        vcaddr.map(vconitem => {
-          meter.push({ vcaddr: vconitem, dis: this.diselect });
+    convartion(formName) {
+      this.$refs[formName].validate((valid) => {
+          if (valid) {
+           if(this.diselect.length==0){
+             this.$message.error('请选择数据项标识')
+           }else{
+              var meter = [];
+      var vcaddr = "";
+      taskid = Math.floor(Math.random() * 128 + 1);
+      if (this.taskform.meteraddress.indexOf("all") != -1) {
+        vcaddr = "all";
+      } else {
+        vcaddr = this.taskform.meteraddress.split(",");
+      }
+      var arr = [];
+      var unit = "";
+      if (this.taskform.unit == "day") {
+        unit = 2;
+      } else if (this.taskform.unit == "hour") {
+        unit = 1;
+      } else if (this.taskform.unit == "minute") {
+        unit = 0;
+      } else {
+        unit = "";
+      }
+
+      this.taskform.downchannel.map(items => {
+        arr.push([items.type, items.interval]);
+      });
+      var Crond = Parse.Object.extend("Crond");
+      var crond = new Crond();
+      var querycround = new Parse.Query(Crond);
+      if (this.taskobjectid != "") {
+        crond.id = this.taskobjectid;
+      }
+      if (this.taskform.frozendate != "") {
+        crond.set("task", {
+          di: this.taskform.diselect,
+          chs: arr,
+          res: this.taskform.upchannel,
+          pns: vcaddr,
+          tertype: this.taskform.ftype,
+          fdate: this.taskform.frozendate / 1000
         });
       } else {
-        if (this.meteraddress == "all") {
-          meter.push({ vcaddr: "all", dis: this.diselect });
-        } else {
-          meter.push({
-            vcaddr: "all",
-            addr: JSON.parse(vcaddr),
-            dis: this.diselect
-          });
-        }
+        crond.set("task", {
+          di: this.taskform.diselect,
+          chs: arr,
+          pns: vcaddr,
+          res: this.taskform.upchannel
+        });
       }
-      var arr=[]
-       var unit=''
-      if(this.unit=='day'){
-         unit=2
-      }else if(this.unit=='hour'){
-        unit=1
-      }else if(this.unit=='minute'){
-        unit=0
-      }else{
-        unit=''
-      }
-      this.downchannel.map(items=>{
-        arr.push([items.type,items.interval])
-      })
-      var Crond = Parse.Object.extend('Crond')
-      var crond = new Crond()
-      var querycround = new Parse.Query(Crond)
-      if(this.taskobjectid!=''){
-        crond.id = this.taskobjectid
-      }
-       if(this.frozendate!=''){
-         crond.set('task',{
-        "di":this.diselect,
-        "chs": arr,
-        'res':this.upchannel,
-        "pns": this.meteraddress,
-        "fdate":this.frozendate/1000
-      })
-      }else{
-         crond.set('task',{
-        "di":this.diselect,
-        "chs": arr,
-        "pns": this.meteraddress,
-        'res':this.upchannel,
-    })
-      }
-      crond.set('args',{
-      "frozendate":this.frozendate/1000,
-      "chs":arr,
-      "freq":  Number(this.freq),
-      "pns": this.meteraddress,
-      "unit":  this.unit,
-      "cycle": this.unit,
-      "dis":this.diselect,
-      "upchannel":this.upchannel,
-      "downchannel":this.downchannel,
-      "endtime":  timetounix(this.endtime),
-      "starttime":  timetounix(this.starttime),
-      })
-      crond.set('active',1)
-      crond.set('type',4)
-      crond.set('name',this.name)
-      crond.set('crond',{
-        "end_time":timetounix(this.endtime),
-        "freq":Number(this.freq) ,
-        "unit": unit,
-        "start_time": timetounix(this.starttime)
-      })
-      crond.set('tid',taskid)
-     crond.set('typedesc','周期任务')
-     
-    //查询任务id是否重复
-    if(this.taskobjectid==''){
-      querycround.equalTo('tid',taskid)
-      querycround.find().then(response=>{
-      // response.map(items=>{
-        if(response.length!=0){
-           this.$message({
-            message: "任务id重复",
-            type: "error"
-          });
-          return
-        }else{
-           crond.save().then(resultes=>{
-            if(resultes){
-                this.$message({
-                message: "添加成功",
-                type: "success"
-              });
-              this.dialogVisible = false;
-              this.name=''
-              this.frozendate=''
-              this.starttime=''
-              this.endtime=''
-              this.freq=''
-              this.unit=''
-              this.downchannel=[
-                {
-                  type:'',
-                  interval:'',
-                  unit:'seconds'
+      crond.set("args", {
+        frozendate: this.taskform.frozendate / 1000,
+        chs: arr,
+        freq: Number(this.taskform.freq),
+        pns: vcaddr,
+        unit: this.taskform.unit,
+        cycle: this.taskform.unit,
+        dis: this.diselect,
+        tertype: this.taskform.ftype,
+        upchannel: this.taskform.upchannel,
+        downchannel: this.taskform.downchannel,
+        endtime: timetounix(this.taskform.endtime),
+        starttime: timetounix(this.taskform.starttime)
+      });
+      crond.set("active", 1);
+      crond.set("type", 4);
+      crond.set("name", this.taskform.name);
+      crond.set("crond", {
+        end_time: timetounix(this.taskform.endtime),
+        freq: Number(this.taskform.freq),
+        unit: unit,
+        start_time: timetounix(this.taskform.starttime)
+      });
+      crond.set("tid", taskid);
+      crond.set("typedesc", "周期任务");
+
+      //查询任务id是否重复
+      if (this.taskobjectid == "") {
+        querycround.equalTo("tid", taskid);
+        querycround.find().then(response => {
+          if (response.length != 0) {
+            this.$message({
+              message: "任务id重复",
+              type: "error"
+            });
+            return;
+          } else {
+            crond.save().then(
+              resultes => {
+                if (resultes) {
+                  this.$message({
+                    message: "添加成功",
+                    type: "success"
+                  });
+                  this.$refs[formName].resetFields();
+                  this.dialogVisible = false;
+                  this.taskform.name = "";
+                  this.taskform.frozendate = "";
+                  this.taskform.starttime = "";
+                  this.taskform.endtime = "";
+                  this.taskform.freq = "";
+                  this.taskform.unit = "";
+                  this.taskform.downchannel = [
+                    {
+                      type: 1,
+                      interval: 20,
+                      unit: "seconds"
+                    }
+                  ];
                 }
-              ]
-            }
-            this.frozendate="",
-            this.diselect=[]
-            this.upchannel=[]
-            this.search()
-          },error=>{
-            if (error.code == "209") {
-                    this.$message({
-                      type: "warning",
-                      message: "登陆权限过期，请重新登录"
-                    });
-                    this.$router.push({
-                      path: "/login"
-                    });
-                  } else if (error.code == 119) {
-                    this.$message({
-                      type: "error",
-                      message: "没有操作权限"
-                    });
-                  }
-          })
-        }
-      // })
-    })
-    }else{
-      crond.save().then(resultes=>{
-            if(resultes){
-                this.$message({
+                (this.taskform.frozendate = ""), (this.diselect = []);
+                this.taskform.upchannel = [];
+                this.search();
+              },
+              error => {
+                if (error.code == "209") {
+                  this.$message({
+                    type: "warning",
+                    message: "登陆权限过期，请重新登录"
+                  });
+                  this.$router.push({
+                    path: "/login"
+                  });
+                } else if (error.code == 119) {
+                  this.$message({
+                    type: "error",
+                    message: "没有操作权限"
+                  });
+                }
+              }
+            );
+          }
+        });
+      } else {
+        crond.save().then(
+          resultes => {
+            if (resultes) {
+              this.$message({
                 message: "编辑成功",
                 type: "success"
               });
+              this.$refs[formName].resetFields();
               this.dialogVisible = false;
-              this.name=''
-              this.frozendate=''
-              this.starttime=''
-              this.endtime=''
-              this.freq=''
-              this.unit=''
-              taskid=Math.floor(Math.random()*128+1)
-              this.taskobjectid = ''
-              this.downchannel=[
+              this.taskform.name = "";
+              this.taskform.frozendate = "";
+              this.taskform.starttime = "";
+              this.taskform.endtime = "";
+              this.taskform.freq = "";
+              this.taskform.unit = "";
+              taskid = Math.floor(Math.random() * 128 + 1);
+              this.taskobjectid = "";
+              this.taskform.downchannel = [
                 {
-                  type:'',
-                  interval:'',
-                  unit:'seconds'
+                  type: 1,
+                  interval: 20,
+                  unit: "seconds"
                 }
-              ]
+              ];
             }
-            this.diselect=[]
-            this.upchannel=[]
-            this.search()
-          },error=>{
+            this.diselect = [];
+            this.taskform.upchannel = [];
+            this.search();
+          },
+          error => {
             if (error.code == "209") {
-                    this.$message({
-                      type: "warning",
-                      message: "登陆权限过期，请重新登录"
-                    });
-                    this.$router.push({
-                      path: "/login"
-                    });
-                  } else if (error.code == 119) {
-                    this.$message({
-                      type: "error",
-                      message: "没有操作权限"
-                    });
-                  }
-          })
-    }
-    },
-    getfrozen(){
-     
-    },
-    selectTime(val){
-      if(val=='other'){
-        this.getfrozen()
-      }
-    },
-    deletetask() {
-      var arr=[]
-      if(this.multipleSelection.length!=0){
-        this.multipleSelection.map(items=>{
-         arr.push(
-           new Promise((resolve,reject)=>{
-           var Crond = Parse.Object.extend('Crond')
-          var crond = new Crond()
-          crond.id = items.id
-          return crond.destroy().then(resultes=>{
-            resolve(resultes)
-
-        },error=>{
-          
-          reject(error.message)
-        }
-        )
-        })
-      )
-        Promise.all(arr).then((data) => {
               this.$message({
-              message: "删除成功",
-              type: "success"
-            });
-            if(data.length==this.multipleSelection.length){
-                this.search()
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
             }
-          
-          }).catch((error)=>{
-            this.$message({
-              message: error,
-              type: "error"
-            });
-          })
-      })
-      }else{
-        this.$message.warning('请勾选要删除的任务')
+          }
+        );
       }
-    }  
+           }
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+      
+    },
+    getfrozen() {},
+    selectTime(val) {
+      if (val == "other") {
+        this.getfrozen();
+      }
+    },
+    //异步处理删除多个任务
+    deletetask() {
+      var arr = [];
+      if (this.multipleSelection.length != 0) {
+        this.multipleSelection.map(items => {
+          arr.push(
+            new Promise((resolve, reject) => {
+              var Crond = Parse.Object.extend("Crond");
+              var crond = new Crond();
+              crond.id = items.id;
+              return crond.destroy().then(
+                resultes => {
+                  resolve(resultes);
+                },
+                error => {
+                  reject(error.message);
+                }
+              );
+            })
+          );
+          Promise.all(arr)
+            .then(data => {
+              this.$message({
+                message: "删除成功",
+                type: "success"
+              });
+              if (data.length == this.multipleSelection.length) {
+                this.search();
+              }
+            })
+            .catch(error => {
+              this.$message({
+                message: error,
+                type: "error"
+              });
+            });
+        });
+      } else {
+        this.$message.warning("请勾选要删除的任务");
+      }
+    }
   }
 };
 </script>
@@ -780,28 +937,25 @@ export default {
 .tasklist .el-dialog__footer {
   padding-bottom: 50px;
 }
-.tasklist .el-dialog{
-  bottom:40px;
+.tasklist .el-dialog {
+  bottom: 40px;
 }
 .tasklist .dialog .children,
 .dialog .starttime {
   margin-top: 20px;
   width: 50%;
 }
-.tasklist .dialog .notchildren
-{
-
+.tasklist .dialog .notchildren {
   margin-top: 20px;
   width: 100%;
 }
 .tasklist .dialog .children label,
 .tasklist .dialog .notchildren label:not(.notfloat),
 .tasklist .dialog .starttime label {
- 
   margin-top: 10px;
-  width:120px;
-  text-align:right;
-  float:left;
+  width: 120px;
+  text-align: right;
+  float: left;
 }
 .tasklist .children .el-input--suffix {
   width: 200px;
@@ -825,8 +979,43 @@ export default {
   position: relative;
   top: -50px;
 }
-.tasklist .el-picker-panel__sidebar+.el-picker-panel__body{
+.tasklist .el-picker-panel__sidebar + .el-picker-panel__body {
   visibility: hidden;
+}
+.dialog .el-form {
+  display: flex;
+  flex-wrap: wrap;
+}
+.dialog .el-form .lineone {
+  width: 100% !important;
+}
+
+.dialog .el-form .el-form-item {
+  width: 50%;
+}
+.dialog .el-form .el-form-item .el-input {
+  width: 100%;
+}
+.dialog .el-form .el-form-item .el-select {
+  width: 100%;
+}
+@media screen and (max-width: 1350px) {
+  .dialog .el-form .el-form-item {
+    width: 100%;
+  }
+  /* .dialog .el-form .lineone .el-form-item__content{
+    margin-left:20px!important;
+  } */
+}
+.dialog .el-col-11 .el-form-item{
+  width:100%;
+}
+.lineone .flexg{
+   display: flex;
+  margin-top: 20px;
+}
+.lineone .elformcontent .el-input__inner {
+  width: 200px;
 }
 </style>
 

@@ -66,7 +66,7 @@
                         align="center"
                         >
                         <template slot-scope="scope">
-                            <span>{{scope.row.host}}</span> 
+                            <span>{{scope.row.host ? scope.row.host:'127.0.0.1'}}</span> 
                         </template>
                         </el-table-column>
                         <el-table-column

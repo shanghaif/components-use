@@ -24,12 +24,13 @@ export default {
   },
   mounted(){
      Parse.initialize("shuwa", "webapi","HZlora2017");
-    // Parse.serverURL = "http://148.70.107.74:5080/iotapi";
-    // Parse.serverURL = "http://ci.iotn2n.com:5080/iotapi";
-    Parse.serverURL = "http://192.168.2.113:5080/iotapi";
-    // Parse.serverURL = "http://132.232.121.164:5080/iotapi";
+    // Parse.serverURL = "http://148.70.107.74:5080/iotapi";//金鳞的库
+    Parse.serverURL = "http://ci.iotn2n.com:5080/iotapi";
+    // Parse.serverURL = "http://192.168.2.113:5080/iotapi";//莫易的库
+    // Parse.serverURL = "http://132.232.121.164:5080/iotapi";//伟星的库
     // Parse.serverURL = "http://148.70.50.192:5080/iotapi"
-    // Parse.serverURL = "http://prod.iotn2n.com/iotapi";
+    // Parse.serverURL = "http://prod.iotn2n.com/iotapi";//线上环境
+    // Parse.serverURL = "http://139.155.158.43:5080/iotapi";//三千万环境
     // Parse.serverURL = '/iotapi'
   },
   methods:{

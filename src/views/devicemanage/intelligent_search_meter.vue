@@ -123,10 +123,6 @@
             style="width:100%;height:40px;background:#f5f7fa;line-height:40px;color:#606266;border-radius:2px;padding-left:20px;box-sizing:border-box"
           >搜表异常记录</div>
           <el-table :data="tableData2" style="width: 100%;text-align:center" height="350" @selection-change="handleSelectionChange" border>
-             <!-- <el-table-column
-              type="selection"
-              width="55">
-             </el-table-column> -->
             <el-table-column
               label="序号"
               type="index"
@@ -135,7 +131,6 @@
                 return Number(index+1) + Number((page-1)*pagesize)}' 
               width="50">
             </el-table-column>
-            
             <el-table-column  prop="addr" label="电表地址" align="center"></el-table-column>
             <el-table-column  label="档案pn值" align="center" v-if="formInline.dtutype=='物理集中器'"></el-table-column>
             <el-table-column  label="原终端地址" align="center"></el-table-column>
@@ -226,7 +221,6 @@ export default {
          this.dtudata = resultes
        })
     },
-     
     onSubmit() {
       this.tableData = []
       var Dtu = Parse.Object.extend("Dtu");

@@ -71,29 +71,33 @@ export function Addtasks(name, frozendate, downchannel,starttime,endtime, meter,
     }
   })
 }
-export function Taskdetail(node, start, length, draw, id, searchvalue) {
+export function Taskdetail(start, length, tid,rid, starttime,freq,search) {
   return request({
     url: '/shuwa_task/vcaddr',
     method: 'get',
     params: {
-      node: node,
       start: start,
       length: length,
-      draw: draw,
-      id: id,
-      'search[value]': searchvalue
+      tid: tid,
+      rid:rid,
+      starttime:starttime,
+      freq:freq,
+      search:search
     }
   })
 }
-export function Taskmeterdetail(di,vcaddr, id,datetime) {
+export function Taskmeterdetail(tid,rid,starttime,vcaddr,freq,fdate,di) {
   return request({
     url: 'shuwa_task/meter',
-    method: 'post',
-    data:{
-      dis:di,
+    method: 'get',
+    params:{
+      tid:tid,
+      rid:rid,
+      starttime:starttime,
       vcaddr:vcaddr,
-      id:id,
-      datetime:datetime
+      freq:freq,
+      fdate:fdate,
+      di:di
     }
   })
 }

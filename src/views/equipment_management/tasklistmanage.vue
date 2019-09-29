@@ -69,7 +69,10 @@
         :page-size="pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
-      ></el-pagination>
+      >
+      <!-- <el-button type="primary" style="background:#409EFF">首页</el-button>
+      <el-button type="primary" style="background:#409EFF">尾页</el-button> -->
+      </el-pagination>
     </div>
     <div class="dialog">
       <el-dialog title="任务配置" :visible.sync="dialogFormVisible" width="40%">
@@ -195,18 +198,7 @@ export default {
       taskform: {
         name: ""
       },
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ],
+      tableData: [],
       multipleSelection: [],
       start: 0,
       pagesize: 10,
@@ -407,23 +399,25 @@ export default {
             strategy: this.form.strategy
           });
           crond.set("active", 1);
-          crond.set("tid", taskid)
+         
           if(this.form.type==1){
               crond.set('typedesc','临时任务')
+               crond.set("tid", 301)
           }else if(this.form.type==2){
               crond.set('typedesc','即时任务')
+               crond.set("tid", 302)
           }
           //判断任务id是不是为空添加任务
           if(this.crondid==''){
-              querycround.equalTo('tid',taskid)
-              querycround.find().then(response=>{
-                if(response.length!=0){
-                this.$message({
-                    message: "任务id重复",
-                    type: "error"
-                });
-                return
-                }else{
+              // querycround.equalTo('tid',taskid)
+              // querycround.find().then(response=>{
+              //   if(response.length!=0){
+              //   this.$message({
+              //       message: "任务id重复",
+              //       type: "error"
+              //   });
+              //   return
+              //   }else{
                  crond.save().then(resultes => {
                     if (resultes) {
                     this.$message.success("添加成功");
@@ -449,8 +443,8 @@ export default {
                     this.getCrondTask(1)
             }
           });
-            }
-            })
+            // }
+            // })
             //编辑任务
         }else{
             crond.save().then(resultes => {

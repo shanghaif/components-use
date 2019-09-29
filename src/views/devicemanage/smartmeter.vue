@@ -2,7 +2,7 @@
     <div class="smartmeter">
         <div class="topsearch">
             <el-input placeholder="请输入电表地址" v-model="metersearch" style="width:300px">
-                <el-button slot="append" icon="el-icon-search" @click="getinformation()"></el-button>
+                <el-button slot="append" icon="el-icon-search" @click="getinformation(0)"></el-button>
             </el-input>
         </div>
         <el-table
@@ -60,14 +60,6 @@
                 <span>{{scope.row.attributes.yhmc}}</span>
             </template>
             </el-table-column>
-            <!-- <el-table-column
-            label="用户地址"
-            align="center"
-            >
-                <template slot-scope="scope">
-                <span>{{scope.row.attributes.addr}}</span>
-            </template>
-            </el-table-column> -->
             <el-table-column
                 prop=""
                 label="操作"
@@ -157,6 +149,7 @@ export default {
             }
             // 显示
             if (this.isShow){
+                // console.log(this.index+1)
                 btnText[this.index+1].children[0].innerHTML="隐藏详情";
                 this.delNewTrs();
                 let row=document.getElementsByClassName("el-table__row")[this.index];
@@ -168,18 +161,34 @@ export default {
                 div.setAttribute("class","NewDiv");
                 let count=0;
                 let info=scope.row.attributes;
-                // console.log(info);
+                var arr=[]
+                if((this.index+1)%2==0){
+                    arr[this.index+1] ={
+                        yhlb:'低压普通用户',
+                        sblx:'电子式电能表',
+                        txgy:'DLT645',
+                        yhdz:`江苏省**市***区**${this.index+1}号`
+                    }
+                    
+                }else{
+                    arr[this.index+1] ={
+                        yhlb:'低压普通用户',
+                        sblx:'电子式电能表',
+                        txgy:'DLT645/2007',
+                        yhdz:`江苏省**市***区**${this.index+1}号`
+                    }
+                }
                 div.innerHTML=`
                     <p><span>集中器地址:</span>${info.vcaddr ? info.vcaddr :''}</p>
                     <p><span>PN:</span>${info.pn ? info.pn:''}</p>
                     <p><span>电表地址:</span>${info.addr ? info.addr:''}</p>
                     <p><span>用户编号:</span>${info.yhabh ? info.yhabh: ''}</p>
-                    <p><span>用户地址:</span>${info.addr ? info.addr :''}</p>
-                    <p><span>用户类别:</span>${info.yhlb ? info.yhlb : ''}</p>
+                    <p><span>用户地址:</span>${info.yhdz ? info.yhdz :arr[this.index+1].yhdz}</p>
+                    <p><span>用户类别:</span>${info.yhlb ? info.yhlb : arr[this.index+1].yhlb}</p>
                     <p><span>供电单位:</span>${info.gddw ? info.gddw : ''}</p>
                     <p><span>生产厂商:</span>${info.sccs ? info.sccs :''}</p>
-                    <p><span>设备类型:</span>${info.sblx ? info.sblx : ''}</p>
-                    <p><span>通信规约:</span>${info.txgy ? info.txgy : ''}</p>
+                    <p><span>设备类型:</span>${info.sblx ? info.sblx : arr[this.index+1].sblx}</p>
+                    <p><span>通信规约:</span>${info.txgy ? info.txgy : arr[this.index+1].txgy}</p>
                     <p><span>台区:</span>${info.tq ? info.tq : ''}</p>
                     <p><span>地理位置:</span>${info.yhdz ? info.yhdz : ''}</p>
                     <p><span>出厂编号:</span>${info.ccbh ? info.ccbh : ''}</p>
@@ -206,17 +215,20 @@ export default {
         },
         handleSizeChange(val){
             this.length=val
-            this.getinformation()
+            this.getinformation(1)
         },
         handleCurrentChange(val){
             this.start=(val-1)*this.length
-            this.getinformation()
+            this.getinformation(1)
         },
         handleSelectionChange(val){
             this.multipleSelection=val
         },
-        getinformation(){
+        getinformation(index){
             this.loading=true
+            if(index==0){
+                this.start=0
+            }
             NProgress.start();
             var Smartmeter = Parse.Object.extend('Smartmeter')
             var smartmeter = new Parse.Query(Smartmeter)
@@ -230,9 +242,20 @@ export default {
                         this.tableData=resultes
                         this.loading=false
                         NProgress.done();
-                    CountAll('Smartmeter').then(resultes=>{
+                  
+                    if(this.metersearch==''){
+                        //  this.total=30000000
+                           CountAll('Smartmeter').then(resultes=>{
                          this.total = resultes.count
-                    })
+                        }).catch(error=>{
+                            this.$message.error(error.error)
+                        });
+                    }else{
+                        smartmeter.count().then(count=>{
+                            this.total=count
+                        })
+                    }
+                   
                    
                 },error=>{
                     if(error.code=='209'){
@@ -248,6 +271,8 @@ export default {
                             type:'error',
                             message:'没有操作权限'
                         })
+                    }else{
+                        this.$message.error(error.error)
                     }
                 })
         },

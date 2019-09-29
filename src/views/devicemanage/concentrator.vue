@@ -27,22 +27,18 @@
         <el-table-column type="selection" align="center" width="50"></el-table-column>
         <el-table-column prop :label="$t('concentrator.status')" align="center" width="100">
           <template slot-scope="scope">
-            <div
-              v-if="scope.row.attributes.jsondata.isonline==true"
-              style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"
-            ></div>
-            <span
-              v-if="scope.row.attributes.jsondata.isonline==true"
-              style="color:#00cc33"
-            >{{$t('concentrator.isonline')}}</span>
-            <div
-              v-if="!scope.row.attributes.jsondata.isonline"
-              style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px"
-            ></div>
-            <span
-              v-if="!scope.row.attributes.jsondata.isonline"
-              style="color:#f00"
-            >{{$t('concentrator.notonline')}}</span>
+            <div v-if="scope.row.attributes.jsondata.isonline">
+              <p
+                style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px;vertical-align:middle;"
+              ></p>
+              <span style="color:#00cc33">{{$t('concentrator.isonline')}}</span>
+            </div>
+            <div v-else>
+              <p
+                style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#f00;margin-right:10px;vertical-align:middle;"
+              ></p>
+              <span style="color:#f00">{{$t('concentrator.notonline')}}</span>
+            </div>
           </template>
         </el-table-column>
         <el-table-column :label="$t('concentrator.concentrator')" align="center">
@@ -50,14 +46,14 @@
             <span>{{scope.row.attributes.vcaddr}}</span>
           </template>
         </el-table-column>
-        <el-table-column  :label="$t('concentrator.courts')" align="center">
+        <el-table-column :label="$t('concentrator.courts')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.jsondata.address}}</span>
           </template>
         </el-table-column>
         <el-table-column :label="$t('concentrator.onlinemeter')" sortable align="center">
           <template slot-scope="scope">
-            <span>{{(scope.row.attributes.jsondata.online ? scope.row.attributes.jsondata.online:0)+"/"+((scope.row.attributes.jsondata.offline ? scope.row.attributes.jsondata.offline : 0)+ (scope.row.attributes.jsondata.online ? scope.row.attributes.jsondata.online:0))}}</span>
+            <span>{{scope.row.attributes.others.online+"/"+scope.row.attributes.others.total}}</span>
           </template>
         </el-table-column>
         <el-table-column prop :label="$t('concentrator.connection')" align="center" width="100">
@@ -68,10 +64,15 @@
               v-if="scope.row.attributes.jsondata.iscon==true"
               disabled
             ></el-switch>
-            <el-switch v-if="scope.row.attributes.jsondata.iscon!=true" v-model="value7" active-color="#cccccc" disabled></el-switch>
+            <el-switch
+              v-if="scope.row.attributes.jsondata.iscon!=true"
+              v-model="value7"
+              active-color="#cccccc"
+              disabled
+            ></el-switch>
           </template>
         </el-table-column>
-        <el-table-column  :label="$t('concentrator.time')" align="center">
+        <el-table-column :label="$t('concentrator.time')" align="center">
           <template slot-scope="scope">
             <span>{{timestampToTime(scope.row.attributes.vctime)}}</span>
           </template>
@@ -208,16 +209,13 @@
     <el-dialog title="新增集中器" :visible.sync="addconcentrator" width="35%" center>
       <el-form ref="form" :model="concenForm">
         <el-form-item>
-          <label for="">集中器地址</label>
+          <label for>集中器地址</label>
           <el-input v-model="concenForm.vcaddr" style="margin-bottom:20px;"></el-input>
         </el-form-item>
-        <label ><span class="startUp">启动配置</span>[JSON]:</label>
-        <el-input
-          type="textarea"
-          :rows="18"
-          v-model="vcConfig"
-          style="margin-top:20px;">
-        </el-input>
+        <label>
+          <span class="startUp">启动配置</span>[JSON]:
+        </label>
+        <el-input type="textarea" :rows="18" v-model="vcConfig" style="margin-top:20px;"></el-input>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addconcentrator= false" style="float:left">关闭</el-button>
@@ -257,20 +255,20 @@ import {
   submittime,
   timetounix,
   startconnect,
-  addcon,
+  addcon
 } from "@/api/login";
-import Parse from 'parse'
+import Parse from "parse";
 export default {
   data() {
     return {
       // value2: true,
       //  value1: true,
-      loading:true,
+      loading: true,
       value6: true,
       value7: false,
       start: 0,
       length: 10,
-      total: 100,
+      total: 0,
       tableData3: [],
       checktimedialog: false,
       dialogVisible: false,
@@ -298,69 +296,69 @@ export default {
         mainchannel: "",
         tcporudp: ""
       },
-      concenForm:{
-        vcaddr:''
+      concenForm: {
+        vcaddr: ""
       },
-      addconcentrator:false,
-      vcConfig:{
-      "channel_mod": 1,
-      "local_ip": "127.0.0.1",
-      "local_port": 9001,
-      "local_mask": "255.255.000.001",
-      "local_gateway": "172.016.023.255",
-      "get_ip_mod": 1,
-      "remote_ip": "183.129.189.154",
-      "remote_port": 65004,
-      "channel_type": 2,
-      "hb_interval": 60,
-      "recall_interval": 30,
-      "recall_times": 3,
-      "tcp_or_udp": 0
-    },
-    vcaddrid:'',
-    jsondata:{
-
-    }
-    }
+      addconcentrator: false,
+      vcConfig: {
+        channel_mod: 1,
+        local_ip: "127.0.0.1",
+        local_port: 9001,
+        local_mask: "255.255.000.001",
+        local_gateway: "172.016.023.255",
+        get_ip_mod: 1,
+        remote_ip: "183.129.189.154",
+        remote_port: 65004,
+        channel_type: 2,
+        hb_interval: 60,
+        recall_interval: 30,
+        recall_times: 3,
+        tcp_or_udp: 0
+      },
+      vcaddrid: "",
+      jsondata: {}
+    };
   },
   mounted() {
     // this.getinformation();
-    this.vcConfig = JSON.stringify(this.vcConfig,null,4)
-    this.getAllConcentrator()
+    this.vcConfig = JSON.stringify(this.vcConfig, null, 4);
+    this.getAllConcentrator();
   },
   methods: {
-    getAllConcentrator(){
-      var Vcon = Parse.Object.extend('Vcon')
-      var vcon = new Parse.Query(Vcon)
-     
-      if(this.vcaddr!=''){
-        vcon.equalTo('vcaddr',this.vcaddr)
+    getAllConcentrator() {
+      var Vcon = Parse.Object.extend("Vcon");
+      var vcon = new Parse.Query(Vcon);
+
+      if (this.vcaddr != "") {
+        vcon.equalTo("vcaddr", this.vcaddr);
       }
-      vcon.skip(this.start)
-      vcon.limit(this.length)
-      vcon.count().then(count=>{
-        this.total = count
-        vcon.find().then(resultes=>{
-            this.tableData3 = resultes
-          this.loading=false
-        })
-      },
-      error => {
-            if (error.code == "209") {
-              this.$message({
-                type: "warning",
-                message: "登陆权限过期，请重新登录"
-              });
-              this.$router.push({
-                path: "/login"
-              });
-            } else if (error.code == 119) {
-              this.$message({
-                type: "error",
-                message: "没有操作权限"
-              });
-            }
-          })
+      vcon.skip(this.start);
+      vcon.limit(this.length);
+      vcon.count().then(
+        count => {
+          this.total = count;
+          vcon.find().then(resultes => {
+            this.tableData3 = resultes;
+            this.loading = false;
+          });
+        },
+        error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          }
+        }
+      );
     },
     Closechecktime() {
       this.checktimedialog = false;
@@ -369,19 +367,32 @@ export default {
       this.multipleSelection = val;
     },
     timestampToTime(timestamp) {
-    var date = new Date(timestamp * 1000) 
-    var Y = date.getFullYear() + '-';
-    var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
-    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
-    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
-    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
-    return Y+M+D+h+m+s;
-  },
-    handleEdit(index, row,id) {
-      this.vcaddrid = id
-      this.sizeForm.vcaddr = row.vcaddr
-      this.sizeForm.ipaddress = row.jsondata.local_ip
+      var date = new Date(timestamp * 1000);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 <= 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D =
+        (date.getDate() + 1 <= 10 ? "0" + date.getDate() : date.getDate()) +
+        " ";
+      var h =
+        (date.getHours() + 1 <= 10 ? "0" + date.getHours() : date.getHours()) +
+        ":";
+      var m =
+        (date.getMinutes() + 1 <= 10
+          ? "0" + date.getMinutes()
+          : date.getMinutes()) + ":";
+      var s =
+        date.getSeconds() + 1 <= 10
+          ? "0" + date.getSeconds()
+          : date.getSeconds();
+      return Y + M + D + h + m + s;
+    },
+    handleEdit(index, row, id) {
+      this.vcaddrid = id;
+      this.sizeForm.vcaddr = row.vcaddr;
+      this.sizeForm.ipaddress = row.jsondata.local_ip;
       this.sizeForm.type = row.jsondata.remote_param.channel_type;
       this.sizeForm.hbinterval = row.jsondata.hb_interval;
       this.sizeForm.port = row.jsondata.local_port;
@@ -396,10 +407,9 @@ export default {
       this.sizeForm.region = String(row.jsondata.channel_mod);
       this.sizeForm.mainchannel = Number(row.jsondata.master_channel);
       this.dialogVisible = true;
-      for(var key in row.jsondata){
-        this.jsondata[key] = row.jsondata[key]
+      for (var key in row.jsondata) {
+        this.jsondata[key] = row.jsondata[key];
       }
-     
     },
     handledetail(index, row) {
       this.$router.push({
@@ -409,65 +419,68 @@ export default {
     },
     handleSizeChange(val) {
       this.length = val;
-      this.getAllConcentrator()
+      this.getAllConcentrator();
     },
     handleCurrentChange(val) {
       this.start = (val - 1) * this.length;
-      this.getAllConcentrator()
+      this.getAllConcentrator();
     },
     //编辑
     Makesureedit() {
-        this.jsondata.vcaddr=this.sizeForm.vcaddr,
-        this.jsondata.local_ip= this.sizeForm.ipaddress,
-       this.jsondata.remote_param.channel_type= this.sizeForm.type,
-       this.jsondata.hb_interval= this.sizeForm.hbinterval,
-        this.jsondata.local_port=this.sizeForm.port,
-        this.jsondata.recall_interval= this.sizeForm.notonline,
-        this.jsondata.local_mask=this.sizeForm.localmask,
-        this.jsondata.recall_times= this.sizeForm.recalltimes,
-        this.jsondata.local_gateway= this.sizeForm.localgateway,
-        this.jsondata.remote_param.remote_ip= this.sizeForm.localip,
-        this.jsondata.get_ip_mod= this.sizeForm.ipgetway,
-        this.jsondata.remote_param.remote_port= this.sizeForm.remoteport,
-        this.jsondata.tcp_or_udp= this.sizeForm.tcporudp,
-        this.jsondata.channel_mod= this.sizeForm.region,
-        this.jsondata.master_channel=this.sizeForm.mainchannel
-          var Vcon = Parse.Object.extend('Vcon')
-          var vcon = new Vcon()
-          vcon.id = this.vcaddrid
-          vcon.set('jsondata',this.jsondata)
-          vcon.save().then(resultes=>{
-            if(resultes){
-              this.$message({
-                type:'success',
-                message:'编辑成功'
-              })
-              this.dialogVisible=false
-              this.getAllConcentrator()
-            }
-          },error => {
-            if (error.code == "209") {
-              this.$message({
-                type: "warning",
-                message: "登陆权限过期，请重新登录"
-              });
-              this.$router.push({
-                path: "/login"
-              });
-            } else if (error.code == 119) {
-              this.$message({
-                type: "error",
-                message: "没有操作权限"
-              });
-            }
-          })
+      (this.jsondata.vcaddr = this.sizeForm.vcaddr),
+        (this.jsondata.local_ip = this.sizeForm.ipaddress),
+        (this.jsondata.remote_param.channel_type = this.sizeForm.type),
+        (this.jsondata.hb_interval = this.sizeForm.hbinterval),
+        (this.jsondata.local_port = this.sizeForm.port),
+        (this.jsondata.recall_interval = this.sizeForm.notonline),
+        (this.jsondata.local_mask = this.sizeForm.localmask),
+        (this.jsondata.recall_times = this.sizeForm.recalltimes),
+        (this.jsondata.local_gateway = this.sizeForm.localgateway),
+        (this.jsondata.remote_param.remote_ip = this.sizeForm.localip),
+        (this.jsondata.get_ip_mod = this.sizeForm.ipgetway),
+        (this.jsondata.remote_param.remote_port = this.sizeForm.remoteport),
+        (this.jsondata.tcp_or_udp = this.sizeForm.tcporudp),
+        (this.jsondata.channel_mod = this.sizeForm.region),
+        (this.jsondata.master_channel = this.sizeForm.mainchannel);
+      var Vcon = Parse.Object.extend("Vcon");
+      var vcon = new Vcon();
+      vcon.id = this.vcaddrid;
+      vcon.set("jsondata", this.jsondata);
+      vcon.save().then(
+        resultes => {
+          if (resultes) {
+            this.$message({
+              type: "success",
+              message: "编辑成功"
+            });
+            this.dialogVisible = false;
+            this.getAllConcentrator();
+          }
+        },
+        error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          }
+        }
+      );
     },
     //搜索
     search() {
       this.start = 0;
       this.length = 10;
       this.draw++;
-     this.getAllConcentrator()
+      this.getAllConcentrator();
     },
     //启动
     startdev() {
@@ -481,20 +494,22 @@ export default {
           type: "warning"
         });
       } else {
-        startcon(this.addrs).then(res => {
-          if (res) {
+        startcon(this.addrs)
+          .then(res => {
+            if (res) {
+              this.$message({
+                message: "成功启动",
+                type: "success"
+              });
+              this.getAllConcentrator();
+            }
+          })
+          .catch(error => {
             this.$message({
-              message: "成功启动",
-              type: "success"
-            });
-           this.getAllConcentrator()
-          }
-        }).catch(error=>{
-        this.$message({
               message: error.error,
               type: "error"
             });
-      });
+          });
       }
     },
     //停止
@@ -509,20 +524,22 @@ export default {
           type: "warning"
         });
       } else {
-        stopcon(this.addrs).then(res => {
-          if (res) {
+        stopcon(this.addrs)
+          .then(res => {
+            if (res) {
+              this.$message({
+                message: "成功关闭",
+                type: "success"
+              });
+              this.getAllConcentrator();
+            }
+          })
+          .catch(error => {
             this.$message({
-              message: "成功关闭",
-              type: "success"
-            });
-            this.getAllConcentrator()
-          }
-        }).catch(error=>{
-        this.$message({
               message: error.error,
               type: "error"
             });
-      });
+          });
       }
     },
     //校时
@@ -544,79 +561,86 @@ export default {
     //连主站
     connect(val) {
       this.vcaddr = val;
-      startconnect(this.vcaddr).then(res => {
-        if (res) {
-          this.$message({
-            message: "主站连接成功",
-            type: "success"
-          });
-          this.vcaddr = "";
-          this.getAllConcentrator()
-        }
-      }).catch(error=>{
-        this.$message({
-              message: error.error,
-              type: "error"
+      startconnect(this.vcaddr)
+        .then(res => {
+          if (res) {
+            this.$message({
+              message: "主站连接成功",
+              type: "success"
             });
-      });
+            this.vcaddr = "";
+            this.getAllConcentrator();
+          }
+        })
+        .catch(error => {
+          this.$message({
+            message: error.error,
+            type: "error"
+          });
+        });
     },
     //提交
     submitchecktime() {
       if (this.vcaddrs.length > 0) {
-        submittime(timetounix(this.unixtime), this.vcaddrs).then(res => {
-          if (res) {
+        submittime(timetounix(this.unixtime), this.vcaddrs)
+          .then(res => {
+            if (res) {
+              this.$message({
+                message: "校时成功",
+                type: "success"
+              });
+              this.getAllConcentrator();
+            }
+          })
+          .catch(error => {
             this.$message({
-              message: "校时成功",
-              type: "success"
-            });
-            this.getAllConcentrator()
-          }
-        }).catch(error=>{
-        this.$message({
               message: error.error,
               type: "error"
             });
-      });
+          });
       } else {
-        submittime(timetounix(this.unixtime)).then(res => {
-          if (res) {
+        submittime(timetounix(this.unixtime))
+          .then(res => {
+            if (res) {
+              this.$message({
+                message: "校时成功",
+                type: "success"
+              });
+              this.getAllConcentrator();
+            }
+          })
+          .catch(error => {
             this.$message({
-              message: "校时成功",
-              type: "success"
-            });
-            this.getAllConcentrator()
-          }
-        }).catch(error=>{
-        this.$message({
               message: error.error,
               type: "error"
             });
-      });
+          });
       }
       this.checktimedialog = false;
     },
-    uploadadd(){
-      this.addconcentrator = true
+    uploadadd() {
+      this.addconcentrator = true;
     },
-    addconcen(){
-      var config = JSON.parse(this.vcConfig)
-      config .vcaddr = this.concenForm.vcaddr
-      addcon(config).then(response=>{
-        if(response){
-           this.$message({
+    addconcen() {
+      var config = JSON.parse(this.vcConfig);
+      config.vcaddr = this.concenForm.vcaddr;
+      addcon(config)
+        .then(response => {
+          if (response) {
+            this.$message({
               message: "新增/更新成功",
               type: "success"
-            })
-            this.addconcentrator = false
-            this.getinformation()
- 
-        }
-      }).catch(error=>{
-        this.$message({
-              message: error.error,
-              type: "warning"
             });
-      })
+            this.addconcentrator = false;
+            this.getinformation();
+          }
+        })
+        .catch(error => {
+          this.$message({
+            message: error.error,
+            type: "warning"
+          });
+        });
     }
   }
 };

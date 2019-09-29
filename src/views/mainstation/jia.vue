@@ -566,7 +566,7 @@ export default {
       })
        var DataItem = Parse.Object.extend('DataItem')
           var dataitem = new Parse.Query(DataItem)
-          dataitem.equalTo('itemType',this.formInline.operation)
+          // dataitem.equalTo('itemType',this.formInline.operation)
           dataitem.equalTo('leafname',val)
           dataitem.limit(1000)
           dataitem.ascending('itemCode')

@@ -3,7 +3,6 @@ import { Message } from 'element-ui'
 import store from '../store'
 import { getToken } from '@/utils/auth'
 import { promised } from 'q';
-
 // 创建axios实例
 axios.defaults.withCredentials =true
 

@@ -1,9 +1,6 @@
 <template>
   <div id="metersearch" style="display:flex;">
-    
-      <Resource1
-        @meterdetail="handleNodeClick"
-      />
+    <Resource1 @meterdetail="handleNodeClick" />
     <div style="width:calc(100% - 360px);">
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
         <el-form-item label="用户编号">
@@ -78,7 +75,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="PN值" align="center" show-overflow-tooltip> 
+          <el-table-column label="PN值" align="center" show-overflow-tooltip>
             <template slot-scope="scope">
               <span>{{scope.row.pn}}</span>
             </template>
@@ -188,148 +185,161 @@
 
             <!-- 电表信息 -->
             <el-divider></el-divider>
-            <div style="display:flex;justify-content:space-between;width:100%;padding:0 10%;line-height:0;">
+            <div
+              style="display:flex;justify-content:space-between;width:100%;padding:0 10%;line-height:0;"
+            >
               <p style="font-size:20px;font-weight:500;">电表信息(选填)</p>
-              <el-button type="info" style="padding:10px;" @click="handleClickUpdateShow">{{updateShow?'隐藏':'显示'}}</el-button>
+              <el-button
+                type="info"
+                style="padding:10px;"
+                @click="handleClickUpdateShow"
+              >{{updateShow?'隐藏':'显示'}}</el-button>
             </div>
-            <div v-show="updateShow" style="display:flex;flex-wrap: wrap;justify-content: space-around;">
+            <div
+              v-show="updateShow"
+              style="display:flex;flex-wrap: wrap;justify-content: space-around;"
+            >
               <el-form-item label="资产编号" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.zcbh" autocomplete="off" placeholder="请输入资产标号编号"></el-input>
-            </el-form-item>
-            <el-form-item label="出厂编号" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.ccbh" autocomplete="off" placeholder="请输入出厂编号"></el-input>
-            </el-form-item>
-            <el-form-item label="远程控制密码" :label-width="formLabelWidth">
-              <el-input show-password v-model="mod_form.dbmm" autocomplete="off" placeholder="请输入远程控制密码"></el-input>
-            </el-form-item>
-            <el-form-item label="采集器编号" :label-width="formLabelWidth">
-              <el-input show-password v-model="mod_form.deveui" autocomplete="off" placeholder="请输入采集编号"></el-input>
-            </el-form-item>
-            <el-form-item label="注册应用号" :label-width="formLabelWidth">
-              <el-input show-password v-model="mod_form.appeui" autocomplete="off" placeholder="请输入注册应用号"></el-input>
-            </el-form-item>
-            <el-form-item label="计量点编号" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.jldbh" autocomplete="off" placeholder="请输入计量点编号"></el-input>
-            </el-form-item>
-            <el-form-item label="投运时间" :label-width="formLabelWidth">
-              <el-date-picker
-                v-model="mod_form.tysj"
-                type="date"
-                placeholder="选择日期">
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item label="上次检验日期" :label-width="formLabelWidth">
-              <el-date-picker
-                v-model="mod_form.scjyrq"
-                type="date"
-                placeholder="选择日期">
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item label="到货批次号" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.dhpc" autocomplete="off" placeholder="请输入到货批次号"></el-input>
-            </el-form-item>
-            <el-form-item label="综合倍率" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.zhbl" autocomplete="off" placeholder="请输入综合倍率"></el-input>
-            </el-form-item>
-            <el-form-item label="抄表区段" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.cbqd" autocomplete="off" placeholder="请输入抄表区段"></el-input>
-            </el-form-item>
-            <el-form-item label="线路" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.xl" autocomplete="off" placeholder="请输入线路"></el-input>
-            </el-form-item>
-            <el-form-item label="厂站" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.cz" autocomplete="off" placeholder="请输入厂站"></el-input>
-            </el-form-item>
-            <el-form-item label="额定电压" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.eddy" autocomplete="off" placeholder="请输入额定电压"></el-input>
-            </el-form-item>
-            <el-form-item label="标定电流" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.bddl" autocomplete="off" placeholder="请输入标定电流"></el-input>
-            </el-form-item>
-            <el-form-item label="准确率" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.zqd" autocomplete="off" placeholder="请输入准确率"></el-input>
-            </el-form-item>
-            <el-form-item label="生产厂家" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.sccj" autocomplete="off" placeholder="请输入生产厂家"></el-input>
-            </el-form-item>
-            <el-form-item label="主副表标志" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.zfbbz" autocomplete="off" placeholder="请输入主副表标志"></el-input>
-            </el-form-item>
-            <el-form-item label="计量点位置" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.jldwz" autocomplete="off" placeholder="请输入计量点位置"></el-input>
-            </el-form-item>
-            <el-form-item label="计量点地址" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.jlddz" autocomplete="off" placeholder="请输入计量点地址"></el-input>
-            </el-form-item>
-            <el-form-item label="通信规约" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.txgw" autocomplete="off" placeholder="请输入通信规约"></el-input>
-            </el-form-item>
-            <el-form-item label="逻辑地址" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.ljdz" autocomplete="off" placeholder="请输入逻辑地址"></el-input>
-            </el-form-item>
-            <el-form-item label="波特率" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.btl" autocomplete="off" placeholder="请输入波特率"></el-input>
-            </el-form-item>
-            <el-form-item label="计量表箱(柜)" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.jlbx" autocomplete="off" placeholder="请输入计量表箱(柜)"></el-input>
-            </el-form-item>
-            <el-form-item label="箱(柜)位置号" :label-width="formLabelWidth">
-              <el-input v-model="mod_form.xgwzh" autocomplete="off" placeholder="请输入箱(柜)位置号"></el-input>
-            </el-form-item>
-            <el-form-item label="计量装置分类" :label-width="formLabelWidth">
-              <el-select v-model="mod_form.jlzzfl" clearable placeholder="请选择计量装置分类">
-                <el-option
-                  v-for="item of mod_form.jlzzfl_arr"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="通信方式" :label-width="formLabelWidth">
-              <el-select v-model="mod_form.txfs" clearable placeholder="请选择通信方式">
-                <el-option
-                  v-for="item of mod_form.txfs_arr"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="计量方式" :label-width="formLabelWidth">
-              <el-select v-model="mod_form.jlfs" clearable placeholder="请选择计量方式">
-                <el-option
-                  v-for="item of mod_form.jlfs_arr"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="设备类别" :label-width="formLabelWidth">
-              <el-select v-model="mod_form.sblx" clearable placeholder="请选择设备类别">
-                <el-option
-                  v-for="item of mod_form.sblx_arr"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="设备类型" :label-width="formLabelWidth">
-              <el-select v-model="mod_form.sblx" clearable placeholder="请选择设备类型">
-                <el-option
-                  v-for="item of mod_form.sblx_arr"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-form-item>
+                <el-input v-model="mod_form.zcbh" autocomplete="off" placeholder="请输入资产标号编号"></el-input>
+              </el-form-item>
+              <el-form-item label="出厂编号" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.ccbh" autocomplete="off" placeholder="请输入出厂编号"></el-input>
+              </el-form-item>
+              <el-form-item label="远程控制密码" :label-width="formLabelWidth">
+                <el-input
+                  show-password
+                  v-model="mod_form.dbmm"
+                  autocomplete="off"
+                  placeholder="请输入远程控制密码"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="采集器编号" :label-width="formLabelWidth">
+                <el-input
+                  show-password
+                  v-model="mod_form.deveui"
+                  autocomplete="off"
+                  placeholder="请输入采集编号"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="注册应用号" :label-width="formLabelWidth">
+                <el-input
+                  show-password
+                  v-model="mod_form.appeui"
+                  autocomplete="off"
+                  placeholder="请输入注册应用号"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="计量点编号" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.jldbh" autocomplete="off" placeholder="请输入计量点编号"></el-input>
+              </el-form-item>
+              <el-form-item label="投运时间" :label-width="formLabelWidth">
+                <el-date-picker v-model="mod_form.tysj" type="date" placeholder="选择日期"></el-date-picker>
+              </el-form-item>
+              <el-form-item label="上次检验日期" :label-width="formLabelWidth">
+                <el-date-picker v-model="mod_form.scjyrq" type="date" placeholder="选择日期"></el-date-picker>
+              </el-form-item>
+              <el-form-item label="到货批次号" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.dhpc" autocomplete="off" placeholder="请输入到货批次号"></el-input>
+              </el-form-item>
+              <el-form-item label="综合倍率" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.zhbl" autocomplete="off" placeholder="请输入综合倍率"></el-input>
+              </el-form-item>
+              <el-form-item label="抄表区段" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.cbqd" autocomplete="off" placeholder="请输入抄表区段"></el-input>
+              </el-form-item>
+              <el-form-item label="线路" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.xl" autocomplete="off" placeholder="请输入线路"></el-input>
+              </el-form-item>
+              <el-form-item label="厂站" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.cz" autocomplete="off" placeholder="请输入厂站"></el-input>
+              </el-form-item>
+              <el-form-item label="额定电压" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.eddy" autocomplete="off" placeholder="请输入额定电压"></el-input>
+              </el-form-item>
+              <el-form-item label="标定电流" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.bddl" autocomplete="off" placeholder="请输入标定电流"></el-input>
+              </el-form-item>
+              <el-form-item label="准确率" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.zqd" autocomplete="off" placeholder="请输入准确率"></el-input>
+              </el-form-item>
+              <el-form-item label="生产厂家" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.sccj" autocomplete="off" placeholder="请输入生产厂家"></el-input>
+              </el-form-item>
+              <el-form-item label="主副表标志" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.zfbbz" autocomplete="off" placeholder="请输入主副表标志"></el-input>
+              </el-form-item>
+              <el-form-item label="计量点位置" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.jldwz" autocomplete="off" placeholder="请输入计量点位置"></el-input>
+              </el-form-item>
+              <el-form-item label="计量点地址" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.jlddz" autocomplete="off" placeholder="请输入计量点地址"></el-input>
+              </el-form-item>
+              <el-form-item label="通信规约" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.txgw" autocomplete="off" placeholder="请输入通信规约"></el-input>
+              </el-form-item>
+              <el-form-item label="逻辑地址" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.ljdz" autocomplete="off" placeholder="请输入逻辑地址"></el-input>
+              </el-form-item>
+              <el-form-item label="波特率" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.btl" autocomplete="off" placeholder="请输入波特率"></el-input>
+              </el-form-item>
+              <el-form-item label="计量表箱(柜)" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.jlbx" autocomplete="off" placeholder="请输入计量表箱(柜)"></el-input>
+              </el-form-item>
+              <el-form-item label="箱(柜)位置号" :label-width="formLabelWidth">
+                <el-input v-model="mod_form.xgwzh" autocomplete="off" placeholder="请输入箱(柜)位置号"></el-input>
+              </el-form-item>
+              <el-form-item label="计量装置分类" :label-width="formLabelWidth">
+                <el-select v-model="mod_form.jlzzfl" clearable placeholder="请选择计量装置分类">
+                  <el-option
+                    v-for="item of mod_form.jlzzfl_arr"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="通信方式" :label-width="formLabelWidth">
+                <el-select v-model="mod_form.txfs" clearable placeholder="请选择通信方式">
+                  <el-option
+                    v-for="item of mod_form.txfs_arr"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="计量方式" :label-width="formLabelWidth">
+                <el-select v-model="mod_form.jlfs" clearable placeholder="请选择计量方式">
+                  <el-option
+                    v-for="item of mod_form.jlfs_arr"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="设备类别" :label-width="formLabelWidth">
+                <el-select v-model="mod_form.sblx" clearable placeholder="请选择设备类别">
+                  <el-option
+                    v-for="item of mod_form.sblx_arr"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="设备类型" :label-width="formLabelWidth">
+                <el-select v-model="mod_form.sblx" clearable placeholder="请选择设备类型">
+                  <el-option
+                    v-for="item of mod_form.sblx_arr"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
             </div>
-            
-            
-            
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -364,10 +374,20 @@
               <el-input v-model="add_form.tq" autocomplete="off" placeholder="请输入台区名称"></el-input>
             </el-form-item>
             <el-form-item label="集中器地址" prop="addr" :label-width="formLabelWidth">
-              <el-input v-model="add_form.vcaddr" :disabled="isvcaddr" autocomplete="off" placeholder="请输入集中器地址"></el-input>
+              <el-input
+                v-model="add_form.vcaddr"
+                :disabled="isvcaddr"
+                autocomplete="off"
+                placeholder="请输入集中器地址"
+              ></el-input>
             </el-form-item>
             <el-form-item label="电能表地址" prop="addr" :label-width="formLabelWidth">
-              <el-input v-model="add_form.addr" :disabled="isaddr" autocomplete="off" placeholder="请输入电能表地址"></el-input>
+              <el-input
+                v-model="add_form.addr"
+                :disabled="isaddr"
+                autocomplete="off"
+                placeholder="请输入电能表地址"
+              ></el-input>
             </el-form-item>
             <el-form-item label="PN值" :label-width="formLabelWidth">
               <el-input v-model="add_form.pn" autocomplete="off" placeholder="请输入PN值"></el-input>
@@ -406,11 +426,20 @@
 
             <!-- 电表信息 -->
             <el-divider></el-divider>
-            <div style="display:flex;justify-content:space-between;width:100%;padding:0 10%;line-height:0;">
+            <div
+              style="display:flex;justify-content:space-between;width:100%;padding:0 10%;line-height:0;"
+            >
               <p style="font-size:20px;font-weight:500;">电表信息(选填)</p>
-              <el-button type="info" style="padding:10px;" @click="handleClickAddShow">{{addShow?'隐藏':'显示'}}</el-button>
+              <el-button
+                type="info"
+                style="padding:10px;"
+                @click="handleClickAddShow"
+              >{{addShow?'隐藏':'显示'}}</el-button>
             </div>
-            <div v-show="addShow" style="display:flex;flex-wrap: wrap;justify-content: space-around;">
+            <div
+              v-show="addShow"
+              style="display:flex;flex-wrap: wrap;justify-content: space-around;"
+            >
               <el-form-item label="资产编号" :label-width="formLabelWidth">
                 <el-input v-model="add_form.zcbh" autocomplete="off" placeholder="请输入资产标号编号"></el-input>
               </el-form-item>
@@ -418,30 +447,37 @@
                 <el-input v-model="add_form.ccbh" autocomplete="off" placeholder="请输入出厂编号"></el-input>
               </el-form-item>
               <el-form-item label="远程控制密码" :label-width="formLabelWidth">
-                <el-input show-password v-model="add_form.dbmm" autocomplete="off" placeholder="请输入远程控制密码"></el-input>
+                <el-input
+                  show-password
+                  v-model="add_form.dbmm"
+                  autocomplete="off"
+                  placeholder="请输入远程控制密码"
+                ></el-input>
               </el-form-item>
               <el-form-item label="采集器编号" :label-width="formLabelWidth">
-                <el-input show-password v-model="add_form.deveui" autocomplete="off" placeholder="请输入采集器编号"></el-input>
+                <el-input
+                  show-password
+                  v-model="add_form.deveui"
+                  autocomplete="off"
+                  placeholder="请输入采集器编号"
+                ></el-input>
               </el-form-item>
               <el-form-item label="注册应用号" :label-width="formLabelWidth">
-                <el-input show-password v-model="add_form.appeui" autocomplete="off" placeholder="请输入注册应用号"></el-input>
+                <el-input
+                  show-password
+                  v-model="add_form.appeui"
+                  autocomplete="off"
+                  placeholder="请输入注册应用号"
+                ></el-input>
               </el-form-item>
               <el-form-item label="计量点编号" :label-width="formLabelWidth">
                 <el-input v-model="add_form.jldbh" autocomplete="off" placeholder="请输入计量点编号"></el-input>
               </el-form-item>
               <el-form-item label="投运时间" :label-width="formLabelWidth">
-                <el-date-picker
-                  v-model="add_form.tysj"
-                  type="date"
-                  placeholder="选择日期">
-                </el-date-picker>
+                <el-date-picker v-model="add_form.tysj" type="date" placeholder="选择日期"></el-date-picker>
               </el-form-item>
               <el-form-item label="上次检验日期" :label-width="formLabelWidth">
-                <el-date-picker
-                  v-model="add_form.scjyrq"
-                  type="date"
-                  placeholder="选择日期">
-                </el-date-picker>
+                <el-date-picker v-model="add_form.scjyrq" type="date" placeholder="选择日期"></el-date-picker>
               </el-form-item>
               <el-form-item label="到货批次号" :label-width="formLabelWidth">
                 <el-input v-model="add_form.dhpc" autocomplete="off" placeholder="请输入到货批次号"></el-input>
@@ -644,7 +680,7 @@ import {
 } from "@/api/login";
 // 引入element-china-area-data地址三级联动
 import { regionData, CodeToText } from "element-china-area-data";
-import { addmeterforuser,CountAll } from "@/api/filemanage";
+import { addmeterforuser, CountAll } from "@/api/filemanage";
 import Parse from "parse";
 import FileSaver from "file-saver";
 import XLSX from "xlsx";
@@ -671,15 +707,15 @@ export default {
     };
     return {
       // 新增集中器和电表是否可用
-      isaddr:false,
-      isvcaddr:false,
+      isaddr: false,
+      isvcaddr: false,
       // 表格加载中
       loading: true,
       // 地址三级联动
       options: regionData,
       // 新增内容
       add_form: {
-        dbmm:"",
+        dbmm: "",
         gsmc: "", //公司名称
         yhabh: "",
         vcaddr: "",
@@ -690,44 +726,47 @@ export default {
         addr: "",
         yhdz: "",
         cblx: "",
-        cblx_arr: [{ label: "虚拟通道", value: 1 },{ label: "物理通道", value: 2 }],
+        cblx_arr: [
+          { label: "虚拟通道", value: 1 },
+          { label: "物理通道", value: 2 }
+        ],
         addr: [], //三级地址
         provinces: "", //省市区
-        gddw: "",//供电单位
-        yhlb:"",//用户类别
-        yhlb_arr:[{ label: "公变客户", value: 1 }],
-        zcbh:"",//资产编号
-        jldbh:"",//计量点编号
-        sblb:"",//设备类别
-        sblb_arr:[{ label: "电能表", value: 1 }],
-        sblx:"",//设备类型
-        sblx_arr:[{ label: "单相电子式电能表", value: 1 }],
-        ccbh:"",//出厂编号
-        tysj:new Date().getTime(),//投运时间
-        dhpc:"",//到货批次号
-        zhbl:"",//综合倍率
-        cbqd:"",//抄表区段
-        xl:"",//线路
-        cz:"",//厂站
-        eddy:"",//额定电压
-        bddl:"",//标定电流
-        zqd:"",//准确率
-        sccj:"",//生产厂家
-        jlzzfl:"",//计量装置分类
-        jlfs:"",//计量方式
-        zfbbz:"",//祝福表标志
-        jldwz:"",//计量点位置
-        jlddz:"",//计量点地址
-        scjyrq:new Date().getTime(),//上次验证日期
-        txfs:"",//通信方式
-        txfs_arr:[{ label: "低供低计", value: 1 }],
-        txgw:"",//通信规约
-        ljdz:"",//逻辑地址
-        btl:"",//波特率
-        jlbx:"",//计量表箱
-        xgwzh:"",//箱位置号
-        deveui:"",//采集器编号
-        appeui:"",//注册应用号
+        gddw: "", //供电单位
+        yhlb: "", //用户类别
+        yhlb_arr: [{ label: "公变客户", value: 1 }],
+        zcbh: "", //资产编号
+        jldbh: "", //计量点编号
+        sblb: "", //设备类别
+        sblb_arr: [{ label: "电能表", value: 1 }],
+        sblx: "", //设备类型
+        sblx_arr: [{ label: "单相电子式电能表", value: 1 }],
+        ccbh: "", //出厂编号
+        tysj: new Date().getTime(), //投运时间
+        dhpc: "", //到货批次号
+        zhbl: "", //综合倍率
+        cbqd: "", //抄表区段
+        xl: "", //线路
+        cz: "", //厂站
+        eddy: "", //额定电压
+        bddl: "", //标定电流
+        zqd: "", //准确率
+        sccj: "", //生产厂家
+        jlzzfl: "", //计量装置分类
+        jlfs: "", //计量方式
+        zfbbz: "", //祝福表标志
+        jldwz: "", //计量点位置
+        jlddz: "", //计量点地址
+        scjyrq: new Date().getTime(), //上次验证日期
+        txfs: "", //通信方式
+        txfs_arr: [{ label: "低供低计", value: 1 }],
+        txgw: "", //通信规约
+        ljdz: "", //逻辑地址
+        btl: "", //波特率
+        jlbx: "", //计量表箱
+        xgwzh: "", //箱位置号
+        deveui: "", //采集器编号
+        appeui: "" //注册应用号
       },
       // 表单验证
       rules: {
@@ -744,39 +783,39 @@ export default {
         vcaddr: "集中器地址",
         addr: "电能表地址",
         pn: "PN值",
-        yhlb:"用户类别",
+        yhlb: "用户类别",
         cblx: "通道类型",
         deveui: "采集器编号",
         appeui: "应用编号",
         yhdz: "用户地址",
-        zcbh:"资产编号",
-        sb:"设备类别",
-        sblx:"设备类型",
-        sccj:"生产厂家",
-        ccbh:"出厂编号",
-        txfs:"通信方式",
-        txgw:"通信规约",
-        ljdz:"逻辑地址",
-        dbmm:"远程控制密码",
-        btl:"波特率",
-        zhbl:"综合倍率",
-        eddy:"额定电压",
-        bddl:"标定电流",
-        zqd:"准确度",
-        dhpc:"到货批次号",
-        tysj:"投运时间",
-        cbqd:"抄表区段",
-        xl:"线路",
-        cz:"厂站",
-        jlzzfl:"计量装置分类",
-        jlfs:"计量方式",
-        zfbbz:"主副表标志",
-        jldbh:"计量点编号",
-        jldwz:"计量点位置",
-        jlddz:"计量点地址",
-        scjyrq:"上次检验日期",
-        jlbx:"计量表箱(柜)",
-        xgwzh:"箱(柜)位置号"
+        zcbh: "资产编号",
+        sb: "设备类别",
+        sblx: "设备类型",
+        sccj: "生产厂家",
+        ccbh: "出厂编号",
+        txfs: "通信方式",
+        txgw: "通信规约",
+        ljdz: "逻辑地址",
+        dbmm: "远程控制密码",
+        btl: "波特率",
+        zhbl: "综合倍率",
+        eddy: "额定电压",
+        bddl: "标定电流",
+        zqd: "准确度",
+        dhpc: "到货批次号",
+        tysj: "投运时间",
+        cbqd: "抄表区段",
+        xl: "线路",
+        cz: "厂站",
+        jlzzfl: "计量装置分类",
+        jlfs: "计量方式",
+        zfbbz: "主副表标志",
+        jldbh: "计量点编号",
+        jldwz: "计量点位置",
+        jlddz: "计量点地址",
+        scjyrq: "上次检验日期",
+        jlbx: "计量表箱(柜)",
+        xgwzh: "箱(柜)位置号"
       },
       // 模板的示例
       Config_tmp: {
@@ -786,43 +825,43 @@ export default {
         vcaddr: "集中器地址为12位,集中器地址不能相同",
         addr: "电表地址为12位,电表地址不能相同",
         pn: "0-2000,同一个集中器pn不能相同",
-        yhlb:"[公变普通用户][公变大客户][专变用户]",
+        yhlb: "[公变普通用户][公变大客户][专变用户]",
         cblx: "[虚拟通道][物理通道]",
         deveui: "c4c13b8fc4a39b0c",
         appeui: "c4cd82096a4837c1",
         yhdz: "广东省汕头市南澳县云澳镇南利嘉银都华轩商铺",
-        
-        zcbh:"03001SF00000271700107078",
-        sb:"电能表",
-        sblx:"[单相电子式电能表][三相电子式电能表]",
-        sccj:"生产厂家",
-        ccbh:"03001SF00000251700249151",
-        txfs:"通信方式",
-        txgw:"DL/T645",
-        ljdz:"逻辑地址",
-        dbmm:"远程控制密码",
-        btl:"2",
-        zhbl:"综合倍率",
-        eddy:"额定电压",
-        bddl:"标定电流",
-        zqd:"准确度",
-        dhpc:"到货批次号",
-        tysj:"投运时间",
-        cbqd:"抄表区段",
-        xl:"线路",
-        cz:"厂站",
-        jlzzfl:"计量装置分类",
-        jlfs:"低供低计",
-        zfbbz:"主副表标志",
-        jldbh:"1111111129145564",
-        jldwz:"用户测试",
-        jlddz:"计量点地址",
-        scjyrq:"上次检验日期",
-        jlbx:"计量表箱(柜)",
-        xgwzh:"箱(柜)位置号"
+
+        zcbh: "03001SF00000271700107078",
+        sb: "电能表",
+        sblx: "[单相电子式电能表][三相电子式电能表]",
+        sccj: "生产厂家",
+        ccbh: "03001SF00000251700249151",
+        txfs: "通信方式",
+        txgw: "DL/T645",
+        ljdz: "逻辑地址",
+        dbmm: "远程控制密码",
+        btl: "2",
+        zhbl: "综合倍率",
+        eddy: "额定电压",
+        bddl: "标定电流",
+        zqd: "准确度",
+        dhpc: "到货批次号",
+        tysj: "投运时间",
+        cbqd: "抄表区段",
+        xl: "线路",
+        cz: "厂站",
+        jlzzfl: "计量装置分类",
+        jlfs: "低供低计",
+        zfbbz: "主副表标志",
+        jldbh: "1111111129145564",
+        jldwz: "用户测试",
+        jlddz: "计量点地址",
+        scjyrq: "上次检验日期",
+        jlbx: "计量表箱(柜)",
+        xgwzh: "箱(柜)位置号"
       },
       // 当前行信息
-      now_row: "",
+      now_row: {},
       // 弹窗表单
       dialogFormVisible: false, //修改
       dialogFormVisibleAdd: false, //新增
@@ -837,45 +876,48 @@ export default {
         addr: "",
         yhdz: "",
         cblx: "",
-        cblx_arr: [{ label: "虚拟通道", value: 1 },{ label: "物理通道", value: 2 }],
+        cblx_arr: [
+          { label: "虚拟通道", value: 1 },
+          { label: "物理通道", value: 2 }
+        ],
         addr: [],
         provinces: "",
-        gddw:"",
-        yhlb:"",//用户类别
-        yhlb_arr:[{ label: "公变客户", value: 1 }],
-        zcbh:"",//资产编号
-        jldbh:"",//计量点编号
-        sblb:"",//设备类别
-        sblb_arr:[{ label: "电能表", value: 1 }],
-        sblx:"",//设备类型
-        sblx_arr:[{ label: "单相电子式电能表", value: 1 }],
-        ccbh:"",//出厂编号
-        tysj:new Date().getTime(),//投运时间
-        dhpc:"",//到货批次号
-        zhbl:"",//综合倍率
-        cbqd:"",//抄表区段
-        xl:"",//线路
-        cz:"",//厂站
-        eddy:"",//额定电压
-        bddl:"",//标定电流
-        zqd:"",//准确率
-        sccj:"",//生产厂家
-        jlzzfl:"",//计量装置分类
-        jlfs:"",//计量方式
-        zfbbz:"",//祝福表标志
-        jldwz:"",//计量点位置
-        jlddz:"",//计量点地址
-        scjyrq:new Date().getTime(),//上次验证日期
-        txfs:"",//通信方式
-        txfs_arr:[{ label: "低供低计", value: 1 }],
-        txgw:"",//通信规约
-        ljdz:"",//逻辑地址
-        btl:"",//波特率
-        jlbx:"",//计量表箱
-        xgwzh:"",//箱位置号
-        dbmm:"",//电表密码
-        deveui:"",//采集器编号
-        appeui:"",//注册应用号
+        gddw: "",
+        yhlb: "", //用户类别
+        yhlb_arr: [{ label: "公变客户", value: 1 }],
+        zcbh: "", //资产编号
+        jldbh: "", //计量点编号
+        sblb: "", //设备类别
+        sblb_arr: [{ label: "电能表", value: 1 }],
+        sblx: "", //设备类型
+        sblx_arr: [{ label: "单相电子式电能表", value: 1 }],
+        ccbh: "", //出厂编号
+        tysj: new Date().getTime(), //投运时间
+        dhpc: "", //到货批次号
+        zhbl: "", //综合倍率
+        cbqd: "", //抄表区段
+        xl: "", //线路
+        cz: "", //厂站
+        eddy: "", //额定电压
+        bddl: "", //标定电流
+        zqd: "", //准确率
+        sccj: "", //生产厂家
+        jlzzfl: "", //计量装置分类
+        jlfs: "", //计量方式
+        zfbbz: "", //祝福表标志
+        jldwz: "", //计量点位置
+        jlddz: "", //计量点地址
+        scjyrq: new Date().getTime(), //上次验证日期
+        txfs: "", //通信方式
+        txfs_arr: [{ label: "低供低计", value: 1 }],
+        txgw: "", //通信规约
+        ljdz: "", //逻辑地址
+        btl: "", //波特率
+        jlbx: "", //计量表箱
+        xgwzh: "", //箱位置号
+        dbmm: "", //电表密码
+        deveui: "", //采集器编号
+        appeui: "" //注册应用号
       },
       formLabelWidth: "120px",
       imgsrc: require("../../imgages/Artboard5.png"),
@@ -928,7 +970,7 @@ export default {
         country: "",
         province: "",
         city: "",
-        departmentid: '',
+        departmentid: "",
         organization: "",
         mode: "vconcentrator",
         version: "v1"
@@ -953,11 +995,11 @@ export default {
       demo: "",
       gsmc: "",
       gsmc_child: [], //选中的所有子
-      file:"",//文件
-      deriveWhere:[],//导出条件
-      addShow:false,//新增隐藏
-      updateShow:false,//修改隐藏
-      isshowonce:false
+      file: "", //文件
+      deriveWhere: [], //导出条件
+      addShow: false, //新增隐藏
+      updateShow: false, //修改隐藏
+      isshowonce: false
     };
   },
   mounted() {
@@ -965,154 +1007,205 @@ export default {
   },
   methods: {
     // 修改隐藏
-    handleClickUpdateShow(){
-      this.updateShow=!this.updateShow;
+    handleClickUpdateShow() {
+      this.updateShow = !this.updateShow;
     },
     // 新增隐藏
-    handleClickAddShow(){
-      this.addShow=!this.addShow;
+    handleClickAddShow() {
+      this.addShow = !this.addShow;
     },
     // 批量导入
     handleBatchClick() {
-      let file=this.$refs.file;
-      this.file=file;
+      let file = this.$refs.file;
+      this.file = file;
       file.click();
     },
-    handleFileChange(obj){
-      let wb;//读取完成的数据
+    handleFileChange(obj) {
+      let wb; //读取完成的数据
       let rABS = false; //是否将文件读取为二进制字符串
-      this.importf(obj,rABS,wb);
+      this.importf(obj, rABS, wb);
     },
     //导入
-    importf(obj,rABS,wb) {
-      if(!obj.files) {
-          return;
+    importf(obj, rABS, wb) {
+      if (!obj.files) {
+        return;
       }
       let f = obj.files[0];
       let reader = new FileReader();
-      reader.onload = e=>{
+      reader.onload = e => {
         let data = e.target.result;
-        if(rABS) {
-          wb = XLSX.read(btoa(this.fixdata(data)), {//手动转化
-              type: 'base64'
+        if (rABS) {
+          wb = XLSX.read(btoa(this.fixdata(data)), {
+            //手动转化
+            type: "base64"
           });
         } else {
           wb = XLSX.read(data, {
-              type: 'binary'
+            type: "binary"
           });
         }
-        console.log(wb)
+        console.log(wb);
         return;
         //wb.SheetNames[0]是获取Sheets中第一个Sheet的名字
         // //wb.Sheets[Sheet名]获取第一个Sheet的数据
         // 解析json
-        let json=JSON.parse(JSON.stringify(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{blankrows:true,defval:""})));
+        let json = JSON.parse(
+          JSON.stringify(
+            XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+              blankrows: true,
+              defval: ""
+            })
+          )
+        );
         console.log(json);
-        let head=["tq","yhabh","yhmc","vcaddr","addr","pn","yhlb","cblx","deveui","appeui","yhdz","zcbh","sb","sblx","sccj","ccbh","txfs","txgw","ljdz","dbmm","btl","zhbl","eddy","bddl","zqd","dhpc","tysj","cbqd","xl","cz","jlzzfl","jlfs","zfbbz","jldbh","jldwz","jlddz","scjyrq","dbmjlbxm","xgwzh"];
-        let arr=[];
-        for (let i=0;i<json.length;i++){
-          let obj={};
-          let x=0;
-          obj.gddw=this.add_form.gddw;
-          for (let key in json[i]){
-            if (x==head.length){
+        let head = [
+          "tq",
+          "yhabh",
+          "yhmc",
+          "vcaddr",
+          "addr",
+          "pn",
+          "yhlb",
+          "cblx",
+          "deveui",
+          "appeui",
+          "yhdz",
+          "zcbh",
+          "sb",
+          "sblx",
+          "sccj",
+          "ccbh",
+          "txfs",
+          "txgw",
+          "ljdz",
+          "dbmm",
+          "btl",
+          "zhbl",
+          "eddy",
+          "bddl",
+          "zqd",
+          "dhpc",
+          "tysj",
+          "cbqd",
+          "xl",
+          "cz",
+          "jlzzfl",
+          "jlfs",
+          "zfbbz",
+          "jldbh",
+          "jldwz",
+          "jlddz",
+          "scjyrq",
+          "dbmjlbxm",
+          "xgwzh"
+        ];
+        let arr = [];
+        for (let i = 0; i < json.length; i++) {
+          let obj = {};
+          let x = 0;
+          obj.gddw = this.add_form.gddw;
+          for (let key in json[i]) {
+            if (x == head.length) {
               break;
             }
-            obj[head[x]]=String(json[i][key]);
+            obj[head[x]] = String(json[i][key]);
             x++;
           }
           arr.push(obj);
           console.log(obj);
           // continue;
-          if (arr.length==json.length){
-            this.upload(arr,0);
+          if (arr.length == json.length) {
+            this.upload(arr, 0);
           }
         }
       };
-      if(rABS) {
-          reader.readAsArrayBuffer(f);
+      if (rABS) {
+        reader.readAsArrayBuffer(f);
       } else {
-          reader.readAsBinaryString(f);
+        reader.readAsBinaryString(f);
       }
     },
-    upload(arr,i){
-      if (i>=arr.length){
+    upload(arr, i) {
+      if (i >= arr.length) {
         return;
       }
-      addMeter(
-        {
-          addr:arr[i].addr,
-          yhdz:arr[i].yhdz,
-          organization:this.gsmc,
-          pn:arr[i].pn,
-          vcaddr:arr[i].vcaddr,
-          gddw:arr[i].gddw,
-          tq:arr[i].tq,
-          yhmc:arr[i].yhmc,
-          yhabh:arr[i].yhabh,
-          yhlb:arr[i].yhlb,
-          zcbh:arr[i].zcbh,
-          jldbh:arr[i].jldbh,
-          sblb:arr[i].sblb,
-          sblx:arr[i].sblx,
-          ccbh:arr[i].ccbh,
-          tysj:arr[i].tysj,
-          dhpc:arr[i].dhpc,
-          zhbl:arr[i].zhbl,
-          cbqd:arr[i].cbqd,
-          xl:arr[i].xl,
-          cz:arr[i].cz,
-          eddy:arr[i].eddy,
-          bddl:arr[i].bddl,
-          zqd:arr[i].zqd,
-          sccj:arr[i].sccj,
-          jlzzfl:arr[i].jlzzfl,
-          jlfs:arr[i].jlfs,
-          zfbbz:arr[i].zfbbz,
-          jldwz:arr[i].jldwz,
-          jlddz:arr[i].jlddz,
-          scjyrq:arr[i].scjyrq,
-          txfs:arr[i].txfs,
-          txgw:arr[i].txgw,
-          ljdz:arr[i].ljdz,
-          btl:arr[i].btl,
-          jlbx:arr[i].jlbx,
-          xgwzh:arr[i].xgwzh,
-          dbmm:arr[i].dbmm,
-          deveui:arr[i].deveui,
-          appeui:arr[i].appeui
-        }
-      )
-      .then(res=>{
-        if (res){
-           this.upload(arr,i+1);
-           this.$message({
-              message: '导入成功!',
-              type: 'success'
+      addMeter({
+        addr: arr[i].addr,
+        yhdz: arr[i].yhdz,
+        organization: this.gsmc,
+        pn: arr[i].pn,
+        vcaddr: arr[i].vcaddr,
+        gddw: arr[i].gddw,
+        tq: arr[i].tq,
+        yhmc: arr[i].yhmc,
+        yhabh: arr[i].yhabh,
+        yhlb: arr[i].yhlb,
+        zcbh: arr[i].zcbh,
+        jldbh: arr[i].jldbh,
+        sblb: arr[i].sblb,
+        sblx: arr[i].sblx,
+        ccbh: arr[i].ccbh,
+        tysj: arr[i].tysj,
+        dhpc: arr[i].dhpc,
+        zhbl: arr[i].zhbl,
+        cbqd: arr[i].cbqd,
+        xl: arr[i].xl,
+        cz: arr[i].cz,
+        eddy: arr[i].eddy,
+        bddl: arr[i].bddl,
+        zqd: arr[i].zqd,
+        sccj: arr[i].sccj,
+        jlzzfl: arr[i].jlzzfl,
+        jlfs: arr[i].jlfs,
+        zfbbz: arr[i].zfbbz,
+        jldwz: arr[i].jldwz,
+        jlddz: arr[i].jlddz,
+        scjyrq: arr[i].scjyrq,
+        txfs: arr[i].txfs,
+        txgw: arr[i].txgw,
+        ljdz: arr[i].ljdz,
+        btl: arr[i].btl,
+        jlbx: arr[i].jlbx,
+        xgwzh: arr[i].xgwzh,
+        dbmm: arr[i].dbmm,
+        deveui: arr[i].deveui,
+        appeui: arr[i].appeui
+      })
+        .then(res => {
+          if (res) {
+            this.upload(arr, i + 1);
+            this.$message({
+              message: "导入成功!",
+              type: "success"
             });
-           if (i==arr.length-1){
-              this.data=[];
+            if (i == arr.length - 1) {
+              this.data = [];
               this.reload();
               this.$message({
-                message: '全部导入成功!',
-                type: 'success'
+                message: "全部导入成功!",
+                type: "success"
               });
-           }
-        }
-      }).catch(res=>{
-        this.$message({
-          showClose: true,
-          message: '导入失败,用户编号或者电表编号重复!',
-          type: 'error'
+            }
+          }
+        })
+        .catch(res => {
+          this.$message({
+            showClose: true,
+            message: "导入失败,用户编号或者电表编号重复!",
+            type: "error"
+          });
         });
-      })
     },
     //文件流转BinaryString
-    fixdata(data) { 
+    fixdata(data) {
       let o = "",
-          l = 0,
-          w = 10240;
-      for(; l < data.byteLength / w; ++l) o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+        l = 0,
+        w = 10240;
+      for (; l < data.byteLength / w; ++l)
+        o += String.fromCharCode.apply(
+          null,
+          new Uint8Array(data.slice(l * w, l * w + w))
+        );
       o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
       return o;
     },
@@ -1150,92 +1243,92 @@ export default {
       })
         .then(() => {
           // 验证字段
-          if (this.add_form.gsmc==""){
-            this.$message.error('请选择集中器');
+          if (this.add_form.gsmc == "") {
+            this.$message.error("请选择集中器");
             return;
-          }else if (this.add_form.gddw==""){
-            this.$message.error('请选择供电单位');
+          } else if (this.add_form.gddw == "") {
+            this.$message.error("请选择供电单位");
             return;
-          }else if (!/^[0-9A-Z]{8,12}$/.test(this.add_form.vcaddr)){
-            this.$message.error('请输入正确的集中器地址8-12位');
+          } else if (!/^[0-9A-Z]{8,12}$/.test(this.add_form.vcaddr)) {
+            this.$message.error("请输入正确的集中器地址8-12位");
             return;
-          }else if (!/^[0-9]{12}$/.test(this.add_form.addr)){
-            this.$message.error('请输入正确的12位电能表地址');
+          } else if (!/^[0-9]{12}$/.test(this.add_form.addr)) {
+            this.$message.error("请输入正确的12位电能表地址");
             return;
-          }else if (!/^[0-9]+$/.test(this.add_form.yhabh)){
-            this.$message.error('请输入正确的用户编号');
+          } else if (!/^[0-9]+$/.test(this.add_form.yhabh)) {
+            this.$message.error("请输入正确的用户编号");
             return;
-          }else if (this.add_form.pn<0 || this.add_form.pn>2032){
-            this.$message.error('请输入正确的pn值(0-2032之间)');
+          } else if (this.add_form.pn < 0 || this.add_form.pn > 2032) {
+            this.$message.error("请输入正确的pn值(0-2032之间)");
             return;
           }
-          addMeter(
-            {
-              addr:this.add_form.addr,
-              yhbh:this.add_form.provinces + " " + this.add_form.yhdz,
-              organization:this.gsmc,
-              pn:this.add_form.pn,
-              vcaddr:this.add_form.vcaddr,
-              gddw: this.add_form.gddw,
-              tq:this.add_form.tq,
-              yhmc:this.add_form.yhmc,
-              yhabh:this.add_form.yhabh,
-              yhlb:this.add_form.yhlb,
-              zcbh:this.add_form.zcbh,
-              jldbh:this.add_form.jldbh,
-              sblb:this.add_form.sblb,
-              sblx:this.add_form.sblx,
-              ccbh:this.add_form.ccbh,
-              tysj:this.add_form.tysj,
-              dhpc:this.add_form.dhpc,
-              zhbl:this.add_form.zhbl,
-              cbqd:this.add_form.cbqd,
-              xl:this.add_form.xl,
-              cz:this.add_form.cz,
-              eddy:this.add_form.eddy,
-              bddl:this.add_form.bddl,
-              zqd:this.add_form.zqd,
-              sccj:this.add_form.sccj,
-              jlzzfl:this.add_form.jlzzfl,
-              jlfs:this.add_form.jlfs,
-              zfbbz:this.add_form.zfbbz,
-              jldwz:this.add_form.jldwz,
-              jlddz:this.add_form.jlddz,
-              scjyrq:this.add_form.scjyrq,
-              txfs:this.add_form.txfs,
-              txgw:this.add_form.txgw,
-              ljdz:this.add_form.ljdz,
-              btl:this.add_form.btl,
-              jlbx:this.add_form.jlbx,
-              xgwzh:this.add_form.xgwzh,
-              dbmm:this.add_form.dbmm
-            }
-          ).then(res => {
-            console.log(res);
-            this.dialogFormVisibleAdd = false;
-            this.getTree();
-            this.add_form.addr="";
-            this.add_form.provinces="";
-            this.add_form.yhdz="";
-            this.gsmc="";
-            this.add_form.pn="";
-            this.add_form.vcaddr="";
-            this.add_form.gddw="";
-            this.add_form.tq="";
-            this.add_form.yhmc="";
-            this.add_form.yhabh="";
-            if (res.code==101){
-              this.$message({
-                type: "success",
-                message: "添加成功!"
+          addMeter({
+            addr: this.add_form.addr,
+            yhbh: this.add_form.provinces + " " + this.add_form.yhdz,
+            organization: this.gsmc,
+            pn: this.add_form.pn,
+            vcaddr: this.add_form.vcaddr,
+            gddw: this.add_form.gddw,
+            tq: this.add_form.tq,
+            yhmc: this.add_form.yhmc,
+            yhabh: this.add_form.yhabh,
+            yhlb: this.add_form.yhlb,
+            zcbh: this.add_form.zcbh,
+            jldbh: this.add_form.jldbh,
+            sblb: this.add_form.sblb,
+            sblx: this.add_form.sblx,
+            ccbh: this.add_form.ccbh,
+            tysj: this.add_form.tysj,
+            dhpc: this.add_form.dhpc,
+            zhbl: this.add_form.zhbl,
+            cbqd: this.add_form.cbqd,
+            xl: this.add_form.xl,
+            cz: this.add_form.cz,
+            eddy: this.add_form.eddy,
+            bddl: this.add_form.bddl,
+            zqd: this.add_form.zqd,
+            sccj: this.add_form.sccj,
+            jlzzfl: this.add_form.jlzzfl,
+            jlfs: this.add_form.jlfs,
+            zfbbz: this.add_form.zfbbz,
+            jldwz: this.add_form.jldwz,
+            jlddz: this.add_form.jlddz,
+            scjyrq: this.add_form.scjyrq,
+            txfs: this.add_form.txfs,
+            txgw: this.add_form.txgw,
+            ljdz: this.add_form.ljdz,
+            btl: this.add_form.btl,
+            jlbx: this.add_form.jlbx,
+            xgwzh: this.add_form.xgwzh,
+            dbmm: this.add_form.dbmm
+          })
+            .then(res => {
+              console.log(res);
+              this.dialogFormVisibleAdd = false;
+              this.getTree();
+              this.add_form.addr = "";
+              this.add_form.provinces = "";
+              this.add_form.yhdz = "";
+              this.gsmc = "";
+              this.add_form.pn = "";
+              this.add_form.vcaddr = "";
+              this.add_form.gddw = "";
+              this.add_form.tq = "";
+              this.add_form.yhmc = "";
+              this.add_form.yhabh = "";
+              if (res.code == 101) {
+                this.$message({
+                  type: "success",
+                  message: "添加成功!"
+                });
+              }
+            })
+            .catch(res => {
+              this.$notify.error({
+                title: "错误",
+                message: res.error
               });
-            }
-          }).catch(res => {
-            this.$notify.error({
-              title: "错误",
-              message: res.error
             });
-          });
         })
         .catch(() => {
           this.$message({
@@ -1274,45 +1367,31 @@ export default {
       }
     },
     // Parse请求
-    Parse(){
+    Parse() {
       let Smartmeter = Parse.Object.extend("Smartmeter");
       let smartmeter = new Parse.Query(Smartmeter);
       return smartmeter;
     },
     // 模糊查询
-    inquire(){
+    inquire() {
+      this.start = 0;
       this.deriveWhere = []; // 搜索条件的数组
-      let smartmeter = this.Parse();
-      if (this.formInline.userId) {
-        for (let i = 0; i < this.tableData3.length; i++) {
-          if (this.tableData3[i].yhabh == this.formInline.userId) {
-            this.formInline.user = this.tableData3[i].yhmc;
-            this.formInline.userId = this.Reg(this.formInline.userId);
-          }
-        }
-        this.deriveWhere.push({ yhabh: { $regex: this.formInline.userId, $options: "i" } });
+      let Smartmeter = Parse.Object.extend("Smartmeter");
+      let smartmeter = new Parse.Query(Smartmeter);
+      if (this.formInline.electricityId != "") {
+        smartmeter.equalTo("addr", this.formInline.electricityId);
       }
-      if (this.formInline.user){
-        this.formInline.user = this.Reg(this.formInline.user);
-        this.deriveWhere.push({ yhmc: { $regex: this.formInline.user, $options: "i" } });
+      if (this.formInline.cost != "") {
+        smartmeter.equalTo("vcaddr", this.formInline.cost);
       }
-      if (this.formInline.electricityId){
-        this.formInline.electricityId = this.Reg(this.formInline.electricityId);
-        this.deriveWhere.push({addr: { $regex: this.formInline.electricityId, $options: "i" }});
-      }
-      if (this.formInline.cost){
-        this.formInline.cost = this.Reg(this.formInline.cost);
-        this.deriveWhere.push({vcaddr: { $regex: this.formInline.cost, $options: "i" }});
-      }
-      if (this.formInline.yhdz){
-        this.formInline.yhdz = this.Reg(this.formInline.yhdz);
-        this.deriveWhere.push({ yhdz: { $regex: this.formInline.yhdz, $options: "i" } });
-      }
-      if (this.deriveWhere.length == 0) return; //如果没有输入，就不用查找
       this.tableData3 = [];
-      smartmeter.equalTo("$and", this.deriveWhere);
-      smartmeter.greaterThan("pn", 0);
-      smartmeter.find().then(res => {
+      smartmeter.skip(this.start);
+      smartmeter.limit(this.pagesize);
+      smartmeter.count().then(count => {
+        this.total = count;
+      });
+      smartmeter.find().then(
+        res => {
           res.map(items => {
             let obj = {};
             obj.objectId = items.id;
@@ -1329,11 +1408,15 @@ export default {
             obj.cblx = items.attributes.cblx;
             this.tableData3.push(obj);
           });
-      });
+        },
+        error => {
+          this.$message.error(error.error);
+        }
+      );
     },
     // 正则过滤
-    Reg(val){
-      return val.replace(/[\*\\\[\]\+\^\$\.\?\|\%\【\】\(\)\（\）]+/g,"");
+    Reg(val) {
+      return val.replace(/[\*\\\[\]\+\^\$\.\?\|\%\【\】\(\)\（\）]+/g, "");
     },
     // 导出
     derive(json, obj) {
@@ -1363,7 +1446,12 @@ export default {
     },
     // 当前页导出
     now_derive() {
-      this.yhmxFordepartment4(this.pagesize, this.start, this.departmentid ,this.deriveWhere);
+      this.yhmxFordepartment4(
+        this.pagesize,
+        this.start,
+        this.departmentid,
+        this.deriveWhere
+      );
     },
     // 显示模态框
     show_table4() {
@@ -1393,56 +1481,61 @@ export default {
     },
     // 刷新
     reload() {
-      this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      this.yhmxFordepartment(
+        this.pagesize,
+        this.start,
+        this.departmentid,
+        this.isshowonce
+      );
     },
-    addsmartmeter(){
-      this.dialogFormVisibleAdd = true
+    addsmartmeter() {
+      this.dialogFormVisibleAdd = true;
     },
     // 修改
     editorMeter(row) {
       console.log(row);
-      this.now_row = row;
-      this.mod_form.yhabh = this.now_row.yhabh;
-      this.mod_form.vcaddr = this.now_row.vcaddr;
-      this.mod_form.deveui = this.now_row.deveui;
-      this.mod_form.tq = this.now_row.tq;
-      this.mod_form.yhmc = this.now_row.yhmc;
-      this.mod_form.pn = this.now_row.pn;
-      this.mod_form.addr = this.now_row.addr;
-      this.mod_form.yhdz = this.now_row.yhdz;
-      this.mod_form.gddw = this.now_row.gddw;
-      this.mod_form.yhlb=this.now_row.yhlb;
-      this.mod_form.zcbh=this.now_row.zcbh;
-      this.mod_form.jldbh=this.now_row.jldbh;
-      this.mod_form.sblb=this.now_row.sblb;
-      this.mod_form.sblx=this.now_row.sblx;
-      this.mod_form.ccbh=this.now_row.ccbh;
-      this.mod_form.tysj=this.now_row.tysj;
-      this.mod_form.dhpc=this.now_row.dhpc;
-      this.mod_form.zhbl=this.now_row.zhbl;
-      this.mod_form.cbqd=this.now_row.cbqd;
-      this.mod_form.xl=this.now_row.xl;
-      this.mod_form.cz=this.now_row.cz;
-      this.mod_form.eddy=this.now_row.eddy;
-      this.mod_form.bddl=this.now_row.bddl;
-      this.mod_form.zqd=this.now_row.zqd;
-      this.mod_form.sccj=this.now_row.sccj;
-      this.mod_form.jlzzfl=this.now_row.jlzzfl;
-      this.mod_form.jlfs=this.now_row.jlfs;
-      this.mod_form.zfbbz=this.now_row.zfbbz;
-      this.mod_form.jldwz=this.now_row.jldwz;
-      this.mod_form.jlddz=this.now_row.jlddz;
-      this.mod_form.scjyrq=this.now_row.scjyrq;
-      this.mod_form.txfs=this.now_row.txfs;
-      this.mod_form.txgw=this.now_row.txgw;
-      this.mod_form.ljdz=this.now_row.ljdz;
-      this.mod_form.btl=this.now_row.btl;
-      this.mod_form.jlbx=this.now_row.jlbx;
-      this.mod_form.xgwzh=this.now_row.xgwzh;
-      this.mod_form.deveui=this.now_row.deveui;
-      this.mod_form.appeui=this.now_row.appeui;
-      this.mod_form.cblx=this.now_row.cblx;
-      this.smartmeterid = row.id
+      // this.now_row = row;
+      this.mod_form.yhabh = row.yhabh;
+      this.mod_form.vcaddr = row.vcaddr;
+      this.mod_form.deveui = row.deveui;
+      this.mod_form.yhmc = row.yhmc;
+      this.mod_form.pn = row.pn;
+      this.mod_form.addr = row.addr;
+      this.mod_form.yhdz = row.yhdz;
+      this.mod_form.tq = row.tq;
+      this.mod_form.gddw = row.gddw;
+      this.mod_form.yhlb = row.yhlb;
+      this.mod_form.zcbh = row.zcbh;
+      this.mod_form.jldbh = row.jldbh;
+      this.mod_form.sblb = row.sblb;
+      this.mod_form.sblx = row.sblx;
+      this.mod_form.ccbh = row.ccbh;
+      this.mod_form.tysj = row.tysj;
+      this.mod_form.dhpc = row.dhpc;
+      this.mod_form.zhbl = row.zhbl;
+      this.mod_form.cbqd = row.cbqd;
+      this.mod_form.xl = row.xl;
+      this.mod_form.cz = row.cz;
+      this.mod_form.eddy = row.eddy;
+      this.mod_form.bddl = row.bddl;
+      this.mod_form.zqd = row.zqd;
+      this.mod_form.sccj = row.sccj;
+      this.mod_form.jlzzfl = row.jlzzfl;
+      this.mod_form.jlfs = row.jlfs;
+      this.mod_form.zfbbz = row.zfbbz;
+      this.mod_form.jldwz = row.jldwz;
+      this.mod_form.jlddz = row.jlddz;
+      this.mod_form.scjyrq = row.scjyrq;
+      this.mod_form.txfs = row.txfs;
+      this.mod_form.txgw = row.txgw;
+      this.mod_form.ljdz = row.ljdz;
+      this.mod_form.btl = row.btl;
+      this.mod_form.jlbx = row.jlbx;
+      this.mod_form.xgwzh = row.xgwzh;
+      this.mod_form.deveui = row.deveui;
+      this.mod_form.appeui = row.appeui;
+      this.mod_form.cblx = row.cblx;
+      this.smartmeterid = row.id;
     },
     // 确定修改
     sure() {
@@ -1463,59 +1556,64 @@ export default {
             object.set("pn", parseInt(this.mod_form.pn));
             object.set("addr", this.mod_form.addr);
             object.set("yhdz", this.mod_form.provinces + this.mod_form.yhdz);
-            object.set("gddw",this.mod_form.gddw);
-            object.set("yhlb",this.mod_form.yhlb);
-            object.set("zcbh",this.mod_form.zcbh);
-            object.set("jldbh",this.mod_form.jldbh);
-            object.set("sblb",this.mod_form.sblb);
-            object.set("sblx",this.mod_form.sblx);
-            object.set("ccbh",this.mod_form.ccbh);
-            object.set("tysj",this.mod_form.tysj);
-            object.set("dhpc",this.mod_form.dhpc);
-            object.set("zhbl",this.mod_form.zhbl);
-            object.set("cbqd",this.mod_form.cbqd);
-            object.set("xl",this.mod_form.xl);
-            object.set("cz",this.mod_form.cz);
-            object.set("eddy",this.mod_form.eddy);
-            object.set("bddl",this.mod_form.bddl);
-            object.set("zqd",this.mod_form.zqd);
-            object.set("sccj",this.mod_form.sccj);
-            object.set("jlzzfl",this.mod_form.jlzzfl);
-            object.set("jlfs",this.mod_form.jlfs);
-            object.set("zfbbz",this.mod_form.vzfbbz);
-            object.set("jldwz",this.mod_form.jldwz);
-            object.set("jlddz",this.mod_form.jlddz);
-            object.set("scjyrq",this.mod_form.scjyrq);
-            object.set("txfs",this.mod_form.txfs);
-            object.set("txgw",this.mod_form.txgw);
-            object.set("ljdz",this.mod_form.ljdz);
-            object.set("btl",this.mod_form.btl);
-            object.set("jlbx",this.mod_form.jlbx);
-            object.set("xgwzh",this.mod_form.xgwzh);
-            object.set("dbmm",this.mod_form.dbmm);
+            object.set("gddw", this.mod_form.gddw);
+            object.set("yhlb", this.mod_form.yhlb);
+            object.set("zcbh", this.mod_form.zcbh);
+            object.set("jldbh", this.mod_form.jldbh);
+            object.set("sblb", this.mod_form.sblb);
+            object.set("sblx", this.mod_form.sblx);
+            object.set("ccbh", this.mod_form.ccbh);
+            object.set("tysj", this.mod_form.tysj);
+            object.set("dhpc", this.mod_form.dhpc);
+            object.set("zhbl", this.mod_form.zhbl);
+            object.set("cbqd", this.mod_form.cbqd);
+            object.set("xl", this.mod_form.xl);
+            object.set("cz", this.mod_form.cz);
+            object.set("eddy", this.mod_form.eddy);
+            object.set("bddl", this.mod_form.bddl);
+            object.set("zqd", this.mod_form.zqd);
+            object.set("sccj", this.mod_form.sccj);
+            object.set("jlzzfl", this.mod_form.jlzzfl);
+            object.set("jlfs", this.mod_form.jlfs);
+            object.set("zfbbz", this.mod_form.vzfbbz);
+            object.set("jldwz", this.mod_form.jldwz);
+            object.set("jlddz", this.mod_form.jlddz);
+            object.set("scjyrq", this.mod_form.scjyrq);
+            object.set("txfs", this.mod_form.txfs);
+            object.set("txgw", this.mod_form.txgw);
+            object.set("ljdz", this.mod_form.ljdz);
+            object.set("btl", this.mod_form.btl);
+            object.set("jlbx", this.mod_form.jlbx);
+            object.set("xgwzh", this.mod_form.xgwzh);
+            object.set("dbmm", this.mod_form.dbmm);
             object.save().then(
               resultes => {
                 this.$message({
                   type: "success",
                   message: "修改成功!"
                 });
-                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+                this.yhmxFordepartment(
+                  this.pagesize,
+                  this.start,
+                  this.departmentid,
+                  this.isshowonce
+                );
                 this.dialogFormVisible = false;
               },
-              error=>{
-                if(error.code=='209'){
+              error => {
+                if (error.code == "209") {
                   this.$message({
-                  type: "warning",
-                  message: "登陆权限过期，请重新登录"
+                    type: "warning",
+                    message: "登陆权限过期，请重新登录"
                   });
                   this.$router.push({
-                    path:'/login'
-                  })
-                }else if(error.code==119){
+                    path: "/login"
+                  });
+                } else if (error.code == 119) {
                   this.$message({
-                    type:'error',
-                    message:'没有操作权限'
-                  })
+                    type: "error",
+                    message: "没有操作权限"
+                  });
                 }
               }
             );
@@ -1549,7 +1647,12 @@ export default {
                   message: "删除成功!"
                 });
                 this.getTree();
-                this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+                this.yhmxFordepartment(
+                  this.pagesize,
+                  this.start,
+                  this.departmentid,
+                  this.isshowonce
+                );
               },
               error => {
                 console.error("Error while deleting User", error);
@@ -1564,15 +1667,15 @@ export default {
           });
         });
     },
-    queryList(nodeId, origindata,arr) {
-      origindata.map(items=>{
-        if(nodeId==items.ParentId&&items.icon=='集中器'){
-           arr.push(items.objectId)
-           this.queryList(items.objectId,origindata,arr)
-        }else if(nodeId==items.ParentId&&items.icon!='集中器'){
-          this.queryList(items.objectId,origindata,arr)
+    queryList(nodeId, origindata, arr) {
+      origindata.map(items => {
+        if (nodeId == items.ParentId && items.icon == "集中器") {
+          arr.push(items.objectId);
+          this.queryList(items.objectId, origindata, arr);
+        } else if (nodeId == items.ParentId && items.icon != "集中器") {
+          this.queryList(items.objectId, origindata, arr);
         }
-      })
+      });
       return arr;
     },
     submitForm(formName) {
@@ -1602,7 +1705,12 @@ export default {
       // if (arr.length == 0) {
       //   this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
       // } else {
-        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      this.yhmxFordepartment(
+        this.pagesize,
+        this.start,
+        this.departmentid,
+        this.isshowonce
+      );
       // }
     },
     handleCurrentChange(val) {
@@ -1610,69 +1718,101 @@ export default {
       // if (arr.length == 0) {
       //   this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
       // } else {
-        this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
+      this.yhmxFordepartment(
+        this.pagesize,
+        this.start,
+        this.departmentid,
+        this.isshowonce
+      );
       // }
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
     // table3
-     yhmxFordepartment(pagesize, start, departments,ishsow) {
+    yhmxFordepartment(pagesize, start, departments, ishsow) {
       this.tableData3 = [];
       let Yhmx = Parse.Object.extend("Smartmeter");
       let query = new Parse.Query(Yhmx);
       query.limit(pagesize);
       query.skip(start);
-      if(ishsow){
-         query.equalTo("vcaddr", departments);
-         query.count().then(count => {
-            if (count) {
-              this.total = count;
-                } else {
-                  this.total = 0;
-                  setTimeout(() => {
-                    this.loading = false;
-                  }, 3000);
-                }
+      query.ascending(["vcaddr", "pn"]);
+      // query.ascending('-pn')
+      if (ishsow) {
+        query.equalTo("vcaddr", departments);
+        query.count().then(count => {
+          if (count) {
+            this.total = count;
+          } else {
+            this.total = 0;
+            setTimeout(() => {
+              this.loading = false;
+            }, 3000);
+          }
+        });
+      } else {
+        CountAll("Smartmeter")
+          .then(response => {
+            this.total = response.count;
+          })
+          .catch(error => {
+            this.$message.error(error.error);
           });
-      }else{
-        CountAll('Smartmeter').then(response=>{
-          this.total =response.count
-        })
+        // this.total=30000000
       }
-     
-          query.find().then(results => {
-            results.map(items => {
-              let obj = {};
-              obj.objectId = items.id;
-              obj.vcaddr = items.attributes.vcaddr;
-              obj.addr = items.attributes.addr;
-              obj.deveui = items.attributes.deveui;
-              obj.appeui = items.attributes.appeui;
-              obj.tq = items.attributes.tq;
-              obj.yhabh = items.attributes.yhabh;
-              obj.yhmc = items.attributes.yhmc;
-              obj.yhdz = items.attributes.yhdz;
-              obj.pn = items.attributes.pn;
-              obj.gddw = items.attributes.gddw;
-              obj.cblx = items.attributes.cblx;
-              this.tableData3.push(obj);
+
+      query.find().then(
+        results => {
+          results.map(items => {
+            let obj = {};
+            obj.objectId = items.id;
+            obj.vcaddr = items.attributes.vcaddr;
+            obj.addr = items.attributes.addr;
+            obj.deveui = items.attributes.deveui;
+            obj.appeui = items.attributes.appeui;
+            obj.tq = items.attributes.tq;
+            obj.yhabh = items.attributes.yhabh;
+            obj.yhmc = items.attributes.yhmc;
+            obj.yhdz = items.attributes.yhdz;
+            obj.pn = items.attributes.pn;
+            obj.gddw = items.attributes.gddw;
+            obj.cblx = items.attributes.cblx;
+            this.tableData3.push(obj);
+          });
+          this.loading = false;
+        },
+        error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
             });
-            this.loading = false;
-       });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.error);
+          }
+        }
+      );
     },
     // table4
-    yhmxFordepartment4(pagesize, start, departments,where) {
+    yhmxFordepartment4(pagesize, start, departments, where) {
       let query = this.Parse();
       query.limit(pagesize);
       query.skip(start);
-      if (where.length>0){
+      if (where.length > 0) {
         query.equalTo("$and", where);
       }
-      if(this.departmentid!=''){
-         query.equalTo("vcaddr", departments);
+      if (this.departmentid != "") {
+        query.equalTo("vcaddr", departments);
       }
-     
+
       query.count().then(count => {
         if (count) {
           this.total = count;
@@ -1709,10 +1849,15 @@ export default {
       //       this.data.push(obj);
       //       if(items.attributes.org_type=='集中器'){
       //         this.departmentid.push(items.id);
-      //       } 
+      //       }
       //     });
-          this.yhmxFordepartment(this.pagesize, this.start, this.departmentid,this.isshowonce);
-          
+      this.yhmxFordepartment(
+        this.pagesize,
+        this.start,
+        this.departmentid,
+        this.isshowonce
+      );
+
       //     this.gsmc_child=this.departmentid;
       //   },
       //   error => {
@@ -1729,7 +1874,7 @@ export default {
       // );
     },
     //树联动父级
-    //原数组data2 nodeId2点击树元素的parentId，arrRes新的数组 
+    //原数组data2 nodeId2点击树元素的parentId，arrRes新的数组
     getParent(data2, nodeId2, arrRes) {
       data2.map(items => {
         if (items.objectId == nodeId2) {
@@ -1742,35 +1887,35 @@ export default {
       return arrRes;
     },
     // 获取父级信息
-    getParentId(where,value,icon){
+    getParentId(where, value, icon) {
       let Department = Parse.Object.extend("Department");
       let query = new Parse.Query(Department);
-      query.equalTo(where,value);
-      query.find().then(res=>{
-        if (icon=="集中器"){
-          this.add_form.gddw=res[0].attributes.name;
-        }else if (icon=="电表"){
-          this.add_form.vcaddr=res[0].attributes.name;
-          this.getParentId("objectId",res.ParentId,"集中器")
+      query.equalTo(where, value);
+      query.find().then(res => {
+        if (icon == "集中器") {
+          this.add_form.gddw = res[0].attributes.name;
+        } else if (icon == "电表") {
+          this.add_form.vcaddr = res[0].attributes.name;
+          this.getParentId("objectId", res.ParentId, "集中器");
         }
-      })
+      });
     },
     // 获取子级
     handleNodeClick(row) {
       this.loading = true;
-      this.isshowonce = true
+      this.isshowonce = true;
+      this.start = 0;
       // 判断点击的层级
       //  console.log(row)
-     if (row.icon == "电表"){
-      
+      if (row.icon == "电表") {
         this.add_form.addr = row.name;
-        this.getParentId("objectId",row.ParentId,"电表");
-        this.isaddr=true;
-        this.isvcaddr=true;
-      }else {
+        this.getParentId("objectId", row.ParentId, "电表");
+        this.isaddr = true;
+        this.isvcaddr = true;
+      } else {
         this.add_form.gddw = row.name;
-        this.isaddr=false;
-        this.isvcaddr=false;
+        this.isaddr = false;
+        this.isvcaddr = false;
       }
       this.add_form.gsmc = row.objectId;
       this.gsmc = row.objectId;
@@ -1781,9 +1926,13 @@ export default {
         if (row.icon == "集中器") {
           this.formInline.cost = row.name;
           this.formInline.electricityId = "";
-        
         }
-        this.yhmxFordepartment(this.pagesize, this.start, row.alias,this.isshowonce);
+        this.yhmxFordepartment(
+          this.pagesize,
+          this.start,
+          row.alias,
+          this.isshowonce
+        );
       }
     },
     handleClose() {
@@ -1804,16 +1953,16 @@ export default {
   box-sizing: border-box;
   font-size: 13px;
   overflow-x: scroll;
-  min-height:100%;
+  min-height: 100%;
 }
 #metersearch > button {
   padding: 3px 15px;
 }
 #metersearch .resource1 {
-  width:360px;
-  height:100vh;
-  flex-shrink:0;
-  overflow:scroll;
+  width: 360px;
+  height: 100vh;
+  flex-shrink: 0;
+  overflow: scroll;
   padding-top: 10px;
 }
 </style>
@@ -1916,7 +2065,7 @@ export default {
   width: 270px !important;
 }
 #metersearch .el-dialog__wrapper .el-dialog {
-  margin-top:5vh !important;
+  margin-top: 5vh !important;
 }
 #metersearch .el-dialog .el-dialog__body {
   padding: 10px;
@@ -1957,17 +2106,18 @@ export default {
 #metersearch .number:last-child{
   display: none;
 }
-#metersearch .el-pagination__jump{
-  display:none;
+#metersearch .el-pagination__jump {
+  display: none;
 }
 /* 切换页数图标 */
 .btn-prev:before {
-    content: "上一页";
+  content: "上一页";
 }
 .btn-next:before {
-    content: "下一页";
+  content: "下一页";
 }
-.btn-prev i.el-icon,.btn-next i.el-icon {
-  display:none !important;
+.btn-prev i.el-icon,
+.btn-next i.el-icon {
+  display: none !important;
 }
 </style>

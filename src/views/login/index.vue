@@ -97,7 +97,9 @@
       getTitle() {
         let pro = window.location.pathname;
         pro = pro.slice(5, pro.length);
+        
         pro = pro == '' ? 'develop' : pro
+      
         Parse.User.logOut();
         Sitepro(pro).then(resultes => {
           this.title = resultes.title
@@ -118,6 +120,7 @@
         }
       },
       handleLogin() {
+        this.routes=[]
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             var user = this.loginForm

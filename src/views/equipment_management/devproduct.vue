@@ -3,13 +3,6 @@
         <h3>产品管理</h3>
         <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane :label="'我的产品'+'('+total+')'" name="first">
-                <!-- <div class="procontent">
-                     <h4 style="display:inline">产品列表</h4> 
-                     <div style="float:right">
-                        <<el-button>刷新</el-button>
-                        
-                    </div>
-                </div>-->
                 <div class="prosecond">
                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                     <el-form-item>
@@ -73,8 +66,6 @@
                                 >
                                 <template slot-scope="scope">
                                     <el-link type="primary" :underline="false" icon="el-icon-view" @click="deviceToDetail(scope.row)">详情</el-link>
-                                    <!-- <el-link type="primary" :underline="false" icon="el-icon-view" @click="addchannel(scope.row)">详情</el-link> -->
-                                    
                                    <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                                         <p>确定删除这个{{scope.row.name}}产品吗？</p>
                                         <div style="text-align: right; margin: 0">
@@ -90,7 +81,6 @@
                                         icon="el-icon-delete"
                                         type="danger"
                                      >删除</el-link>
-                                     
                                      </el-popover>
                                       <el-link
                                         :underline="false"

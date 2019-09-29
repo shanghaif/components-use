@@ -48,9 +48,6 @@
         width="40%"
         :before-close="handleClose">
        <div>
-           <!-- <div class="top" >
-               <el-input style="width:200px" placeholder="请输入搜索内容" v-model="searchvalue" @change="changedialog"></el-input>
-           </div> -->
            <el-table :data="tableData1.slice((start1-1)*length1,start1*length1)"
            height="300"
            style="width: 100%;text-align:center;margin-top:20px">

@@ -11,7 +11,7 @@
       </div>
       <div class="right">
         <span>未执行</span>
-        <p>{{unexe}}</p>
+        <p>{{unexe ? unexe :0 }}</p>
       </div>
       <div class="right">
         <span>失败</span>
@@ -55,12 +55,10 @@ var count = 0;
 export default {
   data() {
     return {
-      di: [],
+      di: '',
       defaultExpandAll: false,
       showCheckbox: true,
       key: 1,
-      datetime: "",
-      vcaddr: "",
       total: 0,
       success: 0,
       node: null,
@@ -72,7 +70,12 @@ export default {
       input: [],
       allselect: [],
       tableData5: {},
-      id:''
+      tid:'',
+      rid:'',
+      starttime:'',
+      freq:'',
+      vcaddr:'',
+      fdate:''
     };
   },
   mounted() {
@@ -94,13 +97,17 @@ export default {
   },
   methods: {
     Getmeterdetail() {
-      this.di = []
-      this.di.push(this.$route.query.di);
-      this.id = this.$route.query.id;
-      (this.vcaddr = this.$route.query.vcaddr),
-        (this.datetime = this.$route.query.datetime);
+    
+     
+      this.tid = this.$route.query.tid;
+      this.rid = this.$route.query.rid;
+      this.vcaddr = this.$route.query.vcaddr
+      this.starttime = this.$route.query.starttime
+      this.fdate = this.$route.query.fdate
+      this.di=this.$route.query.di;
+      this.freq = this.$route.query.freq
          html=''
-      Taskmeterdetail(this.di, this.vcaddr,Number(this.id),Number(this.datetime)).then(
+      Taskmeterdetail(this.tid,this.rid,this.starttime,this.vcaddr,this.freq,this.fdate,this.di).then(
         response => {
           if(response){
             $.each(response.data, function(key, value) {
@@ -163,7 +170,7 @@ export default {
       var sendup = [];
       var _this=this
        var obj={
-          datetime:Number(_this.datetime),
+          datetime:Number(_this.starttime),
           taskid:Number(_this.id),
           vcaddr:_this.vcaddr,
           di:_this.di,

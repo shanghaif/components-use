@@ -100,7 +100,7 @@ export default {
         handleClickVisit(scope){
             let index=scope.$index;
             let productIdentifier=this.tableData[index].productIdentifier;
-            let url=window.location.origin+"/iot/"+productIdentifier+"/#/login";
+            let url=window.location.origin+"/iot/"+productIdentifier+"#/login";
             window.open(url,"__blank");
         },
         // 查询应用信息
