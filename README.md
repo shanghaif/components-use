@@ -10,7 +10,7 @@
  
  Parse.initialize("****(库名称)", "webapi","HZlora2017");   
  
-  Parse.serverURL ='url'后台url
+  Parse.serverURL ='url'(后台url）
  ```
    这是当前公司所需要的方法说是看见this.parse不好看，导致需要用到parse的vue文件都需要引入一边，你也可以直接在main.js中直接引入
    ```JavaScript
