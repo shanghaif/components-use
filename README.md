@@ -5,13 +5,18 @@
   npm install parse --save(在本地安装)  
   parse需要初始化用户名以及权限   
  ### 1.1首先在App.vue初始化时引入
- ```import Parse from 'parse'   
+ ```
+ import Parse from 'parse'   
+ ```
+ ```
  Parse.initialize("****(库名称)", "webapi","HZlora2017");   
- Parse.serverURL ='url'后台url
+ ```
+ ```
+  Parse.serverURL ='url'后台url
  ```
    这是当前公司所需要的方法说是看见this.parse不好看，导致需要用到parse的vue文件都需要引入一边，你也可以直接在main.js中直接引入
-   ```
-   import parse from "parse"
+   ```javascript
+   #!import parse from "parse"
    
    Vue.prototype.$parse = parse
    
