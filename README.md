@@ -1,10 +1,20 @@
 # vue-admin-template
 **里面封装了几个比较常用的插件，分页插件、vue-aliplayer方法，资源树的懒加载，Json-editor,parseplatform**
-## 1.vue 中使用parseplatform
+## 1下载安装
+ ```JavaScript
+  npm install
+  npm start(npm run dev)
+  ```
+  打包   
+  ```JavaScript
+  npm run build
+  ```
+
+## 2.vue 中使用parseplatform
   在vue中安装parse   
   npm install parse --save(在本地安装)  
   parse需要初始化用户名以及权限   
- ### 1.1首先在App.vue初始化时引入
+ ### 2.1首先在App.vue初始化时引入
  ```JavaScript
  import Parse from 'parse'   
  
@@ -20,6 +30,6 @@
    
    ```
    然后在页面直接引用就可以了
-   ### 1.2 库图片
+   ### 2.2 库图片
    ![Parse](http://chuantu.xyz/t6/702/1571304946x1031866013.png)
    
