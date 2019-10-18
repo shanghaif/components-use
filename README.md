@@ -2,10 +2,12 @@
 **里面封装了几个比较常用的插件，分页插件、vue-aliplayer方法，资源树的懒加载，Json-editor,parseplatform**
 ## 1下载安装
  ```JavaScript
+ 安装插件
   npm install
+ 启动项目
   npm start(npm run dev)
   ```
-  打包   
+  **打包**   
   ```JavaScript
   npm run build
   ```
