@@ -3,18 +3,18 @@
     <h3>采证设备</h3>
     
     <div class="deviceslist" style="margin-top:20px">
-      <el-table :data="tableData" stripe style="width: 100%" border>
-        <el-table-column label="设备名称">
+      <el-table :data="tableData" stripe style="width: 100%;text-align:center" border>
+        <el-table-column label="设备名称" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.basedata.type}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="设备编号">
+        <el-table-column label="设备编号" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.devaddr}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="当前状态">
+        <el-table-column label="当前状态" align="center">
           <template slot-scope="scope">
             <span v-if="scope.row.attributes.basedata.status=='offline'" style="color:red">{{'离线'}}</span>
             <span
@@ -24,7 +24,7 @@
             <span v-else style="color:green">{{'在线'}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -69,7 +69,8 @@ export default {
       dialogVisible: false,
       pagesize: 10,
       total: 0,
-      start: 0
+      start: 0,
+      productid:''
     };
   },
   mounted() {
@@ -86,31 +87,38 @@ export default {
     },
     handleEdit(id) {},
     getDevices(val, start) {
-      protection = Parse.Object.extend("Devices");
-      query = new Parse.Query(protection);
-      query.equalTo("devtype", "PUMP");
-      query.limit(val);
-      query.skip(start);
-      query.count().then(total => {
-        this.total = total;
-        query.find().then(results => {
-          results.map(item => {
-            if (item.attributes.basedata.type == "CAMERA") {
-              item.attributes.basedata.type = "摄像头";
-            } else if (item.attributes.basedata.type == "PC") {
-              item.attributes.basedata.type = "控制台";
-            } else if (item.attributes.basedata.type == "DTU") {
-              item.attributes.basedata.type = "控制器";
-            }else if(item.attributes.basedata.type=='ANDROID'){
-              item.attributes.basedata.type = "平板"
-            }
+      var Product = Parse.Object.extend('Product')
+      var product = new Parse.Query(Product)
+      product.equalTo('devType','pump')
+      product.find().then(response=>{
+        this.productid = response[0].id
+          protection = Parse.Object.extend("Devices");
+          query = new Parse.Query(protection);
+          query.equalTo("product",this.productid);
+          query.limit(val);
+          query.skip(start);
+          query.count().then(total => {
+            this.total = total;
+            query.find().then(results => {
+              results.map(item => {
+                if (item.attributes.basedata.type == "CAMERA") {
+                  item.attributes.basedata.type = "摄像头";
+                } else if (item.attributes.basedata.type == "PC") {
+                  item.attributes.basedata.type = "控制台";
+                } else if (item.attributes.basedata.type == "DTU") {
+                  item.attributes.basedata.type = "控制器";
+                }else if(item.attributes.basedata.type=='ANDROID'){
+                  item.attributes.basedata.type = "平板"
+                }
+              });
+              this.tableData = results;
+            }),
+              error => {
+                console.log(error);
+              };
           });
-          this.tableData = results;
-        }),
-          error => {
-            console.log(error);
-          };
-      });
+      })
+      
     },
     addJson(row) {
       this.rowdata = JSON.stringify(row.attributes.basedata.config, null, 4);

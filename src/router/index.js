@@ -28,10 +28,16 @@ export const constantRouterMap = [
   { path: '/phonelogin',component: () => import('@/views/login/phonesms'), hidden: true},
   { path: '/404', component: () => import('@/views/404'), hidden: true},
   { path: '/userinfo', 
-  component: () => import('@/views/user/userinfo'), 
   component: Layout, 
-  hidden: true},
-
+  hidden: true,
+  children:[{
+    path: '/userinfo/:userid',
+    name:'userinfo',
+    component: () => import('@/views/user/userinfo'), 
+    hidden:true,
+    meta: { title: '个人中心'},
+  }]  
+},
   {
     path: '/',
     component: Layout,
@@ -194,13 +200,13 @@ export const constantRouterMap = [
     children: [
       {
         path: '/devicemanage/concentrator',
-        name: '集中器管理',
+        name: '集中器',
         component: () => import('@/views/devicemanage/concentrator'),
-        meta: { title: '集中器管理', icon: 'concentrator' }
+        meta: { title: '集中器', icon: 'concentrator' }
       },
       {
         path: '/devicemanage/devsreport',
-        name: '采集器管理',
+        name: '采集器',
         component: () => import('@/views/devicemanage/devsreport'),
         meta: { title: '采集器管理', icon: 'devsreport' }
       },
@@ -341,6 +347,12 @@ export const constantRouterMap = [
         name: '网关监测',
         component: () => import('@/views/devicemanage/zetagateway'),
         meta: { title: '网关监测', icon: 'gateway' }
+      },
+      {
+        path: '/monitoring/zetatest',
+        name: 'ZETA测试',
+        component: () => import('@/views/devicemanage/zetatest'),
+        meta: { title: 'ZETA测试', icon: 'csc' }
       },
     ]
   },
@@ -570,6 +582,7 @@ export const constantRouterMap = [
         component: () => import('@/views/roles/applicationManagement'),
         meta: { title: '应用管理', icon: 'department' }
       },
+      
       {
         path: '/applicationManagement/addApp',
         name: '新增应用',
@@ -635,7 +648,44 @@ export const constantRouterMap = [
         component: () => import('@/views/equipment_management/channelManage'),
         meta: { title: '服务通道管理',icon:'channelmanage' }
       },
+     
       // 
+    ]
+  },
+  {
+    path: '/rules_engine',
+    component: Layout,
+    redirect: '/rules_engine/engine',
+    name:'规则引擎',
+    meta: { title: '规则引擎', icon: 'engine' },
+    children:[
+      {
+        path: '/rules_engine/engine',
+        name: '规则管理',
+        component: () => import('@/views/engine/rulesengine'),
+        meta: { title: '规则管理',icon:'rulesengine' }
+      },
+      {
+        path: '/rules_engine/resourchannel',
+        name: '资源通道',
+        component: () => import('@/views/engine/resourcechannel'),
+        meta: { title: '资源通道',icon:'engine' }
+      },
+      {
+        path: '/rules_engine/addengine',
+        name: '新增规则',
+        component: () => import('@/views/engine/addengine'),
+        meta: { title: '新增规则'},
+        hidden:true,
+      },
+      {
+        path: '/rules_engine/checkengine',
+        name: '查看规则',
+        component: () => import('@/views/engine/checkengine'),
+        meta: { title: '查看规则'},
+        hidden:true,
+      },
+      
     ]
   },
   // {

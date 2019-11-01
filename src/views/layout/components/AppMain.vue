@@ -47,10 +47,12 @@ export default {
     }
   },
   mounted() {
-      // Websocket.cInfo.host='148.70.107.74'
+      if(!(window.location.pathname.indexOf('suke')!=-1)){
+         // Websocket.cInfo.host='148.70.107.74' 
       // Websocket.cInfo.host='prod.iotn2n.com'
       Websocket.cInfo.host='ci.iotn2n.com'
       // Websocket.cInfo.host='132.232.121.164'
+      // Websocket.cInfo.host='148.70.105.65'
       // Websocket.cInfo.host = location.hostname;
       Websocket.subInfo = {
         topic: "web/"+sessionStorage.getItem('token'), 
@@ -65,7 +67,9 @@ export default {
           eventBus.$emit(this.datasource.type, this.datasource);
          }
          
-      },
+      }
+    }
+     
       this.getCopyright()
   },
   methods:{

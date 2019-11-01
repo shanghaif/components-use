@@ -69,7 +69,7 @@
           :page-size="length"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
-          style="margin-top:30px;"
+          style="margin-top:20px;"
         ></el-pagination>
       </div>
     </div>

@@ -404,7 +404,7 @@ export default {
     },
       /*el-popover点击关闭*/
     makeSure(scope) {
-      // 可以在这里执行删除数据的回调操作.......删除操作.....
+      // 可以在这里执行删除数据的回调操作.......删除操作 .....
       var Product = Parse.Object.extend('Product')
       var product = new Parse.Query(Product)
       product.get(scope.row.id).then(resultes=>{

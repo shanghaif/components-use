@@ -37,12 +37,6 @@
                 <el-option label="不需要" :value="0"></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item label="下发情况">
-              <el-select v-model="zlForm.region" placeholder="请选择下发情况">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
-              </el-select>
-            </el-form-item> -->
             <el-form-item label="开始时间">
               <el-date-picker v-model="zlForm.starttime" type="datetime" placeholder="选择日期时间"></el-date-picker>
             </el-form-item>
@@ -57,7 +51,7 @@
               </el-select>
             </el-form-item> -->
             <el-form-item>
-              <el-button type="primary" size="mini" @click="getZldata">查询</el-button>
+              <el-button type="primary" size="mini" @click="getZldata(0)">查询</el-button>
               <el-button @click="resetForm" size="mini" type="primary">重置</el-button>
               <!-- <el-button type="warning" size="small">隐藏</el-button>
               <el-button type="success" size="small">显示</el-button> -->
@@ -97,7 +91,8 @@
             </el-table-column>
              <el-table-column label="指令路径" align="center" width="300">
                <template slot-scope="scope">
-                <span>{{scope.row.attributes.dir}}</span>
+                <span v-if="scope.row.attributes.dir==1">FROM_HARDWARE_TO_SOFTWARE</span>
+                <span v-else-if="scope.row.attributes.dir==2">FROM_SOFTWARE_TO_HARDWARE</span>
                </template>
              </el-table-column>
             <el-table-column  label="指令参数" align="center">
@@ -173,7 +168,7 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" size="mini" @click="searchzl">查询</el-button>
+              <el-button type="primary" size="mini" @click="searchzl(0)">查询</el-button>
               <el-button size="mini" type="primary" @click="resetsukeForm">重置</el-button>
               <el-button size="mini" type="primary" @click="dialogFormVisible=true">指令增加</el-button>
             </el-form-item>
@@ -352,7 +347,7 @@ export default {
     timestampToTime(timestamp) {
       var date = new Date(timestamp * 1000) 
       var Y = date.getFullYear() + '-';
-      var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+      var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
       var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
       var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
       var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
@@ -365,7 +360,10 @@ export default {
          this.getZldata()
        })
     },
-    getZldata(){
+    getZldata(start){
+      if(start==0){
+        this.zlStart=0
+      }
         var Sukelog = Parse.Object.extend('SukeLog')
          var sukelog = new Parse.Query(Sukelog)
          if(this.zlForm.hardwareType!=""){
@@ -374,9 +372,7 @@ export default {
          if(this.zlForm.hardware_number!=''){
            sukelog.equalTo('hardware_number',this.zlForm.hardware_number)
          }
-        //  if(this.zlForm.display !=9){
-        //    sukelog.equalTo('display',this.zlForm.display)
-        //  }
+  
          if(this.zlForm.status!=''){
            sukelog.equalTo('status',this.zlForm.status)
          }
@@ -390,6 +386,7 @@ export default {
          }
           sukelog.limit(this.zlPageSize)
           sukelog.skip(this.zlStart)
+          sukelog.ascending('-ts')
           sukelog.count().then(count=>{
          this.zlTotal =count
          sukelog.find().then(results=>{
@@ -426,7 +423,10 @@ export default {
         
       })
     },
-    searchzl(){
+    searchzl(start){
+      if(start==0){
+        this.sukeStart=0
+      }
       queryzlinfo(this.sukeForm,this.sukeStart,this.sukePageSize).then(resultes=>{
          if(resultes){
         this.sukeData = resultes.data;
@@ -608,13 +608,13 @@ export default {
   height: 26px;
   border-radius: 0;
   line-height: 26px;
-  width: 150px;
+  width: 200px;
 }
 .sukezl .firstheader .el-date-editor.el-input{
-  width:150px;
+  width:200px;
 }
 .firstheader .el-date-editor .el-input {
-  width: 150px;
+  width: 200px;
 }
 .firstheader .el-form-item {
   margin-bottom: 0;

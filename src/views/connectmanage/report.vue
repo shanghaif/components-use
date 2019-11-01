@@ -132,22 +132,13 @@ export default {
        timestampToTime(timestamp) {
         var date = new Date(timestamp * 1000) 
             var Y = date.getFullYear() + '-';
-            var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
             var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
             var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
             var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
             var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
             return Y+M+D+h+m+s;
         },
-        // getTree(){
-        //        var Department = Parse.Object.extend("Department");
-        //         var department = new Parse.Query(Department);
-        //         department.equalTo('name','省电力公司')
-        //         department.find().then(response=>{
-        //             this.departmentid = response[0].id
-        //             this.search()
-        //         })
-        // },
        search(){
            this.loading = true
            QueryVcon(this.concentrator,2,this.time,this.length,this.start).then(resultes=>{
@@ -158,8 +149,7 @@ export default {
                }
               
            })
-        //    this.loading=true
-          
+        //    this.loading=true  
         //    var Smartmeter = Parse.Object.extend('Smartmeter')
         //    var smartmeter = new Parse.Query(Smartmeter)
         //    smartmeter.equalTo('pn',0)
@@ -177,7 +167,6 @@ export default {
         //        })
         //    })
         //    connectlist(this.start,this.length,this.concentrator).then(response=>{
-           
         //          response.data.map(item=>{
         //              if(Object.keys(item.report).length>=2){
         //                  if(item.dev_total==0){

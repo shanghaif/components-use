@@ -6,15 +6,15 @@ export default function treeToArray(data, children = 'children') {
   data.forEach((item, index) => {
     Vue.set(item, '_index', index)
     tmp.push(item)
-    if (item[children] && item[children].length > 0) {
-      const res = treeToArray(item[children], children)
-      
-    }
+    // if (item[children] && item[children].length > 0) {
+    //   const res = treeToArray(item[children], children)
+    //   tmp =tmp.concat(res)
+    // }
   })
   return tmp
 }
 
-export function addAttrs(data, { parent = null, preIndex = false, level = 0, expand = false, children = 'children', show = true, select = false } = {}) {
+export function addAttrs(data, { parent = null, preIndex = false, level = 0, expand = true, children = 'children', show = true, select = false } = {}) {
   data.forEach((item, index) => {
     const _id = (preIndex ? `${preIndex}-${index}` : index) + ''
     Vue.set(item, '_id', _id)

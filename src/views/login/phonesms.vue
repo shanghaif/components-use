@@ -9,7 +9,10 @@
         label-width="100px"
         class="login-form"
       >
-        <img :src="logosrc" alt style="margin-bottom:30px;">
+         <div class="logo">
+          <img :src="logosrc" alt="logo" style="width:80px;height:80px;">
+          <p>{{title}}</p>
+        </div>
 
         <!-- <el-input v-model="ruleForm2.diqu" type="text"></el-input> -->
         <el-form-item style="border-radius:0">
@@ -109,7 +112,8 @@ export default {
       code: "",
       actions: "",
       routes: [],
-      logosrc: require("../../imgages/shuwa_logo.png"),
+      logosrc: '',
+      title:'',
       ruleForm2: {
         account: "",
         phone: "",
@@ -218,6 +222,8 @@ export default {
         value: items.toString()
       });
     });
+     this.title = sessionStorage.getItem('product_title')
+    this.logosrc =  sessionStorage.getItem('imgsrc')
   },
   methods: {
     showPwd() {
@@ -353,6 +359,16 @@ $light_gray: rgba(0, 0, 0, 0.247058823529412);
       border-radius: 5px;
       color: #454545;
     }
+    /deep/ .logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    p {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 25px 0;
+    }
+  }
   }
 }
 </style>

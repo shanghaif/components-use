@@ -908,7 +908,7 @@
         <div style="background:#ffffff">
           <label id="plug-name"></label>
         </div>
-        <pre id="editor1" class="ace_editor" style="min-height:400px"><textarea class="ace_text-input"></textarea></pre>
+        <pre id="editor1" class="ace_editor" style="min-height:400px"><textarea class="ace_text-input" style="overflow:scroll"></textarea></pre>
       </div>
       <span slot="footer" class="dialog-footer" style="height:30px;">
         <el-button type="primary" @click="preserve">保 存</el-button>
@@ -1199,6 +1199,7 @@ export default {
     }
   },
   mounted() {
+    //editor编辑器使用
     editor2 = ace.edit("editor2");
     editor2.session.setMode("ace/mode/json"); // 设置语言
     editor2.setTheme("ace/theme/monokai"); // 设置主题
@@ -1212,6 +1213,7 @@ export default {
     this.getAllunit()
   },
   methods: {
+    //判断是否为结构体，可展开
     getRowClass(row, rowIndex) {
       if (row.row.dataType.type != "struct") {
         //判断当前行是否有子数据
@@ -1407,6 +1409,7 @@ export default {
         name: ""
       });
     },
+    //物模型提交
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
@@ -1414,6 +1417,7 @@ export default {
            var Product = Parse.Object.extend("Product");
            var product = new Parse.Query(Product);
           product.get(this.productId).then(response => {
+            //提交之前需要先判断类型
                 if(this.sizeForm.type=='FLOAT'||this.sizeForm.type=='DOUBLE'||this.sizeForm.type=='INT'){
                     obj= {
                         "name": this.sizeForm.name,
@@ -1975,6 +1979,7 @@ export default {
     handleChange(value, direction, movedKeys) {
       console.log(value, direction, movedKeys);
     },
+    //用于处理定义好的物模型模板
     TypeInstall(origin, arr) {
       arr.map((items, index) => {
         if (items.DataType == "enum" || items.DataType == "bool") {

@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
-export function ZetaEtag(tag) {
+export function ZetaEtag(tag,status) {
   return request({
     url: 'zeta/etag/'+tag,
     method: 'get',
     params:{
-        
+        status:status
     }
   })
 }
@@ -20,13 +20,14 @@ export function ZetaEtagHistroy(tag,limit,timestamp) {
   })
 }
 
-export function ZetaEtagTopn(limit,skip) {
+export function ZetaEtagTopn(limit,skip,status) {
   return request({
     url: 'zeta/etag/tag/topn',
     method: 'get',
     params:{
     limit:limit,
-    skip:skip
+    skip:skip,
+    status:status
     }
   })
 }

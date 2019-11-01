@@ -231,11 +231,20 @@
             :button-texts="['删除', '添加']"
             filterable
             filter-placeholder="请输入搜索内容"
-          ></el-transfer>
+          >
+           <el-select class="transfer-footer" slot="left-footer" size="small" @change="selectDi" v-model="selectdata">
+             <el-option
+              v-for="(item,index) in options1"
+              :key="index"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+           </el-select>
+          </el-transfer>
         </div>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
+        <el-button @click="handleClose" style="float:left">关 闭</el-button>
         <el-button @click="convartion('taskform')" style="float:right" type="primary">保 存</el-button>
       </span>
     </el-dialog>
@@ -255,39 +264,42 @@ import Parse from "parse";
 var taskid = "";
 export default {
   data() {
-    const generateData = _ => {
-      const data = [];
-      var Mainstation = Parse.Object.extend("MainStationIndex");
-      var mainstation = new Parse.Query(Mainstation);
-      mainstation.startsWith("name", "C.");
-      mainstation.exists("leafs");
-      mainstation.ascending("name");
-      mainstation.find().then(resultes => {
-        var arr = [];
-        resultes.map(items => {
-          items.attributes.leafs.map(children => {
-            arr.push(children);
-          });
-        });
-        var DataItem = Parse.Object.extend("DataItem");
-        var dataitem = new Parse.Query(DataItem);
-        dataitem.containedIn("leafname", arr);
-        dataitem.limit(1000);
-        dataitem.ascending("itemCode");
-        dataitem.find().then(res => {
-          res.map(item => {
-            data.push({
-              key: item.attributes.itemCode,
-              label: `${item.attributes.itemCode +
-                "--" +
-                item.attributes.itemName}`
-            });
-          });
-        });
-      });
-      return data;
-    };
+    // const generateData = _ => {
+    //   const data = [];
+    //   var Mainstation = Parse.Object.extend("MainStationIndex");
+    //   var mainstation = new Parse.Query(Mainstation);
+    //   mainstation.startsWith("name", "C.2");
+    //   mainstation.exists("leafs");
+    //   mainstation.ascending("name");
+    //   mainstation.find().then(resultes => {
+    //     var arr = [];
+    //     resultes.map(items => {
+    //       items.attributes.leafs.map(children => {
+    //         arr.push(children);
+    //       });
+    //     });
+    //     var DataItem = Parse.Object.extend("DataItem");
+    //     var dataitem = new Parse.Query(DataItem);
+    //     dataitem.containedIn("leafname", arr);
+    //     dataitem.limit(1000);
+    //     dataitem.ascending("itemCode");
+    //     dataitem.find().then(res => {
+    //       res.map(item => {
+    //         data.push({
+    //           key: item.attributes.itemCode,
+    //           label: `${item.attributes.itemCode +
+    //             "--" +
+    //             item.attributes.itemName}`
+    //         });
+    //       });
+    //     });
+    //   });
+    //   return data;
+    // };
+    
     return {
+      selectdata:'',
+      options1:[],
       taskform: {
         name: "",
         ftype: "vcaddr",
@@ -335,7 +347,7 @@ export default {
       draw: 1,
       tableData3: [],
       multipleSelection: [],
-      data: generateData(),
+      data: [],
       diselect: [],
       dialogVisible: false,
       valueforsearch: "",
@@ -449,13 +461,52 @@ export default {
   },
   mounted() {
     this.search();
+    this.getMain()
   },
   methods: {
+    getMain(){
+        this.options1=[]
+        var Mainstation = Parse.Object.extend("MainStationIndex");
+        var mainstation = new Parse.Query(Mainstation);
+        mainstation.startsWith("name", "C.");
+        mainstation.exists("leafs");
+        mainstation.ascending("name");
+        mainstation.find().then(resultes=>{
+          resultes.map(items=>{
+           this.options1.push({
+              label:items.attributes.name,
+              value:items.attributes.leafs
+            })
+          })
+           this.selectdata=this.options1[0].label
+       this.selectDi(this.options1[0].value)
+        })
+      
+    },
+    selectDi(val){
+      this.data=[]
+        var DataItem = Parse.Object.extend("DataItem");
+        var dataitem = new Parse.Query(DataItem);
+        dataitem.containedIn("leafname", val);
+        dataitem.limit(1000);
+        dataitem.ascending("itemCode");
+        dataitem.find().then(res => {
+          res.map(item => {
+            this.data.push({
+              key: item.attributes.itemCode,
+              label: `${item.attributes.itemCode +
+                "--" +
+                item.attributes.itemName}`
+            });
+          });
+        });
+     
+    },
     timestampToTime(timestamp) {
       var date = new Date(timestamp * 1000);
       var Y = date.getFullYear() + "-";
       var M =
-        (date.getMonth() + 1 <= 10
+        (date.getMonth() + 1 < 10
           ? "0" + (date.getMonth() + 1)
           : date.getMonth() + 1) + "-";
       var D =
@@ -477,7 +528,7 @@ export default {
     //取到dilist
 
     removeDomain1(item) {
-          var index = this.form.downchannel.indexOf(item);
+          var index = this.taskform.downchannel.indexOf(item);
           if (index !== -1) {
             this.taskform.downchannel.splice(index, 1);
           }
@@ -492,6 +543,7 @@ export default {
     //删除采集轮次
     removeDomain(item) {
       var index = this.downchannel.indexOf(item);
+     
       if (index !== -1) {
         this.downchannel.splice(index, 1);
       }
@@ -505,6 +557,7 @@ export default {
       });
     },
     handleClose() {
+      this.$refs['taskform'].resetFields();
       this.dialogVisible = false;
       this.taskform.name = "";
       this.taskform.frozendate = "";
@@ -705,7 +758,7 @@ export default {
       }
       if (this.taskform.frozendate != "") {
         crond.set("task", {
-          di: this.taskform.diselect,
+          di: this.diselect,
           chs: arr,
           res: this.taskform.upchannel,
           pns: vcaddr,
@@ -714,7 +767,7 @@ export default {
         });
       } else {
         crond.set("task", {
-          di: this.taskform.diselect,
+          di: this.diselect,
           chs: arr,
           pns: vcaddr,
           res: this.taskform.upchannel
@@ -1016,6 +1069,23 @@ export default {
 }
 .lineone .elformcontent .el-input__inner {
   width: 200px;
+}
+.tasklist .el-transfer-panel .el-transfer-panel__footer{
+  top:40px;
+  text-align:center;
+  height:50px;
+}
+.tasklist .el-transfer-panel__filter{
+  visibility: hidden;
+}
+.tasklist .el-transfer-panel .el-transfer-panel__footer .el-select{
+  width:80%;
+}
+.tasklist .el-transfer-panel .el-transfer-panel__footer .el-select>.el-input{
+  margin-top:15px;
+}
+.tasklist .el-transfer-panel .el-transfer-panel__footer .el-input--small .el-input__inner{
+  border-radius:16px;
 }
 </style>
 

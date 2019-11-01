@@ -43,8 +43,9 @@ export function addMeter({addr,yhdz,organization,pn,vcaddr,gddw,tq,yhmc,yhabh,yh
         jlbx,
         xgwzh,
         dbmm,
+        deveui,
         appeui,
-        deveui
+        
     }
   })
 }

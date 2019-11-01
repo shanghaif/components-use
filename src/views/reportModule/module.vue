@@ -1,7 +1,7 @@
 <template>
   <div class="module">
     <div id="editor_holder"></div>
-    <el-button type="primary" @click="addmodule">保 存</el-button>
+    <el-button type="primary" @click="addmodule" style="margin-top:20px;">保 存</el-button>
   </div>
 </template>
  
@@ -215,5 +215,12 @@ select {
 .moveup,
 .json-editor-btntype-move {
   margin-top: 10px;
+}
+.module .je-header-button-holder{
+  display:inline-block;
+  margin-left:20px;
+}
+.module .je-indented-panel button{
+  margin-top:10px;
 }
 </style>

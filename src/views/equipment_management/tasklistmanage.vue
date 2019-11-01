@@ -206,20 +206,71 @@ export default {
       dialogFormVisible: false,
       channel: [
         {
-          label: "物理集中器",
+          label: "LTE通道",
           value: 1
         },
         {
-          label: "GPRS",
+          label: "GPRS/CMDA通道",
           value: 2
         },
         {
-          label: "LoRa",
+          label: "LoRa通道",
           value: 3
         },
         {
-          label: "NB",
+          label: "微功率通道",
           value: 4
+        },
+        {
+          label: "RS232/RS485通道",
+          value: 5
+        },
+        {
+          label: "红外通道",
+          value: 6
+        },
+        {
+          label: "NB-IOT通道",
+          value: 7
+        },
+        {
+          label: "载波通道",
+          value: 8
+        },
+        {
+          label: "Zeta通道",
+          value: 9
+        },
+        {
+          label: "ZigBee通道",
+          value: 10
+        },
+        {
+          label: "光纤通道",
+          value: 11
+        },
+        {
+          label: "网络连接",
+          value: 12
+        },
+        {
+          label: "5G通道",
+          value: 13
+        },
+        {
+          label: "WIFI通道",
+          value: 14
+        },
+        {
+          label: "RS422通道",
+          value: 15
+        },
+        {
+          label: "NFC通道",
+          value: 16
+        },{
+          label: "Bluetooth通道",
+          value: 17
         }
       ],
       form: {
@@ -391,6 +442,13 @@ export default {
             "chs": arr,
             })
           crond.set("name", this.form.name);
+          crond.set("visible", 1);
+          crond.set("crond", {
+                "freq": 2,
+                "unit": 1,
+                "end_time": 1601395200,
+                "start_time": 1571152234
+              });
           crond.set("type", this.form.type);
           crond.set("args", {
             upchannel: this.form.upchannel,

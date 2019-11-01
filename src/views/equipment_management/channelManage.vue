@@ -27,7 +27,7 @@
               <span>{{scope.row.attributes.name}}</span>
             </template>
           </el-table-column>
-           <el-table-column label="通道类型">
+          <el-table-column label="通道类型">
             <template slot-scope="scope">
               <span v-if="scope.row.attributes.type==1">采集通道</span>
               <span v-else>资源通道</span>
@@ -60,7 +60,7 @@
               <span>{{'channel/'+scope.row.id}}</span>
             </template>
           </el-table-column>
-         
+
           <el-table-column label="描述">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.desc}}</span>
@@ -100,12 +100,12 @@
             :total="total"
           ></el-pagination>
         </div>
-        <!--通道管理弹窗-->
+        <!--通道管理弹窗---------------------------------------------------------------------------------------------->
         <el-dialog
           :title="channelupdated+'服务通道'"
           :visible.sync="channelForm"
           width="40%"
-          top="5vh"
+          top="0"
           :before-close="handleClose"
         >
           <!-- <div style="margin:20px 0;">服务通道设置</div> -->
@@ -115,6 +115,7 @@
                 v-model="addchannel.region"
                 placeholder="请选择服务类型"
                 :disabled="channelId!=''"
+                @change="removeauto"
               >
                 <el-option
                   v-for="(item,index) in channelregion"
@@ -129,52 +130,747 @@
             </el-form-item>
 
             <!--服务通道选择参数配置-->
-            <!--TCP和UDP部分配置-->
-            <el-form-item label="IP" v-if="addchannel.region=='UDP'||addchannel.region=='TCP'" class="notlastchildren">
+            <!--kafka---------------------------------------------------------------------------------->
+            <!-- <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="kafkaclient"
+              :rules='[
+              {required:true,message:"kafa服务器不能为空",trigger: "blur"}
+              ]'
+            >
+              <template>
+                <span slot="label">
+                  <span>Kafka服务器</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="Kafka服务器">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="kafka服务器" v-model="addchannel.kafkaclient"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>Metadata更新间隔</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="Metadata更新间隔"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="Metadata更新间隔" v-model="addchannel.kafkametadata"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>同步调用间隔时间</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="同步调用间隔时间">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+
+              <el-input type="text" placeholder="同步调用间隔时间" v-model="addchannel.kafkaduring"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>最大批处理字节数</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="最大批处理字节数">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="最大批处理字节数" v-model="addchannel.kafkakb"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>压缩</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="压缩">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="压缩" v-model="addchannel.kafkays"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='Kafka'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template slot="label">
+                <span>
+                  <span>发送消息的缓冲区大小</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="发送消息的缓冲区大小"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="发送消息的缓冲区大小" v-model="addchannel.kafkahc"></el-input>
+            </el-form-item> -->
+            <!--MySQL---------------------------------------------------------------------------------------->
+            <!-- <el-form-item
+              label="MySQL服务器"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="MySQLclient"
+              :rules='[
+              {required:true,message:"MySQL服务器不能为空",trigger: "blur"}
+              ]'
+            >
+              <template>
+                <span slot="label">
+                  <span>MySQL服务器</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="Kafka服务器">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="MySQL服务器" v-model="addchannel.MySQLclient"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="MySQL"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MySQL数据库名</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="MySQL数据库名">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="MySQL数据库名" v-model="addchannel.MySQLname"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="MySQL"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>连接池大小</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="连接池大小">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+
+              <el-input type="text" placeholder="连接池大小" v-model="addchannel.MySQLduring"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MySQL用户名</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="MySQL用户名">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="MySQL用户名"
+                v-model="addchannel.MySQLusername"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MySQL密码</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="MySQL密码">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="MySQL密码"
+                v-model="addchannel.MySQLpassword"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>批量写入大小</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="批量写入大小">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="批量写入大小" v-model="addchannel.MySQLpldx"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>批量写入间隔(毫秒)</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="批量写入间隔(毫秒)"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="批量写入间隔" v-model="addchannel.MySQLplduring"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>是否重连</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="是否重连">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="是否重连" v-model="addchannel.MySQLconnect"></el-input>
+            </el-form-item> -->
+            <!---------------------------------------------------MongoDB配置------------------------------------------>
+            <!-- <el-form-item
+              label="MongoDB服务器"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="MongoDBclient"
+              :rules='[
+              {required:true,message:"MongoDB服务器不能为空",trigger: "blur"}
+              ]'
+            >
+              <template>
+                <span slot="label">
+                  <span>MongoDB服务器</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="Kafka服务器">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="MongoDB服务器" v-model="addchannel.MongoDBclient"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="MongoDB"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MongoDB数据库名</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="MongoDB数据库名"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="MongoDB数据库名" v-model="addchannel.MongoDBname"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="MongoDB"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>连接池大小</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="连接池大小">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+
+              <el-input type="text" placeholder="连接池大小" v-model="addchannel.MongoDBduring"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MongoDB用户名</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="MongoDB用户名"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="MongoDB用户名"
+                v-model="addchannel.MongoDBusername"
+                class="notauto"
+                readonl
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>MongoDB密码</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="MongoDB密码">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="MongoDB密码"
+                v-model="addchannel.MongoDBpassword"
+                class="notauto"
+                readonly
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>连接认证源</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="连接认证源">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="连接认证源"
+                v-model="addchannel.MongoDBconnectrenzhen"
+                class="notauto"
+                readonly
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>连接超时时间(毫秒)</span>
+                  <el-popover
+                    placement="top-start"
+                    width="200"
+                    trigger="hover"
+                    content="连接超时时间(毫秒)"
+                  >
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="连接超时时间"
+                v-model="addchannel.MongoDBovertime"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>写模式</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="写模式">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input
+                type="text"
+                placeholder="写模式"
+                v-model="addchannel.MongoDBmode"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>开始SSL</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="开始SSL">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="开始SSL" v-model="addchannel.MongoDBopenssl"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>私密文件路径</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="私密文件路径">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="私密文件路径" v-model="addchannel.MongoDBsmpath"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>证书文件路径</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="证书文件路径">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="证书文件路径" v-model="addchannel.MongoDBzspath"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="kafka"
+              v-if="addchannel.region=='MongoDB'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <template>
+                <span slot="label">
+                  <span>CA证书文件路径</span>
+                  <el-popover placement="top-start" width="200" trigger="hover" content="CA证书文件路径">
+                    <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
+                  </el-popover>
+                </span>
+              </template>
+              <el-input type="text" placeholder="CA证书文件路径" v-model="addchannel.MongoDBcapath"></el-input>
+            </el-form-item> -->
+            <!--PG配置------------------------------------------------------------------------------------------------>
+            <el-form-item
+              :label="addchannel.region+'服务器'"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="postgresqlhost"
+              :rules='[
+              {required:true,message:"服务器不能为空",trigger: "blur"}
+              ]'
+            >
+              <el-input type="text" placeholder="服务器" v-model="addchannel.postgresqlhost"></el-input>
+            </el-form-item>
+            <el-form-item
+              label="端口"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="postgresqlport"
+              :rules='[
+              {required:true,message:"服务器端口不能为空",trigger: "blur"},
+               { validator: validPort } 
+              ]'
+            >
+              <el-input type="text" placeholder="端口" v-model.number="addchannel.postgresqlport"></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="addchannel.region+'用户名'"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="postgresqlusername"
+              :rules='[
+              {required:true,message:"用户名不能为空",trigger: "blur"}
+              ]'
+            >
+              <el-input
+                type="text"
+                placeholder="用户名"
+                v-model="addchannel.postgresqlusername"
+                class="notauto"
+                readonl
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="addchannel.region+'密码'"
+               v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="postgresqlpassword"
+              :rules='[
+              {required:true,message:"密码不能为空",trigger: "blur"}
+              ]'
+            >
+              <el-input
+                type="text"
+                placeholder="密码"
+                v-model="addchannel.postgresqlpassword"
+                class="notauto"
+                readonly
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="database"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+              prop="postgresqldatabase"
+              :rules='[
+              {required:true,message:"database不能为空",trigger: "blur"}
+              ]'
+            >
+              <el-input
+                type="text"
+                placeholder="database"
+                v-model="addchannel.postgresqldatabase"
+                class="notauto"
+                readonly
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="批量写入大小"
+              v-if="addchannel.region=='postgresql'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <el-input
+                type="text"
+                placeholder="批量写入大小"
+                v-model.number="addchannel.postgresqllength"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="addchannel.region+'资源名'"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <el-input
+                type="text"
+                placeholder="数据库名"
+                v-model="addchannel.postgresqlname"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              :label="addchannel.region+'连接数'"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+              <el-input
+                placeholder="连接数"
+                v-model.number="addchannel.postgresqlconnect"
+                class="notauto"
+                readonly
+                autocomplete="off"
+              ></el-input>
+            </el-form-item>
+            <el-form-item
+              label="开始SSL"
+              v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
+              class="notlastchildren notline"
+              label-width="200px"
+            >
+            <el-select v-model="addchannel.postgresqlssl">
+              <el-option label="disable" value="disable">
+
+              </el-option>
+              <el-option label="require" value="require">
+
+              </el-option>
+              <el-option label="verify-ca" value="verify-ca">
+
+              </el-option>
+              <el-option label="verify-full" value="verify-full">
+
+              </el-option>
+            </el-select>
+            </el-form-item>
+            <!--TCP和UDP部分配置--------------------------------------------------------------------------------------->
+            <el-form-item
+              label="IP"
+              v-if="addchannel.region=='UDP'||addchannel.region=='TCP'"
+              class="notlastchildren"
+            >
               <el-input v-model="addchannel.ip" autocomplete="off" disabled></el-input>
             </el-form-item>
             <el-form-item
               label="端口"
               v-if="addchannel.region=='UDP'||addchannel.region=='TCP'|| addchannel.region=='HTTP'"
               prop="port"
-              :rules='[{ required: true, trigger: "blur" }, { validator: validPort }]'
+              :rules='[{ required: true, message:"端口不能为空",trigger: "blur" }, { validator: validPort }]'
               class="notlastchildren"
             >
               <el-input v-model="addchannel.port" autocomplete="off" placeholder="请输入通道端口"></el-input>
             </el-form-item>
-          
-            <el-form-item label="缓存限定" v-if="addchannel.region=='TCP'" prop="buff_size" :rules='[
+
+            <el-form-item
+              label="缓存限定"
+              v-if="addchannel.region=='TCP'"
+              prop="buff_size"
+              :rules='[
           { required: true, message: "最大存储不能为空", trigger: "blur" },
           { type: "number", message: "最大存储必须为数字值" }
-        ]' class="notlastchildren">
-                <el-input v-model.number="addchannel.buff_size" autocomplete="off" :min="1">
-                  <template slot="append">KB</template>
-                </el-input>
+        ]'
+              class="notlastchildren"
+            >
+              <el-input v-model.number="addchannel.buff_size" autocomplete="off" :min="1">
+                <template slot="append">KB</template>
+              </el-input>
             </el-form-item>
-            <el-form-item label="路径" v-if="addchannel.region=='HTTP'" prop="path"   :rules='[
-          { required: true, message: "需要输入正确的url", trigger: "blur" }]' class="notlastchildren">
+            <el-form-item
+              label="路径"
+              v-if="addchannel.region=='HTTP'"
+              prop="path"
+              :rules='[
+          { required: true, message: "需要输入正确的url", trigger: "blur" }]'
+              class="notlastchildren"
+            >
               <el-input v-model="addchannel.path" autocomplete="off" placeholder="请输入通道路径"></el-input>
             </el-form-item>
-            <!--Tdengine部分配置-->
-            <el-form-item label="服务链接" v-if="addchannel.region=='Tdengine'" prop="server" class="lastchildren" :rules='[
+            <!--Tdengine部分配置-------------------------------------------------------------------------------------->
+            <el-form-item
+              label="服务链接"
+              v-if="addchannel.region=='Tdengine'"
+              prop="server"
+              class="lastchildren"
+              :rules='[
               { required: true, message: "需要输入正确的url", trigger: "blur" },
               { validator: validUrl, trigger: "blur" }
-            ]' >
+            ]'
+            >
               <el-input v-model="addchannel.server" autocomplete="off" placeholder="请输入存储服务器地址">
                 <template slot="prepend">http://</template>
               </el-input>
             </el-form-item>
-            <el-form-item label="库登录账号" v-if="addchannel.region=='Tdengine'" prop="username" :rules='[
+            <el-form-item
+              label="库登录账号"
+              v-if="addchannel.region=='Tdengine'"
+              prop="username"
+              :rules='[
           { required: true, message: "请输入用户名", trigger: "blur" }
-        ]' class="notlastchildren">
-              <el-input v-model="addchannel.username" autocomplete="off" placeholder="请输入用户名"></el-input>
+        ]'
+              class="notlastchildren"
+            >
+              <el-input
+                v-model="addchannel.username"
+                autocomplete="off"
+                placeholder="请输入用户名"
+                type="text"
+                class="notauto"
+                readonly
+              ></el-input>
             </el-form-item>
-            <el-form-item label="库登录密码" v-if="addchannel.region=='Tdengine'" prop="password" :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]' class="notlastchildren">
+            <el-form-item
+              label="库登录密码"
+              v-if="addchannel.region=='Tdengine'"
+              prop="password"
+              :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]'
+              class="notlastchildren"
+            >
               <el-input
                 v-model="addchannel.password"
                 autocomplete="off"
                 placeholder="请输入密码"
                 :type="pwdType"
+                class="notauto"
+                readonly
               >
                 <template slot="append">
                   <span class="show-pwd" @click="showPwd" style="cursor:pointer">
@@ -183,11 +879,17 @@
                 </template>
               </el-input>
             </el-form-item>
-            <!--同步间隔提示-->
-            <el-form-item label="同步间隔" v-if="addchannel.region=='Tdengine'" prop="auto_save" :rules='[
+            <!--同步间隔提示---------------------------------------------------------------------------------->
+            <el-form-item
+              label="同步间隔"
+              v-if="addchannel.region=='Tdengine'"
+              prop="auto_save"
+              :rules='[
               { required: true, message: "同步间隔不能为空", trigger: "blur" },
               { type: "number", message: "同步间隔必须为数字值" }
-            ]' class="notlastchildren">
+            ]'
+              class="notlastchildren"
+            >
               <el-input
                 v-model.number="addchannel.auto_save"
                 autocomplete="off"
@@ -197,10 +899,16 @@
                 <template slot="append">秒</template>
               </el-input>
             </el-form-item>
-            <el-form-item label="缓存数据量" v-if="addchannel.region=='Tdengine'" prop="max_size" :rules='[
+            <el-form-item
+              label="缓存数据量"
+              v-if="addchannel.region=='Tdengine'"
+              prop="max_size"
+              :rules='[
           { required: true, message: "最大条数不能为空", trigger: "blur" },
           { type: "number", message: "最大条数必须为数字值" }
-        ]' class="notlastchildren">
+        ]'
+              class="notlastchildren"
+            >
               <el-input
                 v-model.number="addchannel.max_size"
                 autocomplete="off"
@@ -210,16 +918,28 @@
                 <template slot="append">条</template>
               </el-input>
             </el-form-item>
-            <el-form-item label="缓存限定" v-if="addchannel.region=='Tdengine'" prop="max_memory" :rules='[
+            <el-form-item
+              label="缓存限定"
+              v-if="addchannel.region=='Tdengine'"
+              prop="max_memory"
+              :rules='[
           { required: true, message: "最大存储不能为空", trigger: "blur" },
-          { type: "number", message: "最大存储必须为数字值" }]' class="notlastchildren">
+          { type: "number", message: "最大存储必须为数字值" }]'
+              class="notlastchildren"
+            >
               <el-input v-model.number="addchannel.max_memory" autocomplete="off" :min="1">
                 <template slot="append">KB</template>
               </el-input>
             </el-form-item>
-            <!--MQTT-->
-            <el-form-item v-if="addchannel.region=='MQTT'" class="lastchildren" style="margin-bottom:10px;">
-              <span><i class="el-icon-question"></i>topic或client满足下面任意条件</span>
+            <!----------------MQTT----------------------------------------------------------------------------------->
+            <el-form-item
+              v-if="addchannel.region=='MQTT'"
+              class="lastchildren"
+              style="margin-bottom:10px;"
+            >
+              <span>
+                <i class="el-icon-question"></i>topic或client满足下面任意条件
+              </span>
             </el-form-item>
             <el-form-item label="Topic" v-if="addchannel.region=='MQTT'" class="notlastchildren">
               <el-input v-model="addchannel.topic" autocomplete="off" placeholder="填正则表达式"></el-input>
@@ -227,14 +947,20 @@
             <el-form-item label="Client" v-if="addchannel.region=='MQTT'" class="notlastchildren">
               <el-input v-model="addchannel.client" autocomplete="off" placeholder="填正则表达式"></el-input>
             </el-form-item>
-            <!--MQTTCLI配置-->
-            <el-form-item label="主机地址" v-if="addchannel.region=='MQTTCLI'" prop="address" :rules='[
+            <!--MQTTCLI配置------------------------------------------------>
+            <el-form-item
+              label="主机地址"
+              v-if="addchannel.region=='MQTTCLI'"
+              prop="address"
+              class="notlastchildren"
+              :rules='[
               { required: true, message: "输入主机地址", trigger: "blur" },
               { validator: validUrl, trigger: "blur" }
-              ]'>
-             <el-input v-model="addchannel.address" autocomplete="off" placeholder="请输入地址"></el-input>
+              ]'
+            >
+              <el-input v-model="addchannel.address" autocomplete="off" placeholder="请输入地址"></el-input>
             </el-form-item>
-             <el-form-item
+            <el-form-item
               label="端口"
               v-if="addchannel.region=='MQTTCLI'"
               prop="port"
@@ -243,36 +969,68 @@
             >
               <el-input v-model="addchannel.port" autocomplete="off" placeholder="请输入通道端口"></el-input>
             </el-form-item>
-            <el-form-item label="用户名" v-if="addchannel.region=='MQTTCLI'" prop="username" :rules='[
+            <el-form-item
+              label="用户名"
+              v-if="addchannel.region=='MQTTCLI'"
+              prop="username"
+              :rules='[
                 { required: true, message: "请输入用户名", trigger: "blur" }
-              ]' class="notlastchildren">
-                    <el-input v-model="addchannel.username" autocomplete="off" placeholder="请输入用户名"></el-input>
+              ]'
+              class="notlastchildren"
+            >
+              <el-input
+                v-model="addchannel.username"
+                autocomplete="off"
+                placeholder="请输入用户名"
+                class="notauto"
+                type="text"
+                readonly
+              ></el-input>
             </el-form-item>
-            <el-form-item label="密码" v-if="addchannel.region=='MQTTCLI'" prop="password" :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]' class="notlastchildren">
-                    <el-input
-                      v-model="addchannel.password"
-                      autocomplete="off"
-                      placeholder="请输入密码"
-                      :type="pwdType"
-                    >
-                      <template slot="append">
-                        <span class="show-pwd" @click="showPwd" style="cursor:pointer">
-                          <svg-icon :icon-class="pwdType=='password' ? 'eye':'zheneys'" />
-                        </span>
-                      </template>
-                    </el-input>
+            <el-form-item
+              label="密码"
+              v-if="addchannel.region=='MQTTCLI'"
+              prop="password"
+              :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]'
+              class="notlastchildren"
+            >
+              <el-input
+                v-model="addchannel.password"
+                autocomplete="off"
+                placeholder="请输入密码"
+                :type="pwdType"
+                class="notauto"
+                readonly
+              >
+                <template slot="append">
+                  <span class="show-pwd" @click="showPwd" style="cursor:pointer">
+                    <svg-icon :icon-class="pwdType=='password' ? 'eye':'zheneys'" />
+                  </span>
+                </template>
+              </el-input>
             </el-form-item>
-            <el-form-item label="心跳(秒)" v-if="addchannel.region=='MQTTCLI'" prop="keepalive" :rules='[
+            <el-form-item
+              label="心跳(秒)"
+              v-if="addchannel.region=='MQTTCLI'"
+              prop="keepalive"
+              :rules='[
                 { required: true, message: "请输入心跳", trigger: "blur" },
                 { type: "number", message: "心跳间隔必须为数字值" }
-              ]' class="notlastchildren">
-              <el-input v-model.number="addchannel.keepalive" autocomplete="off" placeholder="请输入心跳间隔" :min='1'></el-input>
+              ]'
+              class="notlastchildren"
+            >
+              <el-input
+                v-model.number="addchannel.keepalive"
+                autocomplete="off"
+                placeholder="请输入心跳间隔"
+                :min="1"
+              ></el-input>
             </el-form-item>
             <el-form-item label=" " v-if="addchannel.region=='MQTTCLI'">
               <el-checkbox v-model="addchannel.clean_start">清除会话</el-checkbox>
               <el-checkbox v-model="addchannel.ssl">SSL</el-checkbox>
             </el-form-item>
-            <el-form-item label="描述" class="lastchildren">
+            <el-form-item label="通道描述" class="lastchildren">
               <el-input
                 v-model="addchannel.desc"
                 autocomplete="off"
@@ -287,7 +1045,7 @@
             <el-button type="primary" @click="addchannelForm('addchannel')">确 定</el-button>
           </div>
         </el-dialog>
-        <!--选择通道的类型-->
+        <!-----------------------------------选择通道的类型----------------------------------------------------------------------->
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -296,25 +1054,10 @@
 /*{params}/由于一些表单的验证用v-if所以规则要写在里面*/
 import Parse from "parse";
 import { prototype } from "stream";
+import {channelConnect} from '@/api/testchannel'
 export default {
   data() {
-    var validUrl = (rule, value, callback) => {
-      let reg = /^[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/;
-      if (!reg.test(value)) {
-        callback(new Error("需要输入正确的url"));
-      } else {
-        callback();
-      }
-    };
-    var validPort = (rule, value, callback) => {
-      let reg = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
-
-      if (!reg.test(value)) {
-        callback(new Error("需要输入正确的端口号"));
-      } else {
-        callback();
-      }
-    };
+    
     return {
       innerVisible: false,
       //全部产品信息
@@ -336,8 +1079,8 @@ export default {
         {
           name: "HTTP",
           value: "HTTP",
-          channeltype: "采集通道",
-          channelvalue: "1"
+          channeltype: "资源通道",
+          channelvalue: "2"
         },
         {
           name: "TCP",
@@ -368,7 +1111,7 @@ export default {
           value: "Tdengine",
           channeltype: "资源通道",
           channelvalue: "2"
-        }
+        },
       ],
       channelformsearch: {
         name: ""
@@ -391,12 +1134,27 @@ export default {
         username: "",
         password: "",
         isEnable: false,
-        buff_size:1024000,
-        address :'',
-        clean_start:false,
-        ssl:false,
-        keepalive:'',
-      
+        buff_size: 1024000,
+        address: "",
+        clean_start: false,
+        ssl: false,
+        keepalive: "",
+        //kafka参数
+        kafkaclient: "127.0.0.1:9092",
+        kafkametadata: "3s",
+        kafkaduring: "3s",
+        kafkakb: "1024KB",
+        kafkays: "",
+        kafkahc: "1024KB",
+        postgresqlconnect: "",
+        postgresqlhost: "",
+        postgresqlusername: "",
+        postgresqlpassword: "",
+        postgresqlport:5432,
+        postgresqldatabase: "postgres",
+        postgresqlssl: 'disable',
+        postgresqllength: "",
+        postgresqlname: ""
       },
       pwdType: "password",
       channelId: "",
@@ -407,16 +1165,33 @@ export default {
         ],
         channeltype: [
           { required: true, message: "请选择通道类型", trigger: "change" }
-        ],
+        ]
       },
       productIds: [],
-      channelupdated:''
+      channelupdated: ""
     };
   },
   mounted() {
     this.getChannel();
   },
   methods: {
+    //验证
+     validUrl(rule, value, callback){
+      let reg = /^[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/;
+      if (!reg.test(value)) {
+        callback(new Error("需要输入正确的url"));
+      } else {
+        callback();
+      }
+    },
+    validPort(rule, value, callback){
+      let reg = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+      if (!reg.test(value)) {
+        callback(new Error("需要输入正确的端口号"));
+      } else {
+        callback();
+      }
+    },
     showPwd() {
       if (this.pwdType === "password") {
         this.pwdType = "";
@@ -430,7 +1205,6 @@ export default {
       } else {
         return "red_active";
       }
-      console.log(row, rowIndex);
     },
     utc2beijing(utc_datetime) {
       // 转为正常的时间格式 年-月-日 时:分:秒
@@ -440,9 +1214,18 @@ export default {
         .replace(/\.[\d]{3}Z/, "");
       return date; // 2017-03-31 16:02:06
     },
-    addchanneltype(){
-      this.channelForm=true
-      this.channelupdated='新增'
+    addchanneltype() {
+      this.channelForm = true;
+      this.channelupdated = "新增";
+    },
+    removeauto() {
+      //去掉自动补全
+      setTimeout(() => {
+        var notautolength = document.getElementsByClassName("notauto");
+        for (var i = 0; i < notautolength.length; i++) {
+          notautolength[i].children[0].removeAttribute("readonly");
+        }
+      }, 1000);
     },
     //初始化
     getChannel(start) {
@@ -511,23 +1294,19 @@ export default {
             channel.set("type", this.addchannel.channeltype);
             channel.set("desc", this.addchannel.desc);
             channel.set("isEnable", this.addchannel.isEnable);
-            if (
-              this.addchannel.region == "UDP"
-            ) {
+            if (this.addchannel.region == "UDP") {
               channel.set("config", {
                 port: this.addchannel.port
               });
-            }else if (
-              this.addchannel.region == "TCP"
-            ) {
+            } else if (this.addchannel.region == "TCP") {
               channel.set("config", {
                 port: this.addchannel.port,
-                buff_size:this.addchannel.buff_size
+                buff_size: this.addchannel.buff_size
               });
-            }  else if (this.addchannel.region == "MQTT") {
+            } else if (this.addchannel.region == "MQTT") {
               channel.set("config", {
                 topic: this.addchannel.topic,
-                client: this.addchannel.client,
+                client: this.addchannel.client
               });
             } else if (this.addchannel.region == "HTTP") {
               channel.set("config", {
@@ -543,16 +1322,15 @@ export default {
                 username: this.addchannel.username,
                 password: this.addchannel.password
               });
-            }
-            else if (this.addchannel.region == "MQTTCLI") {
+            } else if (this.addchannel.region == "MQTTCLI") {
               channel.set("config", {
                 address: this.addchannel.address,
                 port: this.addchannel.port,
-                username:this.addchannel.username,
-                password:this.addchannel.password,
-                clean_start:this.addchannel.clean_start,
-                ssl:this.addchannel.ssl,
-                keepalive:this.addchannel.keepalive,
+                username: this.addchannel.username,
+                password: this.addchannel.password,
+                clean_start: this.addchannel.clean_start,
+                ssl: this.addchannel.ssl,
+                keepalive: this.addchannel.keepalive
               });
             }
             channel.save().then(
@@ -576,14 +1354,14 @@ export default {
                     username: "",
                     password: "",
                     desc: "",
-                    buff_size:'',
-                    path:'',
-                    isEnable:false,
-                    ip:'0.0.0.0',
-                     address :'',
-                    clean_start:false,
-                    ssl:false,
-                    keepalive:'',
+                    buff_size: "",
+                    path: "",
+                    isEnable: false,
+                    ip: "0.0.0.0",
+                    address: "",
+                    clean_start: false,
+                    ssl: false,
+                    keepalive: ""
                   };
                   this.channelForm = false;
                   this.channelId = "";
@@ -604,6 +1382,33 @@ export default {
         }
       });
     },
+    //测试连接
+    testConnect(formName){
+         this.$refs[formName].validate(valid => {
+           if (valid) {
+             if(this.addchannel.region=='MongoDB'||this.addchannel.region=='MySQL'||this.addchannel.region=='postgresql'){
+                 channelConnect(this.addchannel.region.toLowerCase(),this.addchannel.postgresqlhost,this.addchannel.postgresqlport,this.addchannel.postgresqlusername,this.addchannel.postgresqlpassword,this.addchannel.postgresqldatabase,this.addchannel.postgresqllength,this.addchannel.postgresqlname,this.addchannel.postgresqlconnect,this.addchannel.postgresqlssl).then(resultes=>{
+                   if(resultes){
+                      this.$notify({
+                      title: '成功',
+                      message: '连接可用 ',
+                      type: 'success',
+                      duration:2000
+                    });
+                   }
+                 }).catch(error=>{
+                   this.$message.error(error.error)
+                 })
+             
+             }
+           
+           }else{
+             this.$message.error('有必填项未填写')
+             return false
+           }
+         
+        })
+    },
     //关闭弹窗清空
     handleClose() {
       this.addchannel = {
@@ -622,12 +1427,12 @@ export default {
         username: "",
         password: "",
         desc: "",
-        buff_size:'',
-        isEnable:false,
-        address :'',
-        clean_start:false,
-        ssl:false,
-        keepalive:'',
+        buff_size: "",
+        isEnable: false,
+        address: "",
+        clean_start: false,
+        ssl: false,
+        keepalive: ""
       };
       this.channelForm = false;
       // this.$refs["addchannel"].resetFields();
@@ -660,14 +1465,14 @@ export default {
     //编辑
     updateChannel(row) {
       this.channelForm = true;
-      this.channelupdated='编辑'
+      this.channelupdated = "编辑";
       this.addchannel.name = row.attributes.name;
       this.addchannel.region = row.attributes.cType;
       if (row.attributes.cType == "MQTT") {
         this.addchannel.topic = row.attributes.config.topic;
         this.addchannel.client = row.attributes.config.client;
       } else if (row.attributes.cType == "HTTP") {
-        this.addchannel.path = row.attributes.config.path;
+        this.addchannel.path = row.attributes.config.path.substring(7);
       } else if (row.attributes.cType == "Tdengine") {
         this.addchannel.auto_save = row.attributes.config.auto_save;
         this.addchannel.max_size = row.attributes.config.max_size;
@@ -676,18 +1481,18 @@ export default {
         this.addchannel.server = row.attributes.config.server.substring(7);
         this.addchannel.username = row.attributes.config.username;
         this.addchannel.password = row.attributes.config.password;
-      }else if(row.attributes.cType=='TCP'){
-        this.addchannel.buff_size = row.attributes.config.buff_size
+      } else if (row.attributes.cType == "TCP") {
+        this.addchannel.buff_size = row.attributes.config.buff_size;
         // this.addchannel.port = row.attributes.config.port;
-      }else if(row.attributes.cType=='MQTTCLI'){
-        this.addchannel.address=row.attributes.config.address
-        this.addchannel.username=row.attributes.config.username
-        this.addchannel.password=row.attributes.config.password
-        this.addchannel.clean_start=row.attributes.config.clean_start
-        this.addchannel.ssl=row.attributes.config.ssl
-        this.addchannel.keepalive=row.attributes.config.keepalive
+      } else if (row.attributes.cType == "MQTTCLI") {
+        this.addchannel.address = row.attributes.config.address;
+        this.addchannel.username = row.attributes.config.username;
+        this.addchannel.password = row.attributes.config.password;
+        this.addchannel.clean_start = row.attributes.config.clean_start;
+        this.addchannel.ssl = row.attributes.config.ssl;
+        this.addchannel.keepalive = row.attributes.config.keepalive;
       }
-      this.addchannel.ip="0.0.0.0"
+      this.addchannel.ip = "0.0.0.0";
       this.addchannel.port = row.attributes.config.port;
       this.addchannel.desc = row.attributes.desc;
       this.addchannel.channeltype = row.attributes.type;
@@ -756,18 +1561,44 @@ export default {
       flex-wrap: wrap;
       .el-form-item {
         width: 50%;
-
         .el-select {
           width: 100%;
         }
       }
       .lastchildren {
         width: 100%;
+        // .el-form-item__label{
+        //   position: relative;
+        //   left:20px;
+        //   text-align:left;
+        // }
       }
-      .notlastchildren{
-          @media screen and (max-width: 1350px) {
-            width:100%;
-            }
+      .notlastchildren {
+        @media screen and (max-width: 1350px) {
+          width: 100%;
+        }
+      }
+      /deep/ .notline {
+        .el-form-item__label {
+          text-align: left;
+          position: relative;
+          left: 100px;
+          z-index: 100;
+        }
+        .el-form-item__content {
+          margin-left: 100px !important;
+        }
+        @media screen and (max-width: 1350px) {
+          .el-form-item__label {
+            text-align: left;
+            position: relative;
+            left: 30px;
+            z-index: 100;
+          }
+          .el-form-item__content {
+            margin-left: 30px !important;
+          }
+        }
       }
     }
   }
@@ -778,6 +1609,9 @@ export default {
     .el-form-item__content {
       width: 100%;
     }
+  }
+  /deep/ .el-dialog__wrapper {
+    margin-bottom: 20px;
   }
 }
 </style>

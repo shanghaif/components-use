@@ -77,7 +77,6 @@ export default {
   },
   methods: {
     click() {
-      console.log(this.isFullscreen);
       if (screenfull.isFullscreen == true) {
         this.isscreen=true
         eventBus.$emit("isshow", "全屏");
@@ -95,9 +94,24 @@ export default {
       screenfull.toggle();
     }
   },
+  // beforeUpdate(){
+  //   var _self = this
+  //   this.$nextTick(function () {
+  //     document.addEventListener('keyup', function (e) {
+  //     //此处填写你的业务逻辑即可
+  //      if (e.keyCode == 27) {
+  //        if(screenfull.isFullscreen == false){
+  //           eventBus.$emit("isshow", "全屏");
+  //           alert("执行退出全屏操作...");
+  //           }  
+  //         }
+  //       })
+  //     })
+  // },
   mounted() {
     eventBus.$emit("isshow", "全屏");
-  }
+    
+    }
 };
 </script>
 

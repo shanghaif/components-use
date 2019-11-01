@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="tableData" :row-style="showRow" v-bind="$attrs" v-on="$listeners" row-key="objectId">
+  <el-table :data="tableData" :row-style="showRow" v-bind="$attrs" v-on="$listeners" row-key="objectId" ref="multipleTable">
     <slot name="selection" />
     <slot name="pre-column" />
     <el-table-column
@@ -15,10 +15,10 @@
           <template v-if="item.expand">
             <span :style="{'padding-left':20+ 'px'} " />
             <span v-show="showSperadIcon(scope.row)" class="tree-ctrl" @click="toggleExpanded(scope.$index)">
-              <!-- <i v-if="!scope.row._expand" class="el-icon-plus" /> -->
-              
             </span>
             <i v-if="(!scope.row._expand)&&(!scope.row.children)" class="el-icon-minus" style="margin-right:5px;"/>
+             <!-- <i v-if="scope.row._expand" class="el-icon-plus"/>
+              <i v-else class="el-icon-minus" /> -->
           </template>
           <template v-if="item.checkbox">
             <el-checkbox
@@ -74,6 +74,9 @@ export default {
       guard: 1
     }
   },
+  mounted() {
+    console.log(this.defaultExpandAll)
+  },
   computed: {
     children() {
       
@@ -81,6 +84,7 @@ export default {
     },
     tableData() {
       const data = this.data
+     
       if (this.data.length === 0) {
         return []
       }
@@ -88,8 +92,8 @@ export default {
         expand: this.defaultExpandAll,
         children: this.defaultChildren
       })
-
       const retval = treeToArray(data, this.defaultChildren)
+      
       return retval
     }
   },

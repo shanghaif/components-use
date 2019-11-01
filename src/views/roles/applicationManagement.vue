@@ -43,6 +43,22 @@
                             label="操作"
                             >
                             <template slot-scope="scope">
+                                <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
+                                        <p>确定删除这个{{scope.row.name}}应用吗？</p>
+                                        <div style="text-align: right; margin: 0">
+                                        <el-button
+                                            size="mini"
+                                            @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
+                                        >取消</el-button>
+                                        <el-button type="primary" size="mini" @click="makeSure(scope)">确定</el-button>
+                                        </div>
+                                        <el-link
+                                        slot="reference"
+                                        :underline="false"
+                                        icon="el-icon-delete"
+                                        type="danger"
+                                     >删除</el-link>
+                                     </el-popover>
                                 <el-button @click="handleClickUpdate(scope)" type="text" size="small">编辑</el-button>
                                 <el-button @click="handleClickLook(scope)" type="text" size="small">密钥</el-button>
                                 <el-button type="text" size="small" @click="handleClickVisit(scope)">访问</el-button>
@@ -66,6 +82,7 @@
 <script>
 import { getApp,handleZero } from "@/api/applicationManagement"
 import { utc2beijing } from "@/utils"
+import Parse from 'parse'
 export default {
     data(){
         return {
@@ -224,6 +241,31 @@ export default {
                 }
             })
         },
+        //删除应用
+         makeSure(scope) {
+      // 可以在这里执行删除数据的回调操作.......删除操作.....
+      var App = Parse.Object.extend('App')
+      var app = new App()
+      app.id = scope.row.objectId
+    //   app.get(scope.row.objectId).then(resultes=>{
+          app.destroy().then(response=>{
+              if(response){
+                  this.$message({
+                      type:'success',
+                      message:'删除成功'
+                  })
+                  scope._self.$refs[`popover-${scope.$index}`].doClose();
+                  this.getAppMange()
+              }
+          },error=>{
+              this.$message({
+                  type:'error',
+                  message:error.message
+              })
+        //   })
+      })
+      
+    },
     },
 }
 </script>

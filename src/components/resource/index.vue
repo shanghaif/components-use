@@ -1,7 +1,7 @@
 <template>
     <div class="resource">
         <div>
-            <el-input v-model="search" placeholder="请输入客户姓名搜索" style="width:150px"></el-input>
+            <el-input v-model="search" placeholder="请输入资源名称搜索" style="width:150px"></el-input>
             <el-button type="primary" @click="searchuser" size="mini">搜索</el-button>
             <el-button type="primary" @click="resetuser" size="mini">重置</el-button>
             <el-tree
@@ -50,8 +50,7 @@ export default {
       }
    },
    computed: {
-    treeData() {
-      // console.log(this.data)
+    treeData() { 
       let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
       return cloneData.filter(father => {
         let branchArr = cloneData.filter(
@@ -78,88 +77,6 @@ export default {
        this.search=''
        this.$emit('resetusername',this.search)
      }
-        // handleNodeClick(row) {
-        //     this.$emit('lookdata',row)
-        // },
-        // append(data){
-        //     console.log(data)
-        // },
-//         renderContent(h, {
-// 				node,
-// 				data,
-// 			}) {
-// 				return h('span', {
-// 					style: {
-// //						color: "red",
-// 					},
-// 					//这里添加hover事件
-// 					on: {
-// 						'mouseenter': () => {
-//                             data.is_show = true;
-// 						},
-// 						//鼠标离开
-// 						'mouseleave': () => {
-// 							data.is_show = false;
-// 						}
-// 					}
-// 				}, [
-// 					h('span', {
-// 						//显示名称
-// 					}, node.label),
-// 					h('span', {
-// 						style: {
-// 							display: data.is_show ? '' : 'none',
-// 						},
-// 					}, [
-// 						//添加
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-//                                 marginLeft:"10px",
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-//                                     // this.append(data)
-//                                     this.$emit('change',data)
-// 								}
-// 							}
-// 						}, "添加"),
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-// 									// this.amend(data)
-// 								}
-// 							}
-// 						}, "修改"),
-// 						h('el-button', {
-// 							props: {
-// 								type: 'text',
-// 								size: 'small',
-// 							},
-// 							style: {
-// 							},
-// 							on: {
-// 								click: () => {
-//                                     event.stopPropagation()
-// 									console.log(data)
-// 								}
-// 							}
-// 						}, "删除"),
-// 					]),
-// 				]);
-// 		}  
    }
 }
 </script>

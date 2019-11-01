@@ -23,25 +23,25 @@
          <el-form-item label="任务名称">
          <el-input  v-model="formline.name" placeholder="任务名称" readonly></el-input>
       </el-form-item>
-      <!-- <el-form-item label="开始时间">
-        <el-date-picker
-          v-model="formline.starttime"
-          type="datetime"
-          placeholder="选择任务开始时间"
-          value-format="timestamp"
-          :picker-options="pickerOptionsStart">
-        </el-date-picker>
-      </el-form-item> -->
       <el-form-item label="查询日期">
+        <el-date-picker
+        v-model="formline.value1"
+        type="date"
+        :picker-options="pickerOptions"
+        @change="changeTime"
+        placeholder="选择日期">
+      </el-date-picker>
+      </el-form-item>
+      <el-form-item label="查询时间">
         <el-select v-model="formline.starttime" filterable clearable>
-          <el-option v-for="(item,index) in origintime" :label="timestampToTime(Number(item))" :key="index" :value="Number(item)">
+          <el-option v-for="(item,index) in timeselect" :label="timestampToTime(Number(item)).substr(10)" :key="index" :value="Number(item)">
 
           </el-option>
         </el-select>
       </el-form-item>
        <el-form-item label="采集轮次">
         <el-select v-model="formline.chs">
-          <el-option v-for="(item,index) in downchannel" :label="item[0]+'--'+item[1]+'秒'" :key="index" :value="index+1">
+          <el-option v-for="(item,index) in downchannel" :label="'第'+(index+1)+'轮次'+'('+item[0]+')'" :key="index" :value="index+1">
 
           </el-option>
         </el-select>
@@ -56,7 +56,7 @@
     </div>
     <div class="block">
       <el-table :data="tableData" style="width: 100%;text-align:center" >
-        <el-table-column type="index" width="50" :index="(index)=>{return (index+1) + start}" ></el-table-column>
+        <el-table-column type="index" width="100" :index="(index)=>{return (index+1) + start}" ></el-table-column>
         <el-table-column prop="vcaddr" label="集中器" align="center"></el-table-column>
         <el-table-column  label="冻结日期" align="center">
           <template slot-scope="scope">
@@ -118,23 +118,30 @@ export default {
         searchvalue:'',
         starttime:'',
         chs:1,
+        value1:''
       },
+      timeselect:[],
       freq:'',
       unit:'',
       loading:true,
       loadingtext:'加载中',
-      // pickerOptionsStart: {
-      //      disabledDate: time => {
-      //        let endDateVal = this.taskstarttime*1000;
-      //        if (endDateVal) {
-      //           return time.getTime() > new Date(endDateVal).getTime();
-      //        }
-      //      }
-      //   },
+      pickerOptions: {
+       disabledDate: time => {
+          let endDateVal = this.taskstarttime*1000;
+          if (endDateVal) {
+            return (
+              time.getTime() < new Date(endDateVal).getTime()- 8.64e7 ||
+              time.getTime() > Date.now()
+            );
+          } else {
+            return time.getTime() < Date.now()- 8.64e7 ;
+          }
+        }
+    },
       freqstep:'',
       origintime:[],
       frozendate:''
-    };
+    }
   },
   mounted() {
     
@@ -144,7 +151,7 @@ export default {
     timestampToTime(timestamp) {
     var date = new Date(timestamp * 1000) 
     var Y = date.getFullYear() + '-';
-    var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
     var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
     var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
     var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
@@ -152,7 +159,7 @@ export default {
     return Y+M+D+h+m+s;
   },
   originData(){
-     this.id = this.$route.query.id;
+      this.id = this.$route.query.id;
       this.loading=true
       this.taskstarttime = this.$route.query.starttime
       this.downchannel = JSON.parse(this.$route.query.downchannel)
@@ -199,12 +206,6 @@ export default {
           this.loading = false
         },3000)
       }
-      // else if(this.freqstep >0&&this.freqstep<=1){
-      //   this.loadingtext = "任务进行中"
-      //   setTimeout(()=>{
-      //     this.loading = false
-      //   },3000)     
-      // }
       else{
         //有任务时的查询
         this.origintime=[]
@@ -212,9 +213,28 @@ export default {
            var time = Number(this.taskstarttime)+Number(this.freq*i)
            this.origintime.push(time)
         }
-        this.formline.starttime = this.origintime[0]
+        var start=new Date();
+        start.setHours(0);
+        start.setMinutes(0);
+        start.setSeconds(0);
+        start.setMilliseconds(0);
+        this.formline.value1=Date.parse(start)
+        console.log(this.formline.value1)
+        this.changeTime()
         this.Gettaskdetail() 
       }
+      
+  },
+  changeTime(){
+    
+    var time = this.timestampToTime(this.formline.value1/1000).substr(0,10)
+    this.timeselect=[]
+    this.origintime.map(items=>{
+      if(this.timestampToTime(items).indexOf(time)!=-1){
+        this.timeselect.push(items)
+      }
+    })
+     this.formline.starttime = this.timeselect[0]
   },
   //初始化任务详情接口
     Gettaskdetail() {

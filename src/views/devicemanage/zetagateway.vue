@@ -21,8 +21,8 @@
             <el-form-item label="在线状态">
               <el-select v-model="formInline.status" placeholder="设备状态">
                 <el-option label="全部" :value="9"></el-option>
-                <el-option label="在线" :value="1"></el-option>
-                <el-option label="离线" :value="0"></el-option>
+                <el-option label="在线" value="ACTIVE"></el-option>
+                <el-option label="离线" value="OFFLINE"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -38,7 +38,10 @@
               </div>
               <div class="content">
                 <!--ZETA网关-->
-                <p><span>ZETA网关:<span style="color:green">{{'('+item.attributes.devaddr+')'}}</span></span><span style="float:right" :style="{'color':item.status ==  1 ? 'green':'red'}">{{item.status==1 ? '正常运行':'未运行'}}</span></p>
+                <p><span>ZETA网关:<span style="color:green">{{'('+item.attributes.devaddr+')'}}</span></span>
+                <span v-if="breathe==true" class="breathe-btn" style="display:inline-block;float:right;" :style="{'background-image':item.attributes.status=='ACTIVE' ? '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(green))': '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(red))'}"></span>
+                <span  v-else  class="animated fadeInDown" style="float:right" :style="{'color':item.attributes.status ==  'ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ? '运行中 ':'未运行'}}</span>
+                </p>
                 <p>型号:<span style="color:#409EFF">{{'APA1ZT'}}</span><span style="float:right;display:inline-block;width:60%;">终端地址:<span style="color:#409EFF">{{item.attributes.ip}}</span></span></p>
                 <p>网络环境:<span style="color:#409EFF">{{item.attributes.rssi==-255 ? (item.attributes.rssi==-99 ? '无信号': '网线' ): '无线网络'}}</span><span style="float:right;display:inline-block;width:60%;">网络格式:<span style="color:#409EFF">{{item.attributes.basedata.WCDMA}}</span></span></p>
                 <!--SIM卡号-->
@@ -47,10 +50,10 @@
                  <p><span>ICCID:{{item.attributes.basedata.ICCID}}</span></p>
                 <!--服务器连接状态-->
                 <p><span>服务器连接状态：</span><span style="float:right;display:inline-block;width:60%;">本地时钟：</span></p>
-                <p><span :style="{'color':item.attributes.status=='ONLINE' ? 'green':'red'}">{{item.attributes.status=='ONLINE' ? '已连接':'未连接'}}</span><span style="float:right;color:rgb(75, 139, 244);display:inline-block;width:60%;">{{readtime}}</span></p>
+                <p><span :style="{'color':item.attributes.status=='ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ? '已连接':'未连接'}}</span><span style="float:right;color:rgb(75, 139, 244);display:inline-block;width:60%;">{{readtime}}</span></p>
                 <!--RSSI-->
                 <p><span>最新RSSI:<span style="color:#666">{{item.attributes.basedata.rssi+'dbm'}}</span></span>
-                <!-- <span style="float:right">GPS状态:<span :style="{'color':item.status==1 ? 'green':'red'}">{{item.status==1 ? '正常运行':'未运行'}}</span></span> -->
+                <span style="float:right;width:60%;">15分钟内数据包:<span></span></span>
                 </p>
                  <!--当前位置-->
                 <p><span>位置:</span><span>N：-22.123456</span><span style="margin-left:10px">E：-11.002233</span></p>
@@ -74,9 +77,12 @@
 <script>
 import Parse from 'parse'
 import { getApp } from '@/api/applicationManagement';
+import { setInterval } from 'timers';
+
 export default {
    data() {
       return {
+          breathe:true,
           formInline:{
               gatetype:'net',
               gate:'APZ1ZT',
@@ -89,14 +95,27 @@ export default {
           pagesize:12,
           total:0,
           gatedata:[],
-          productid:''
+          productid:'',
+          time1:null,
+          time2:null,
       }
    },
    mounted() {
+     //自动刷新
      this.$nextTick(function () {
-            setInterval(this.nowtime, 1000);
+            this.time1 = window.setInterval(this.nowtime, 1000);
+            this.time2 = window.setInterval(()=>{
+              this.getGateway()
+              this.breathe=true
+              setTimeout(()=>{
+                  this.breathe=false
+              },3000)
+            },60000)
         })
         this.getGateway()
+        setTimeout(()=>{
+          this.breathe=false
+        },3000)
    },
    methods: {
      //本地时钟
@@ -104,18 +123,18 @@ export default {
             var timestamp3 = Date.parse(new Date());
             var date = new Date(timestamp3) 
             var Y = date.getFullYear() + '-';
-            var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
             var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
             var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
             var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
             var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
             this.readtime=(Y+M+D+h+m+s); 
       },
+      //获取AP
       getGateway(){
         var Proudct = Parse.Object.extend('Product')
         var product = new Parse.Query(Proudct)
         product.equalTo('devType','zeta')
-       
         product.find().then(resultes=>{
           if(resultes.length!=0){
              this.productid = resultes[0].id
@@ -123,7 +142,6 @@ export default {
           }else{
             this.$message.warning('暂无数据')
           }
-         
         },error => {
             if (error.code == "209") {
               this.$message({
@@ -146,6 +164,11 @@ export default {
         var devices = new Parse.Query(Devices)
         if(this.formInline.address!=''){
           devices.equalTo('devaddr',this.formInline.address)
+        }
+        if(this.formInline.status=='ACTIVE'){
+          devices.equalTo('status',this.formInline.status)
+        }else if(this.formInline.status=='OFFLINE'){
+          devices.notEqualTo('status','ACTIVE')
         }
         if(index==1){
           this.start=0
@@ -187,14 +210,20 @@ export default {
        this.start = (val-1)*this.pagesize
        this.getZetaGateway()
       },
-   }
+   },
+   beforeDestroy() {
+     window.clearInterval(this.time1)
+     this.time1 = null
+     window.clearInterval(this.time2)
+     this.time2 = null
+   },
 }
 </script>
 <style lang="scss" scoped>
 .gateway{
     height:100%;
     width:100%;
-    padding:20px;
+    padding:20px 0 0 0;
     box-sizing: border-box;
     background:#fff;
     .gatecontent{
@@ -210,7 +239,6 @@ export default {
         margin-bottom:10px;
         .imgurl{
           line-height:220px;
-          
           img{
             display: inline-block;
             vertical-align: middle;
@@ -235,4 +263,37 @@ export default {
       margin-top:10px;
     }
 }
+</style>
+<style>
+  .breathe-btn {
+      position:relative;
+      width:30px;
+      height:10px;
+      line-height:40px;
+      border:1px solid #2b92d4;
+      border-radius:5px;
+      color:#fff;
+      font-size:20px;
+      text-align:center;
+      cursor:pointer;
+      /* box-shadow:0 1px 2px rgba(0,0,0,.3); */
+      overflow:hidden;
+      /* background-image:-webkit-gradient(linear,left top,left bottom,from(black),to(green)); */
+      animation-timing-function:ease-in-out;
+      animation-name:breathe;
+      animation-duration:2000ms;
+      animation-iteration-count:infinite;
+      animation-direction:alternate;
+    }
+    @keyframes breathe {
+      0% {
+      opacity:.2;
+      /* box-shadow:0 1px 2px rgba(255,255,255,0.1); */
+    }
+    100% {
+      opacity:1;
+      /* border:1px solid rgba(59,235,235,1); */
+      /* box-shadow:0 1px 30px rgba(59,255,255,1); */
+    }
+  }
 </style>

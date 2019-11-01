@@ -19,7 +19,7 @@
             <svg-icon icon-class="password" />
           </span>
           <el-input v-model="loginForm.password" name="password" auto-complete="on" placeholder="请输入密码" :type="pwdType" @keyup.enter.native="handleLogin"
-          />
+          /> 
           <span class="show-pwd" @click="showPwd">
             <svg-icon icon-class="eye" />
           </span>
@@ -89,7 +89,6 @@
         backgroundsrc: require("../../imgages/loginbanner.jpg"),
         redirect: undefined,
         routes: [],
-        pwdType: 'password'
       };
     },
     methods: {
@@ -149,16 +148,24 @@
               })
               .catch(error => {
                 if (error.code == 101) {
-                  this.$message({
-                    type: "warning",
-                    message: '用户名或密码错误'
-                  });
+                  if(error.message.indexOf('Invalid')==-1){
+                     this.$message({
+                      type: "warning",
+                      message: '密码输入错误次数过多，该账户已被锁住'
+                    });
+                  }else{
+                    this.$message({
+                      type: "warning",
+                      message: '用户名或密码错误'
+                    });
+                  }
+                 
                 }
                 else {
                   this.$message({
                     type: "warning",
-                    message: "服务器未连接"
-                  });
+                    message: error.message
+                   });
                 }
  
               });
@@ -182,8 +189,9 @@
         })
       }
     },
-    created() {
+    created() { 
       this.getTitle();
+      sessionStorage.setItem("list",'[]');
     }
   };
 </script>

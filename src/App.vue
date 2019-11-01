@@ -30,7 +30,8 @@ export default {
     // Parse.serverURL = "http://132.232.121.164:5080/iotapi";//伟星的库
     // Parse.serverURL = "http://148.70.50.192:5080/iotapi"
     // Parse.serverURL = "http://prod.iotn2n.com/iotapi";//线上环境
-    // Parse.serverURL = "http://139.155.158.43:5080/iotapi";//三千万环境
+    // Parse.serverURL = "http://148.70.105.66:5080/iotapi";//三千万环境
+    // Parse.serverURL = "http://47.97.75.58:80/iotapi"
     // Parse.serverURL = '/iotapi'
   },
   methods:{

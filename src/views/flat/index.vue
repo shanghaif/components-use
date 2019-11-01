@@ -53,7 +53,6 @@ export default {
             if (res.result) {
               alert("订阅成功");
             }
-            // this.tableData = Websocket.tablelist
           });
         }
       });

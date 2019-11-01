@@ -137,6 +137,7 @@
               </p>
               <p>
                 pn值:{{item.pn}}
+                
                 <span :class="[item.status?'normal':'offLine']">{{item.status | Online}}</span>
               </p>
               <div>
@@ -247,7 +248,8 @@
               <p>
                 {{item.name}}
                 <strong :class="[item.online ? 'normal' : 'offLine']">({{item.addr}})</strong>
-                <span :class="[item.online ? 'normal' : 'offLine']">{{item.online | Online}}</span>
+                <span  v-if="item.online" class="breathe-btn" style="display:inline-block;float:right;" :style="{'background-image':item.online ? '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(green))': '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(red))'}"></span>
+                <span  v-if="!item.online" :class="[item.online ? 'normal' : 'offLine']">{{item.online | Online}}</span>
               </p>
               <p>所属台区：{{item.tq}}</p>
               <p>终端通信地址：{{item.host}}</p>
@@ -364,7 +366,7 @@ export default {
             var timestamp3 = Date.parse(new Date());
             var date = new Date(timestamp3) 
             var Y = date.getFullYear() + '-';
-            var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+            var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
             var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
             var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
             var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
@@ -900,7 +902,7 @@ export default {
         return "单相智能电表";
       } else {
         return "三相智能电表";
-      }
+      } 
     }
   },
   components: { Resource1, PagingQuery }
@@ -1083,4 +1085,37 @@ export default {
   margin: 20px 0;
   text-align: center;
 }
+</style>
+<style>
+  .breathe-btn {
+      position:relative;
+      width:30px;
+      height:10px;
+      line-height:40px;
+      border:1px solid #2b92d4;
+      border-radius:5px;
+      color:#fff;
+      font-size:20px;
+      text-align:center;
+      cursor:pointer;
+      /* box-shadow:0 1px 2px rgba(0,0,0,.3); */
+      overflow:hidden;
+      /* background-image:-webkit-gradient(linear,left top,left bottom,from(black),to(green)); */
+      animation-timing-function:ease-in-out;
+      animation-name:breathe;
+      animation-duration:2000ms;
+      animation-iteration-count:infinite;
+      animation-direction:alternate;
+    }
+    @keyframes breathe {
+      0% {
+      opacity:.2;
+      /* box-shadow:0 1px 2px rgba(255,255,255,0.1); */
+    }
+    100% {
+      opacity:1;
+      /* border:1px solid rgba(59,235,235,1); */
+      /* box-shadow:0 1px 30px rgba(59,255,255,1); */
+    }
+  }
 </style>

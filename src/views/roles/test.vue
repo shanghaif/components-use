@@ -156,16 +156,19 @@ export default {
           label: "菜单路径",
           key: "url",
           width: 200,
+          expand:true,
           align: "center"
         },
         {
           label: "顶部导航",
           key: "showtopmenu",
+          expand:true,
           align: "center"
         },
         {
           label: "序号",
           key: "number",
+          expand:true,
           width: 100
         },
         {

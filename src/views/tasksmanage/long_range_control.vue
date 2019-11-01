@@ -58,7 +58,7 @@
             </el-form-item>
             <el-form-item label="通道类型" prop="route">
               <el-select v-model="ruleform.route" placeholder="请选择通道类型">
-                <el-option label="无线" value="tcp"></el-option>
+                <el-option label="默认" value="tcp"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="当前状态">
@@ -379,7 +379,6 @@ export default {
   },
   mounted() {
     this.heightforresource=true
-    // document.getElementsByClassName("resource1")[0].style.height = 
     this.session = Parse.User.current().attributes.sessionToken;
   },
   methods: {
@@ -538,6 +537,7 @@ export default {
     handleClose1() {
       this.dialogTableVisible1 = false;
     },
+    //电表pn 地址 以及状态查询
     sleslectmeter(val) {
       this.smartmeterlist.map((items, index) => {
         if (items.attributes.addr == val) {
@@ -546,7 +546,6 @@ export default {
           this.ruleform.yhmc = items.attributes.yhmc;
           this.ruleform.yhabh = items.attributes.yhabh;
           this.ruleform.gddw = items.attributes.gddw;
-          console.log(items.attributes.jsondata.cur_status)
           if (items.attributes.jsondata.cur_status) {
               this.ruleform.cur_status= items.attributes.jsondata.cur_status;
             } else {

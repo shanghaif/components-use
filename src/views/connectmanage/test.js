@@ -1,4 +1,5 @@
-series: [
+
+    series: [
     {
         name: '安装数',
         type: 'bar',
@@ -26,8 +27,4 @@ series: [
             return idx * 10 + 100;
         }
     }
-],
-animationEasing: 'elasticOut',
-animationDelayUpdate: function (idx) {
-    return idx * 5;
-}
+]

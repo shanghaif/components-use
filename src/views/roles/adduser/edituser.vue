@@ -124,8 +124,9 @@ export default {
     getDepartment() {
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
+      department.limit(10000)
       department.find().then(resultes => {
-        // console.log(resultes)
+        
         resultes.map(items=>{
           var obj={}
           items.createtime = new Date(items.attributes.createdAt).toLocaleDateString()

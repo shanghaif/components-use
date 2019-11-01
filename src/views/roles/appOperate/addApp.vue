@@ -102,7 +102,7 @@
                 </el-form-item>
                  <!-- Token有效时间 -->
                 <el-form-item label="Token有效时间">
-                    <el-input controls-position="left" v-model="form.time" type="number" :min="1" placheholder="请输入Token有效时间">
+                    <el-input controls-position="left" v-model.number="form.time" type="number" :min="1" placheholder="请输入Token有效时间">
                         <template slot="append">秒</template>
                     </el-input>
                     
@@ -147,12 +147,12 @@ export default {
                 scale:"",//应用接入规模
                 dashboard:'',
                 scaleDate:[
-                    {id:0,value:500,label:"500"},
-                    {id:1,value:5000,label:"5000"},
-                    {id:2,value:50000,label:"5万"},
-                    {id:3,value:500000,label:"50万"},
-                    {id:4,value:5000000,label:"500万"},
-                    {id:5,value:50000000,label:"5000万"},
+                    {id:0,value:100,label:"100"},
+                    {id:1,value:1000,label:"1000"},
+                    {id:2,value:10000,label:"1万"},
+                    {id:3,value:100000,label:"10万"},
+                    {id:4,value:1000000,label:"100万"},
+                    {id:5,value:10000000,label:"1000万"},
                     {id:6,value:100000000,label:"1亿"}
                 ],
                 productIdentifier:"",//应用链接

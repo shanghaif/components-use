@@ -108,7 +108,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="应用商接口para">
-            <el-input v-model="sukeserver.para" placeholder="应用商接口para" type="number"></el-input>
+            <el-input v-model.number="sukeserver.para" placeholder="应用商接口para"  :min="0"></el-input>
             </el-form-item>
             <el-form-item>
             <el-button type="primary"  size="mini" @click="queryyys">查 询</el-button>
@@ -168,7 +168,7 @@
           <el-input v-model="Ispform.status" placeholder="应用商设备状态接口地址,需包含http://"></el-input>
         </el-form-item>
         <el-form-item label="应用商设备状态接口para">
-          <el-input v-model="Ispform.statuspara" placeholder="应用商设备状态接口para"></el-input>
+          <el-input v-model.number="Ispform.statuspara" placeholder="应用商设备状态接口para" ></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="addSkyys('Ispform')">提 交</el-button>
@@ -296,7 +296,7 @@ export default {
     timestampToTime(timestamp) {
       var date = new Date(timestamp * 1000) 
       var Y = date.getFullYear() + '-';
-      var M = (date.getMonth()+1 <= 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+      var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
       var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
       var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
       var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
@@ -505,7 +505,7 @@ export default {
   height: 26px;
   border-radius: 0;
   line-height: 26px;
-  width: 150px;
+  width: 200px;
 }
 .sukeserver .el-tabs__item{
   font-size:16px;

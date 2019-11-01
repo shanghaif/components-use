@@ -1,6 +1,6 @@
 <template>
   <div id="metersearch" style="display:flex;">
-    <Resource1 @meterdetail="handleNodeClick" />
+    <Resource1  :regiondata='departmentdata' @meterdetail="handleNodeClick" @department="getDeSearch" />
     <div style="width:calc(100% - 360px);">
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
         <el-form-item label="用户编号">
@@ -348,11 +348,11 @@
         </el-dialog>
         <!-- 新增的模态框 -->
         <el-dialog title="新增" :visible.sync="dialogFormVisibleAdd">
-          <el-form :model="add_form">
+          <el-form  ref="add_form" :model="add_form" :rules="add_form_rules">
             <!-- 抄表档案 -->
             <el-divider content-position="left">抄表档案</el-divider>
-            <el-form-item label="供电单位" :label-width="formLabelWidth">
-              <el-input v-model="add_form.gddw" disabled autocomplete="off"></el-input>
+            <el-form-item label="供电单位" :label-width="formLabelWidth" prop="gddw">
+              <el-input v-model="add_form.gddw"  autocomplete="off" readonly></el-input>
             </el-form-item>
             <el-form-item label="用户编号" :label-width="formLabelWidth">
               <el-input v-model="add_form.yhabh" autocomplete="off" placeholder="请输入用户编号"></el-input>
@@ -370,27 +370,26 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="台区名称" :label-width="formLabelWidth">
+            <el-form-item label="台区名称" :label-width="formLabelWidth" prop="tq">
               <el-input v-model="add_form.tq" autocomplete="off" placeholder="请输入台区名称"></el-input>
             </el-form-item>
-            <el-form-item label="集中器地址" prop="addr" :label-width="formLabelWidth">
+            <el-form-item label="集中器地址" :label-width="formLabelWidth" prop="vcaddr">
               <el-input
                 v-model="add_form.vcaddr"
-                :disabled="isvcaddr"
+                readonly
                 autocomplete="off"
                 placeholder="请输入集中器地址"
               ></el-input>
             </el-form-item>
-            <el-form-item label="电能表地址" prop="addr" :label-width="formLabelWidth">
+            <el-form-item label="电能表地址"  :label-width="formLabelWidth" prop="addr">
               <el-input
                 v-model="add_form.addr"
-                :disabled="isaddr"
                 autocomplete="off"
                 placeholder="请输入电能表地址"
               ></el-input>
             </el-form-item>
-            <el-form-item label="PN值" :label-width="formLabelWidth">
-              <el-input v-model="add_form.pn" autocomplete="off" placeholder="请输入PN值"></el-input>
+            <el-form-item label="PN值" :label-width="formLabelWidth" prop="pn">
+              <el-input v-model.number="add_form.pn" autocomplete="off" placeholder="请输入PN值"></el-input>
             </el-form-item>
             <el-form-item label="抄表类型" :label-width="formLabelWidth">
               <el-select v-model="add_form.cblx" clearable placeholder="请选择抄表类型">
@@ -402,7 +401,7 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="采集器编号" :label-width="formLabelWidth">
+            <el-form-item label="采集器编号" :label-width="formLabelWidth" prop="deveui" :status-icon="true"    >
               <el-input v-model="add_form.deveui" autocomplete="off" placeholder="请输入采集器编号"></el-input>
             </el-form-item>
             <el-form-item label="应用编号" :label-width="formLabelWidth">
@@ -412,7 +411,7 @@
               <el-cascader
                 size="large"
                 :options="options"
-                v-model="add_form.addr"
+                v-model="add_form.provinces"
                 @change="handleAddChange"
               ></el-cascader>
               <el-input
@@ -584,7 +583,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
-            <el-button type="primary" @click="add_user">确 定</el-button>
+            <el-button type="primary" @click="add_user('add_form')">确 定</el-button>
           </div>
         </el-dialog>
       </div>
@@ -695,14 +694,75 @@ import { utc2beijing } from "@/utils/index";
 let arr = [];
 export default {
   data() {
-    let validatevcaddr = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请输入地址"));
+    let validateVcaddr = (rule, value, callback) => {
+      let regx =/^[0-9A-Z]{12}$|^[0-9A-Z]{8}$/ 
+      if (value=='') {
+        callback(new Error("请在左边树挑选集中器"));
       } else {
-        if (!/^\w{12}$/.test(value)) {
-          callback(new Error("长度必须为是十二位"));
+        if (!regx.test(value)) {
+          callback(new Error("长度必须为是十二位或八位"));
+        }else{
+           callback();
         }
+       
+      }
+    };
+    let validateAddr = (rule, value, callback) => {
+      let regx =/^\d{12}$/ 
+      if ( value=='') {
+        callback(new Error("请输入电表地址"));
+      } else {
+        if (!regx.test(value)) {
+          callback(new Error("长度必须为是十二位"));
+        }else{
+           callback();
+        }
+       
+      }
+    };
+    let validatePn= (rule, value, callback) => {
+      if (value=='') {
+        callback(new Error("请输入电表pn"));
+      } else {
+        if (!value< 0 || value > 2032) {
+          callback(new Error("请输入正确的pn值(0-2032之间)"));
+        }else{
+           callback();
+        }
+       
+      }
+    };
+    let validateYhbh= (rule, value, callback) => {
+      let reg = /^[0-9]+$/
+      if (value=='') {
+        callback(new Error("请输入用户编号"));
+      } else {
+        if (!reg.test(value)) {
+          callback(new Error("请输入正确的用户编号"))
+        }else{
+           callback();
+        }
+       
+      }
+    }; 
+    let validateGddw= (rule, value, callback) => {
+      if (!value) {
+        callback(new Error("左边树选择集中器地址可关联供电单位"));
+      } else {
         callback();
+      }
+    };
+    let validateDevui = (rule, value, callback) => {
+      let regx1 =/^[0-9A-Z]{12}$/ 
+      if (value =='') {
+        callback(new Error("请输入采集器地址"));
+      } else {
+        if (!regx1.test(value)) {
+          callback(new Error("采集器长度为是十二位"));
+        }else{
+          callback();
+        }
+        
       }
     };
     return {
@@ -731,10 +791,11 @@ export default {
           { label: "物理通道", value: 2 }
         ],
         addr: [], //三级地址
-        provinces: "", //省市区
+        provinces: [], //省市区
+        provinces1: [],
         gddw: "", //供电单位
         yhlb: "", //用户类别
-        yhlb_arr: [{ label: "公变客户", value: 1 }],
+        yhlb_arr: [{ label: "公变客户", value: "1"  }],
         zcbh: "", //资产编号
         jldbh: "", //计量点编号
         sblb: "", //设备类别
@@ -769,12 +830,29 @@ export default {
         appeui: "" //注册应用号
       },
       // 表单验证
-      rules: {
-        addr: [
-          { required: true, message: "请输入活动名称", trigger: "blur" },
-          { min: 12, max: 12, message: "长度在 3 到 5 个字符", trigger: "blur" }
-        ]
-      },
+     add_form_rules:{
+       tq: [
+            { required: true, message: '请输入台区名称', trigger: 'blur' },
+          ],
+          vcaddr:[
+             { validator: validateVcaddr, required: true, trigger: "blur" }
+          ],
+           gddw:[
+             { validator: validateGddw, required: true, trigger: "blur" }
+          ],
+           addr:[
+             { validator: validateAddr, required: true, trigger: "blur" }
+          ],
+           pn:[
+             { validator: validatePn, required: true, trigger: "blur" }
+          ],
+           yhbh:[
+             { validator: validateYhbh, required: true, trigger: "blur" }
+          ],
+           deveui:[
+             { validator: validateDevui, required: true, trigger: "blur" }
+          ]
+        },
       // 当前表的表头
       Config: {
         tq: "台区名称",
@@ -881,7 +959,8 @@ export default {
           { label: "物理通道", value: 2 }
         ],
         addr: [],
-        provinces: "",
+        provinces: [],
+        provinces1: "",
         gddw: "",
         yhlb: "", //用户类别
         yhlb_arr: [{ label: "公变客户", value: 1 }],
@@ -920,11 +999,6 @@ export default {
         appeui: "" //注册应用号
       },
       formLabelWidth: "120px",
-      imgsrc: require("../../imgages/Artboard5.png"),
-      imgsrc1: require("../../imgages/Artboard1.png"),
-      imgsrc2: require("../../imgages/Artboard4.png"),
-      imgsrc3: require("../../imgages/Artboard3.png"),
-      imgsrc4: require("../../imgages/Artboard2.png"),
       table4: false,
       // 查询
       no_two: false,
@@ -975,22 +1049,22 @@ export default {
         mode: "vconcentrator",
         version: "v1"
       },
-      rules: {
-        yhabh: [{ required: true, message: "请输入用户编号", trigger: "blur" }],
-        addr: [{ validator: validatevcaddr, required: true, trigger: "blur" }],
-        vcaddr: [
-          { validator: validatevcaddr, required: true, trigger: "blur" }
-        ],
-        pn: [{ required: true, message: "请输入pn值", trigger: "blur" }],
-        departmentid: [
-          {
-            type: "array",
-            required: true,
-            message: "请选择具体部门",
-            trigger: "blur"
-          }
-        ]
-      },
+      // rules: {
+      //   yhabh: [{ required: true, message: "请输入用户编号", trigger: "blur" }],
+      //   addr: [{ validator: validatevcaddr, required: true, trigger: "blur" }],
+      //   vcaddr: [
+      //     { validator: validatevcaddr, required: true, trigger: "blur" }
+      //   ],
+      //   pn: [{ required: true, message: "请输入pn值", trigger: "blur" }],
+      //   departmentid: [
+      //     {
+      //       type: "array",
+      //       required: true,
+      //       message: "请选择具体部门",
+      //       trigger: "blur"
+      //     }
+      //   ]
+      // },
       // 获取excel导入的信息
       demo: "",
       gsmc: "",
@@ -999,13 +1073,22 @@ export default {
       deriveWhere: [], //导出条件
       addShow: false, //新增隐藏
       updateShow: false, //修改隐藏
-      isshowonce: false
+      isshowonce: false,
+      departmentdata:[]
     };
   },
   mounted() {
     this.getTree();
   },
   methods: {
+    getDeSearch(val){
+      var Department = Parse.Object.extend('Department')
+      var department = new Parse.Query(Department)
+      department.equalTo('name',val)
+      department.find().then(resultes=>{
+       this.departmentdata = resultes
+      })
+    },
     // 修改隐藏
     handleClickUpdateShow() {
       this.updateShow = !this.updateShow;
@@ -1057,7 +1140,6 @@ export default {
             })
           )
         );
-        console.log(json);
         let head = [
           "tq",
           "yhabh",
@@ -1218,24 +1300,28 @@ export default {
         CodeToText[value[1]] +
         ", " +
         CodeToText[value[2]];
-      this.mod_form.provinces = data.split(",").join("");
+        this.mod_form.provinces = value
+      this.mod_form.provinces1 = data
     },
     handleAddChange(value) {
       //新增
+      
       let data =
         CodeToText[value[0]] +
         ", " +
         CodeToText[value[1]] +
         ", " +
         CodeToText[value[2]];
-      this.add_form.provinces = data.split(",").join("");
+      this.add_form.provinces = value
+      this.add_form.provinces1 = data
+      console.log(this.add_form.provinces)
     },
     meterdetail(row) {
       console.log(row);
       // this.formInline.vcaddr = row.alias;
     },
     // 新增数据
-    add_user() {
+    add_user(formName) {
       this.$confirm("此操作将添加此条记录, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -1243,71 +1329,55 @@ export default {
       })
         .then(() => {
           // 验证字段
-          if (this.add_form.gsmc == "") {
-            this.$message.error("请选择集中器");
-            return;
-          } else if (this.add_form.gddw == "") {
-            this.$message.error("请选择供电单位");
-            return;
-          } else if (!/^[0-9A-Z]{8,12}$/.test(this.add_form.vcaddr)) {
-            this.$message.error("请输入正确的集中器地址8-12位");
-            return;
-          } else if (!/^[0-9]{12}$/.test(this.add_form.addr)) {
-            this.$message.error("请输入正确的12位电能表地址");
-            return;
-          } else if (!/^[0-9]+$/.test(this.add_form.yhabh)) {
-            this.$message.error("请输入正确的用户编号");
-            return;
-          } else if (this.add_form.pn < 0 || this.add_form.pn > 2032) {
-            this.$message.error("请输入正确的pn值(0-2032之间)");
-            return;
-          }
-          addMeter({
-            addr: this.add_form.addr,
-            yhbh: this.add_form.provinces + " " + this.add_form.yhdz,
-            organization: this.gsmc,
-            pn: this.add_form.pn,
-            vcaddr: this.add_form.vcaddr,
-            gddw: this.add_form.gddw,
-            tq: this.add_form.tq,
-            yhmc: this.add_form.yhmc,
-            yhabh: this.add_form.yhabh,
-            yhlb: this.add_form.yhlb,
-            zcbh: this.add_form.zcbh,
-            jldbh: this.add_form.jldbh,
-            sblb: this.add_form.sblb,
-            sblx: this.add_form.sblx,
-            ccbh: this.add_form.ccbh,
-            tysj: this.add_form.tysj,
-            dhpc: this.add_form.dhpc,
-            zhbl: this.add_form.zhbl,
-            cbqd: this.add_form.cbqd,
-            xl: this.add_form.xl,
-            cz: this.add_form.cz,
-            eddy: this.add_form.eddy,
-            bddl: this.add_form.bddl,
-            zqd: this.add_form.zqd,
-            sccj: this.add_form.sccj,
-            jlzzfl: this.add_form.jlzzfl,
-            jlfs: this.add_form.jlfs,
-            zfbbz: this.add_form.zfbbz,
-            jldwz: this.add_form.jldwz,
-            jlddz: this.add_form.jlddz,
-            scjyrq: this.add_form.scjyrq,
-            txfs: this.add_form.txfs,
-            txgw: this.add_form.txgw,
-            ljdz: this.add_form.ljdz,
-            btl: this.add_form.btl,
-            jlbx: this.add_form.jlbx,
-            xgwzh: this.add_form.xgwzh,
-            dbmm: this.add_form.dbmm
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            addMeter({
+              addr: this.add_form.addr,
+              yhbh: this.add_form.provinces1 + " " + this.add_form.yhdz,
+              organization: this.gsmc,
+              pn: this.add_form.pn,
+              vcaddr: this.add_form.vcaddr,
+              gddw: this.add_form.gddw,
+              tq: this.add_form.tq,
+              yhmc: this.add_form.yhmc,
+              yhabh: this.add_form.yhabh,
+              yhlb: this.add_form.yhlb,
+              zcbh: this.add_form.zcbh,
+              jldbh: this.add_form.jldbh,
+              sblb: this.add_form.sblb,
+              sblx: this.add_form.sblx,
+              ccbh: this.add_form.ccbh,
+              tysj: this.add_form.tysj,
+              dhpc: this.add_form.dhpc,
+              zhbl: this.add_form.zhbl,
+              cbqd: this.add_form.cbqd,
+              xl: this.add_form.xl,
+              cz: this.add_form.cz,
+              eddy: this.add_form.eddy,
+              bddl: this.add_form.bddl,
+              zqd: this.add_form.zqd,
+              sccj: this.add_form.sccj,
+              jlzzfl: this.add_form.jlzzfl,
+              jlfs: this.add_form.jlfs,
+              zfbbz: this.add_form.zfbbz,
+              jldwz: this.add_form.jldwz,
+              jlddz: this.add_form.jlddz,
+              scjyrq: this.add_form.scjyrq,
+              txfs: this.add_form.txfs,
+              txgw: this.add_form.txgw,
+              ljdz: this.add_form.ljdz,
+              btl: this.add_form.btl,
+              jlbx: this.add_form.jlbx,
+              xgwzh: this.add_form.xgwzh,
+              dbmm: this.add_form.dbmm,
+              deveui:this.add_form.deveui,
+             
           })
             .then(res => {
-              console.log(res);
               this.dialogFormVisibleAdd = false;
               this.getTree();
               this.add_form.addr = "";
-              this.add_form.provinces = "";
+              this.add_form.provinces = [];
               this.add_form.yhdz = "";
               this.gsmc = "";
               this.add_form.pn = "";
@@ -1329,6 +1399,12 @@ export default {
                 message: res.error
               });
             });
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+          
         })
         .catch(() => {
           this.$message({
@@ -1493,8 +1569,7 @@ export default {
     },
     // 修改
     editorMeter(row) {
-      console.log(row);
-      // this.now_row = row;
+      console.log(row)
       this.mod_form.yhabh = row.yhabh;
       this.mod_form.vcaddr = row.vcaddr;
       this.mod_form.deveui = row.deveui;
@@ -1535,7 +1610,7 @@ export default {
       this.mod_form.deveui = row.deveui;
       this.mod_form.appeui = row.appeui;
       this.mod_form.cblx = row.cblx;
-      this.smartmeterid = row.id;
+      this.smartmeterid = row.objectId;
     },
     // 确定修改
     sure() {
@@ -1547,7 +1622,7 @@ export default {
         .then(() => {
           let Yhmx = Parse.Object.extend("Smartmeter");
           let query = new Parse.Query(Yhmx);
-          query.get(this.now_row.objectId).then(object => {
+          query.get(this.smartmeterid).then(object => {
             object.set("yhabh", this.mod_form.yhabh);
             object.set("vcaddr", this.mod_form.vcaddr);
             object.set("deveui", this.mod_form.deveui);
@@ -1555,7 +1630,7 @@ export default {
             object.set("yhmc", this.mod_form.yhmc);
             object.set("pn", parseInt(this.mod_form.pn));
             object.set("addr", this.mod_form.addr);
-            object.set("yhdz", this.mod_form.provinces + this.mod_form.yhdz);
+            object.set("yhdz", this.mod_form.provinces1 + this.mod_form.yhdz);
             object.set("gddw", this.mod_form.gddw);
             object.set("yhlb", this.mod_form.yhlb);
             object.set("zcbh", this.mod_form.zcbh);
@@ -1647,12 +1722,12 @@ export default {
                   message: "删除成功!"
                 });
                 this.getTree();
-                this.yhmxFordepartment(
-                  this.pagesize,
-                  this.start,
-                  this.departmentid,
-                  this.isshowonce
-                );
+                // this.yhmxFordepartment(
+                //   this.pagesize,
+                //   this.start,
+                //   this.departmentid,
+                //   this.isshowonce
+                // );
               },
               error => {
                 console.error("Error while deleting User", error);
@@ -1737,7 +1812,6 @@ export default {
       query.limit(pagesize);
       query.skip(start);
       query.ascending(["vcaddr", "pn"]);
-      // query.ascending('-pn')
       if (ishsow) {
         query.equalTo("vcaddr", departments);
         query.count().then(count => {
@@ -1900,13 +1974,11 @@ export default {
         }
       });
     },
-    // 获取子级
+    // 树形控件点击集中器操作
     handleNodeClick(row) {
       this.loading = true;
       this.isshowonce = true;
       this.start = 0;
-      // 判断点击的层级
-      //  console.log(row)
       if (row.icon == "电表") {
         this.add_form.addr = row.name;
         this.getParentId("objectId", row.ParentId, "电表");
@@ -1918,7 +1990,7 @@ export default {
         this.isvcaddr = false;
       }
       this.add_form.gsmc = row.objectId;
-      this.gsmc = row.objectId;
+      
       if (row.leaf == true) {
         let arr1 = [row.objectId];
         this.gsmc_child = arr;
@@ -1926,6 +1998,13 @@ export default {
         if (row.icon == "集中器") {
           this.formInline.cost = row.name;
           this.formInline.electricityId = "";
+          this.gsmc = row.objectId;
+          this.add_form.vcaddr = row.name
+          var Vcon = Parse.Object.extend('Vcon')
+          var vcon = new Parse.Query(Vcon)
+          vcon.get(this.gsmc).then(resultes=>{
+            this.add_form.gddw = resultes.attributes.organization.attributes.name
+          })
         }
         this.yhmxFordepartment(
           this.pagesize,
@@ -2078,7 +2157,7 @@ export default {
   padding-bottom: 10px;
 }
 #metersearch .el-form-item {
-  margin: 5px 0;
+  margin: 10px 0;
 }
 /* 左边菜单 */
 #metersearch .el-col.left {
@@ -2103,9 +2182,9 @@ export default {
 #metersearch .el-date-editor {
   width: auto;
 }
-#metersearch .number:last-child{
+/* #metersearch .number:last-child{
   display: none;
-}
+} */
 #metersearch .el-pagination__jump {
   display: none;
 }

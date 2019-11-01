@@ -4,46 +4,46 @@
       <el-button type="primary" @click="addtask()">新增任务</el-button>
     </div>
     <div class="tasklist">
-      <el-table :data="taskData" stripe border style="width:100%">
+      <el-table :data="taskData" stripe border style="width:100%;text-align:center">
         <el-table-column type="index" label="id"></el-table-column>
-        <el-table-column label="检验编号">
+        <el-table-column label="检验编号" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.inspection_number}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="委托单位">
+        <el-table-column label="委托单位" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.client}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="产品名称">
+        <el-table-column label="产品名称" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.produt}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="水泵型号">
+        <el-table-column label="水泵型号" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.model}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="测试台体">
+        <el-table-column label="测试台体" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.updatedAt}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="检验标准">
+        <el-table-column label="检验标准" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.standard}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="创建日期">
+        <el-table-column label="创建日期" align="center">
           <template slot-scope="scope">
             <span>{{new Date(scope.row.createdAt).toLocaleDateString()}}</span>
           </template>
         </el-table-column>
-        <el-table-column width="200" label="查看">
+        <el-table-column width="200" label="查看" align="center">
           <template slot-scope="scope">
-            <el-button type="primary" @click="taskDetail(scope.row.objectId,scope.row.testbed)">详情</el-button>
+            <el-button type="primary" @click="taskDetail(scope.row.objectId,scope.row.testbed)" size="mini">详情</el-button>
             <!-- <el-button type="primary" @click="derive(scope.row.objectId)">导出</el-button> -->
           </template>
         </el-table-column>
@@ -60,11 +60,11 @@
       </div>
       <div class="block">
         <el-dialog title="新增检测任务" :visible.sync="taskdialog" width="30%">
-          <el-form :model="form">
-            <el-form-item label="检验编号：" :label-width="formLabelWidth">
-              <el-input v-model="form.inspection_number"  placeholder="请选择检验编号"></el-input>
+          <el-form ref="form" :model="form" :rules="formrule">
+            <el-form-item label="检验编号：" :label-width="formLabelWidth" prop="inspection_number">
+              <el-input v-model="form.inspection_number"  placeholder="请输入检验编号"></el-input>
             </el-form-item>
-            <el-form-item label="委托单位：" :label-width="formLabelWidth">
+            <el-form-item label="委托单位：" :label-width="formLabelWidth" prop="client">
               <!-- <el-input v-model="form.client"  placeholder="请选择委托单位"></el-input> -->
               <el-select v-model="form.client" placeholder="请选择委托单位" >
                 <el-option
@@ -75,13 +75,13 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="产品名称：" :label-width="formLabelWidth">
+            <el-form-item label="产品名称：" :label-width="formLabelWidth" prop="produt">
               <el-input v-model="form.produt"  placeholder="请选择产品名称"></el-input>
             </el-form-item>
-            <el-form-item label="水泵型号：" :label-width="formLabelWidth">
-              <el-input v-model="form.model"  placeholder="请选择水泵型号"></el-input>
+            <el-form-item label="水泵型号：" :label-width="formLabelWidth" prop="model">
+              <el-input v-model="form.model"  placeholder="请输入泵型号"></el-input>
             </el-form-item>
-            <el-form-item label="检验标准：" :label-width="formLabelWidth">
+            <el-form-item label="检验标准：" :label-width="formLabelWidth" prop="region">
               <el-select
                 v-model="form.region"
                 placeholder="请选择检验标准"
@@ -96,7 +96,7 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="测试台体：" :label-width="formLabelWidth">
+            <el-form-item label="测试台体：" :label-width="formLabelWidth" prop="bedname">
               <el-select v-model="form.bedname" placeholder="请选择测试台体" >
                 <el-option
                   v-for="(item,key) in form.testbed"
@@ -106,28 +106,30 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="开始时间：" :label-width="formLabelWidth">
+            <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="starttime">
               <el-date-picker
                 v-model="form.starttime"
                 type="datetime"
                 placeholder="选择开始时间"
-                
+                @change="testdata"
+                :picker-options="pickerOptionsStart"
                 value-format="timestamp"
               ></el-date-picker>
             </el-form-item>
-            <el-form-item label="结束时间：" :label-width="formLabelWidth">
+            <el-form-item label="结束时间：" :label-width="formLabelWidth" prop="endtime">
               <el-date-picker
                 v-model="form.endtime"
                 type="datetime"
                 placeholder="选择结束时间"
-                
+                @change="enddata"
+                :picker-options="pickerOptionsEnd"
                 value-format="timestamp"
               ></el-date-picker>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="taskdialog = false">取 消</el-button>
-            <el-button type="primary" @click="addBedtask()">确 定</el-button>
+            <el-button type="primary" @click="addBedtask('form')">确 定</el-button>
           </div>
         </el-dialog>
       </div>
@@ -140,6 +142,32 @@ import { getModule, deriveReport } from "@/api/reportmodule/reportmodule";
 export default {
   data() {
     return {
+      pickerOptionsStart: {
+        disabledDate: time => {
+          let endDateVal = this.form.endtime;
+          if (endDateVal) {
+            return (
+              time.getTime() > new Date(endDateVal).getTime() ||
+              time.getTime() < Date.now() - 8.64e7
+            );
+          } else {
+            return time.getTime() < Date.now() - 8.64e7;
+          }
+        }
+      },
+      pickerOptionsEnd: {
+        disabledDate: time => {
+          let beginDateVal = this.form.starttime;
+          if (beginDateVal) {
+            return (
+              time.getTime() <
+              new Date(beginDateVal).getTime() - 1 * 24 * 60 * 60 * 1000
+            );
+          } else {
+            return time.getTime() < Date.now() - 8.64e7;
+          }
+        }
+      },
       taskData: [],
       pagesize: 10,
       start: 0,
@@ -176,7 +204,33 @@ export default {
         }
       ],
       formLabelWidth: "120px",
-      taskdialog: false
+      taskdialog: false,
+      formrule:{
+        inspection_number:[
+          { required: true, message: '请输入检验编号', trigger: 'blur' },
+        ],
+        client:[
+          { required: true, message: '请选择委托单位', trigger: 'change' }
+        ],
+        region: [
+            { required: true, message: '请选择检验标准', trigger: 'change' }
+         ],
+         produt:[
+          { required: true, message: '请输入产品名称', trigger: 'blur' },
+        ],
+        model:[
+          { required: true, message: '请输入水泵型号', trigger: 'blur' },
+        ],
+        bedname: [
+            { required: true, message: '请选择测试台体', trigger: 'change' }
+         ],
+         starttime: [
+            { type: 'date', required: true, message: '请选择开始时间', trigger: 'change' }
+          ],
+          endtime: [
+            { type: 'date', required: true, message: '请选择结束时间', trigger: 'change' }
+          ],
+      }
     };
   },
   created() {},
@@ -260,8 +314,9 @@ export default {
       });
       this.standard = obj.data.inspection_standard; //我这边的name就是对应label的
     },
-    addBedtask() {
-      console.log();
+    addBedtask(formName) {
+     this.$refs[formName].validate((valid) => {
+          if (valid) {
       var Report = Parse.Object.extend("Report");
       var report = new Report();
       report.set("inspection_number", this.form.inspection_number);
@@ -287,10 +342,37 @@ export default {
             message: error.message
           });
         })
+        }
+      })
     },
     derive(reportId) {
       deriveReport(reportId).then(res => {});
-    }
+    },
+    //时间校验
+    enddata() {
+      if (this.form.endtime <= this.form.starttime) {
+        this.$message.warning("任务结束时间要小于开始时间");
+        this.form.endtime = "";
+      }
+      if (this.form.endtime < Date.now() - 2000) {
+        this.$message.warning("任务结束时间要大于当前时间");
+        this.form.endtime = "";
+      }
+    },
+    testdata() {
+      if (
+        this.form.endtime <= this.form.starttime &&
+        this.form.endtime != "" &&
+        this.form.endtime != null
+      ) {
+        this.$message.warning("任务开始时间要小于结束时间");
+        this.form.starttime = "";
+      }
+      if (this.form.starttime < Date.now() - 2000) {
+        this.$message.warning("任务开始时间要大于当前时间");
+        this.form.starttime = "";
+      }
+    },
   }
 };
 </script>

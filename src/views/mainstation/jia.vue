@@ -25,8 +25,9 @@
                 <el-input placeholder="终端逻辑地址" v-model="formInline.vcaddr" style="width:150px"></el-input>
               </el-form-item>
                <el-form-item label="规约名称:">
-                <el-select placeholder="规约类型" v-model="formInline.protocol" style="width:150px">
+                <el-select placeholder="规约类型" v-model="formInline.protocol" style="width:150px" @change="protocolChange">
                   <el-option label="南网上行通信规约" value="30"></el-option>
+                  <el-option label="国网通信规约" value="20"></el-option>
                 </el-select>
               </el-form-item>
                <el-form-item label="数据类型:">
@@ -36,9 +37,9 @@
               </el-form-item>
               <el-form-item label="通道类型:">
                 <el-select placeholder="数据类型" v-model="formInline.route" style="width:150px">
-                  <el-option label="无线" value="tcp"></el-option>
-                   <el-option label="485" value="tcp1"></el-option>
-                    <el-option label="载波" value="tcp2"></el-option>
+                  <el-option label="默认" value="tcp"></el-option>
+                  <el-option label="无线" value="tcp1"></el-option>
+                  <el-option label="载波" value="tcp2"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item label="开始测量点号:">
@@ -64,7 +65,7 @@
              <el-form-item label="开始时间:">
                 <el-date-picker
                   v-model="formInline.starttime"
-                  type="datetime"
+                  :type="datatimetype"
                   placeholder="选择开始时间"
                   value-format="timestamp"
                   :picker-options="pickerBeginDateBefore"
@@ -74,7 +75,7 @@
               <el-form-item label="结束时间:">
                 <el-date-picker
                   v-model="formInline.endtime"
-                  type="datetime"
+                  :type="datatimetype"
                   placeholder="选择结束时间"
                   value-format="timestamp"
                   :picker-options="pickerBeginDateAfter"
@@ -126,9 +127,6 @@
         <el-table-column property="value" label="数据" align="center"></el-table-column>
         <el-table-column property="time" label="冻结日期" align="center" show-overflow-tooltip></el-table-column>
         <el-table-column property="ts" label="时间" width="200" align="center">
-          <!-- <template slot-scope="scope">
-          <span>{{ timestampToTime(scope.row.ts)}}</span>
-          </template> -->
         </el-table-column>
         <el-table-column  label="状态" align="center">
           <template slot-scope="scope">
@@ -167,10 +165,6 @@ import Mainstation from '@/components/mainstation';
 import Resource1 from "@/components/resource/resource";
 import {
   Websocket,
-  // sendInfo,
-  // TOPIC_EMPTY,
-  // MSG_EMPTY,
-  // DISCONNECT_MSG,
   didata
 } from "@/utils/wxscoket.js";
 import { eventBus } from '@/api/eventBus';
@@ -183,6 +177,7 @@ export default {
   },
   data() {
     return {
+      datatimetype:'datetime',
       operatetype:[],
       isSelecttime:true,
       isCollapse:true,
@@ -273,21 +268,26 @@ export default {
       });
     },
   },
-//  updated() {
-//    this.gridData1=Websocket.originrecivedata;
-//  },
+
   mounted() {
-    // this.getMainstation('0');
-
-    // this.getmess();
     this.getOperate()
-
     this.session = sessionStorage.getItem('token')
-    // sessionStorage.setItem('session',this.session)
-     
-     
+     console.log(this.datatype)
   },
   methods: {
+    //规约类型选择
+    protocolChange(val){
+      if(val==20){
+        this.datatimetype = 'date'
+        this.formInline.operation=this.operatetype[2].id
+        this.firstchange(this.operatetype[2].id)
+      }else{
+        this.datatimetype = 'datetime'
+        this.formInline.operation=this.operatetype[1].id
+        this.firstchange(this.operatetype[1].id)
+      }
+    },
+    //获取操作类型
     getOperate(){
       var Mainstation = Parse.Object.extend('MainStationIndex')
       var mainstation = new Parse.Query(Mainstation)
@@ -306,6 +306,7 @@ export default {
     handleClose(){
       this.dialogTableVisible = false
     },
+    //获取数据类型
     firstchange(val){
       this.formInline.datatype=''
        this.datatype=[]
@@ -329,71 +330,7 @@ export default {
     },
     getcheck(data,node){
      this.getMainstation(data.objectId)
-    },
-    getOrgList(node,resolve) {
-               if (node.level === 0) {
-                 this.data=[]
-                 var Department = Parse.Object.extend("Department");
-                var department = new Parse.Query(Department);
-                department.equalTo('ParentId','0')
-                department.limit(10000)
-                department.find().then(
-                  resultes => {
-                    resultes.map(items => {
-                      var obj = {};
-                      items.createtime = new Date(
-                        items.attributes.createdAt
-                      ).toLocaleDateString();
-                      (obj.name = items.attributes.name),
-                        (obj.ParentId = items.attributes.ParentId);
-                      obj.objectId = items.id;
-                      obj.level = items.attributes.level;
-                      obj.createtime = items.createtime;
-                      obj.alias = items.attributes.alias
-                      obj.leaf = items.attributes.leafnode
-                      obj.icon = items.attributes.org_type
-                      this.data.push(obj);
-                    });
-                     return resolve(this.data);
-                  },
-                  error => {
-                    resolve([])
-                  }
-                );
-                 console.log(this.data)
-               
-                }else{
-                  this.data=[]
-                var Department = Parse.Object.extend("Department");
-                var department = new Parse.Query(Department);
-                department.equalTo('ParentId',node.data.objectId)
-                department.limit(10000)
-                department.find().then(
-                  resultes => {
-                    resultes.map(items => {
-                      var obj = {};
-                      items.createtime = new Date(
-                        items.attributes.createdAt
-                      ).toLocaleDateString();
-                      (obj.name = items.attributes.name),
-                        (obj.ParentId = items.attributes.ParentId);
-                      obj.objectId = items.id;
-                      obj.level = items.attributes.level;
-                      obj.createtime = items.createtime;
-                      obj.alias = items.attributes.alias
-                      obj.leaf = items.attributes.leafnode
-                      obj.icon = items.attributes.org_type
-                      this.data.push(obj);
-                    });
-                     return resolve(this.data);
-                  },
-                  error => {
-                    resolve([])
-                  }
-                );
-        
-            }
-          },
+    }, 
     test(){
       this.formInline={
         protocol: "30",
@@ -410,6 +347,7 @@ export default {
       }
       this.getOperate()
     },
+    //数据推送得到value
     getValue() {
       this.gridData1.length=0
       if(this.selectdata.length==0){
@@ -433,6 +371,7 @@ export default {
       Websocket.originrecivedata=[]
       var ranNum = Math.ceil(Math.random() * 25)
       var operation = String.fromCharCode(65+ranNum)+Math.ceil(Math.random()*100000)
+      //eventBus事件分发
         eventBus.$on(operation, data => {
            _this.gridData1=[]
             data.data.map(items => {
@@ -441,7 +380,7 @@ export default {
                 _this.gridData1.unshift({
                   "di": items.di,
                   "pn": items.pn,
-                  "value": items.value,
+                  "value": JSON.stringify(items.value),
                   "vcaddr": data.vcaddr,
                   "ts": timestampToTime(items.ts),
                   "meteraddr": items.meteraddr,
@@ -483,13 +422,14 @@ export default {
     handleChange(value) {
       this.selectdata = value;
     },
+    //树形控件点击事件
     meterdetail(row) {
       if(row.icon!='集中器'&&row.icon!='电表'){
         this.$message({
               type: "warning",
               message: "请挑选集中器或电表"
             });
-      }else if(row.icon=='集中器'){
+      }else if(row.icon=='集中器'){ 
         this.formInline.vcaddr = row.alias;
         this.formInline.start = 1
           this.formInline.end = 1
@@ -509,6 +449,7 @@ export default {
       }
       
     },
+    //分页 
     handleSizeChange(val) {
       
       this.currentPage = 1;
@@ -517,6 +458,7 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val;
     },
+    //根据点击的树去department挑选
     getMainstation(objectId) {
       // this.data = [];
       this.session = Parse.User.current().attributes.sessionToken;
@@ -551,10 +493,13 @@ export default {
             this.$router.push({
               path: "/login"
             });
+          }else{
+            this.$message.error(error.message)
           }
         }
       );
     },
+    //数据标识选择 
     dataselect(val) {
       didata.length=0
       this.value=[]
@@ -564,9 +509,9 @@ export default {
           this.operation = items.modelindex
         }
       })
-       var DataItem = Parse.Object.extend('DataItem')
+      if(this.formInline.protocol==30){
+        var DataItem = Parse.Object.extend('DataItem')
           var dataitem = new Parse.Query(DataItem)
-          // dataitem.equalTo('itemType',this.formInline.operation)
           dataitem.equalTo('leafname',val)
           dataitem.limit(1000)
           dataitem.ascending('itemCode')
@@ -581,6 +526,24 @@ export default {
             })
           
           })
+      }else{
+        var DataItemGw = Parse.Object.extend('DataItemGW')
+        var dataitemgw = new Parse.Query(DataItemGw)
+        dataitemgw.equalTo('leafname',val)
+         dataitemgw.limit(1000)
+         dataitemgw.ascending('itemCode')
+        dataitemgw.find().then(res=>{
+            res.map(items=>{
+              var obj={
+                "label": items.attributes.itemname,
+                "key": items.attributes.itemCode
+              }
+              this.data1.push(obj)
+              didata.push(obj)
+            })
+        })
+      }
+       
         if(this.operation=='c.3'||this.operation=='c.4'){
         this.isSelecttime=false
         this.formInline.starttime = new Date(new Date().setHours(0, 0, 0, 0)-24*60*60*1000)

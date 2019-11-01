@@ -60,6 +60,45 @@
         >删除</el-button>
       </template>
     </tree-table>
+    <!-- <el-table :data="treeData"
+    style="width: 100%;margin-top: 20px;"
+    :expand-row-keys="expenddata"
+    border
+    row-key="objectId">
+    <el-table-column
+      prop="name"
+      label="名称"
+     >
+    </el-table-column>
+    <el-table-column
+      prop="objectId"
+      label="ID"
+     >
+    </el-table-column>
+    <el-table-column
+      prop="scope"
+      label="level"
+     >
+    </el-table-column>
+    <el-table-column
+      prop="createtime"
+      label="创建时间"
+     >
+    </el-table-column>
+     <el-table-column
+      label="操作"
+     >
+     <template slot-scope="scope">
+      <el-button size="mini" type="success" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-button>
+        <el-button
+          size="mini"
+          type="danger"
+          icon="el-icon-delete"
+          @click="handleDelete(scope.row)"
+        >删除</el-button>
+     </template>
+    </el-table-column>
+    </el-table> -->
     <!--部门弹窗-->
     <el-dialog title="编辑部门" :visible.sync="departmentEdit">
       <el-form :model="departmentForm">
@@ -92,6 +131,7 @@ export default {
       departmentEdit: false,
       defaultExpandAll: true,
       showCheckbox: true,
+      expenddata:[],
       key: 1,
       treeprops: {
         value: "objectId",
@@ -145,12 +185,14 @@ export default {
   },
   computed: {
     treeData() {
+     
       let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
       return cloneData.filter(father => {
         let branchArr = cloneData.filter(
           child => father.objectId == child.ParentId
         ); //返回每一项的子级数组
-        branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
+        branchArr.length > 0 ? (father.children = branchArr) : "";
+       //如果存在子级，则给父级添加一个children属性，并赋值
         return father.ParentId == 0; //返回第一层
       });
     }
@@ -259,6 +301,7 @@ export default {
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
        department.equalTo('leafnode',false)
+       department.limit(10000)
       department.find().then(resultes => {
         resultes.map(items => {
           var obj = {};

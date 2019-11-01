@@ -10,7 +10,7 @@
       >{{ $t('concentrator.search') }}</el-button>
     </div>
     <div class="section">
-      <!-- <el-button type="primary" icon="el-icon-plus" @click="uploadadd">{{ $t('concentrator.add') }}</el-button> -->
+      <el-button type="primary" icon="el-icon-plus" @click="uploadadd">{{ $t('concentrator.add') }}</el-button>
       <el-button plain @click="startdev">{{ $t('concentrator.start') }}</el-button>
       <el-button plain @click="stop">{{ $t('concentrator.end') }}</el-button>
       <el-button plain @click="checktime">{{ $t('concentrator.checktime') }}</el-button>
@@ -53,7 +53,8 @@
         </el-table-column>
         <el-table-column :label="$t('concentrator.onlinemeter')" sortable align="center">
           <template slot-scope="scope">
-            <span>{{scope.row.attributes.others.online+"/"+scope.row.attributes.others.total}}</span>
+            <span v-if="scope.row.attributes.others.online&&scope.row.attributes.others.total">{{scope.row.attributes.others.online+"/"+scope.row.attributes.others.total}}</span>
+            <span v-else>{{"0/0"}}</span>
           </template>
         </el-table-column>
         <el-table-column prop :label="$t('concentrator.connection')" align="center" width="100">
@@ -109,12 +110,39 @@
       ></el-pagination>
     </div>
     <!--弹出编辑对话框-->
-    <el-dialog title="集中器基本信息" :visible.sync="dialogVisible" width="35%" center>
+    <el-dialog title="集中器基本信息" :visible.sync="dialogVisible" width="35%" top="1vh" center>
       <el-form ref="form" :model="sizeForm">
-        <el-form-item>
-          <span>集中器地址</span>
-          <span style="margin-left:50px;">{{sizeForm.vcaddr}}</span>
-        </el-form-item>
+        <el-divider content-position="left">基本信息</el-divider>
+         <div style="display:flex">
+          <el-form-item label="集中器地址">
+            <el-input v-model="sizeForm.vcaddr" readonly></el-input>
+          </el-form-item>
+           <el-form-item label="供电单位" style="margin-left:30px;">
+             <el-cascader
+              placeholder="选择供电单位"
+              v-model="sizeForm.gddw"
+              :props="treeprops"
+              :options="treeData"
+              auto-complete="off"
+              :show-all-levels="false"
+              :change-on-select="false"
+            ></el-cascader>
+          </el-form-item>
+        </div>
+        <!---->
+         <div style="display:flex">
+          <el-form-item label="规约类型">
+            <el-select v-model="sizeForm.protocol_type" >
+             <el-option label="南网计量上行通信规约" :value="1"></el-option>
+              <el-option label=" 广东电网集中器上行规约" :value="2"></el-option>
+              <el-option label="国网用采主站与采集终端通信协议" :value="3"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="投运时间" style="margin-left:30px;">
+            <el-input v-model="sizeForm.vctime" readonly></el-input>
+          </el-form-item>
+        </div>
+        <el-divider content-position="left">通信信息</el-divider>
         <div style="display:flex">
           <el-form-item label="通信工作模式">
             <el-select v-model="sizeForm.region">
@@ -206,20 +234,136 @@
       </span>
     </el-dialog>
     <!--新建弹框-->
-    <el-dialog title="新增集中器" :visible.sync="addconcentrator" width="35%" center>
-      <el-form ref="form" :model="concenForm">
-        <el-form-item>
-          <label for>集中器地址</label>
-          <el-input v-model="concenForm.vcaddr" style="margin-bottom:20px;"></el-input>
-        </el-form-item>
-        <label>
-          <span class="startUp">启动配置</span>[JSON]:
-        </label>
-        <el-input type="textarea" :rows="18" v-model="vcConfig" style="margin-top:20px;"></el-input>
+    <el-dialog title="新增集中器" :visible.sync="addconcentrator" width="35%" top="1vh" center>
+      <el-form ref="form" :model="vcConfig">
+        <el-divider content-position="left">基本信息</el-divider>
+         <div style="display:flex">
+          <el-form-item label="集中器地址">
+            <el-input v-model="vcConfig.vcaddr"></el-input>
+          </el-form-item>
+            <el-form-item label="供电单位" style="margin-left:30px;">
+                <el-cascader
+              placeholder="选择供电单位"
+              v-model="vcConfig.gddw"
+              :props="treeprops"
+              :options="treeData"
+              :show-all-levels="false"
+              :change-on-select="false"
+            ></el-cascader>
+          </el-form-item>
+        </div>
+        <!---->
+         <div style="display:flex">
+          <el-form-item label="投运时间">
+            <el-date-picker
+            v-model="vcConfig.vctime"
+            type="datetime"
+            placeholder="集中器时间"
+            value-format="timestamp"
+            :picker-options="pickerOptionsStart"
+          ></el-date-picker>
+            <!-- <el-input v-model="vcConfig.vctime"></el-input> -->
+          </el-form-item>
+           <el-form-item label="规约类型"  style="margin-left:30px;">
+            <el-select v-model="vcConfig.protocol_type" >
+              <el-option label="南网计量上行通信规约" :value="1"></el-option>
+              <el-option label=" 广东电网集中器上行规约" :value="2"></el-option>
+              <el-option label="国网用采主站与采集终端通信协议" :value="3"></el-option>
+            </el-select>
+          </el-form-item>
+          
+        </div>
+        <el-divider content-position="left">通信信息</el-divider>
+        <div style="display:flex">
+          <el-form-item label="通信工作模式">
+            <el-select v-model="vcConfig.region">
+              <el-option label="客户机模式" value="1"></el-option>
+              <el-option label="混合模式" value="0"></el-option>
+              <el-option label="服务器模式" value="3"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="通道类型" style="margin-left:30px;">
+            <el-select v-model="vcConfig.type">
+              <el-option label="GPRS/CDMA" :value="2"></el-option>
+              <el-option label="PSTN" :value="3"></el-option>
+              <el-option label="Ethernet" :value="4"></el-option>
+              <el-option label="RS232/RS485" :value="6"></el-option>
+              <el-option label="CSD" :value="7"></el-option>
+              <el-option label="Radio" :value="8"></el-option>
+            </el-select>
+          </el-form-item>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="终端IP地址">
+            <el-input v-model="vcConfig.ipaddress"></el-input>
+          </el-form-item>
+          <el-form-item label="心跳间隔" style="margin-left:30px;">
+            <el-input v-model="vcConfig.hbinterval" style="padding-right:0;"></el-input>
+          </el-form-item>
+          <span style="line-height:45px;">秒</span>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="TCP监听端口">
+            <el-input v-model="vcConfig.port"></el-input>
+          </el-form-item>
+          <el-form-item label="掉线重播间隔" style="margin-left:30px;">
+            <el-input v-model="vcConfig.notonline" style="padding-right:0;">
+              
+            </el-input>
+          </el-form-item>
+          <span style="line-height:45px;">秒</span>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="终端子网掩码">
+            <el-input v-model="vcConfig.localmask"></el-input>
+          </el-form-item>
+          <el-form-item label="掉线重播次数" style="margin-left:30px;">
+            <el-input v-model="vcConfig.recalltimes" style="padding-right:0;"></el-input>
+          </el-form-item>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="终端网关地址">
+            <el-input v-model="vcConfig.localgateway"></el-input>
+          </el-form-item>
+          <el-form-item label="主站通信地址" style="margin-left:30px;">
+            <el-input v-model="vcConfig.localip" style="padding-right:0;"></el-input>
+          </el-form-item>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="IP地址获取方式">
+            <el-select v-model="vcConfig.ipgetway">
+              <el-option label="自动设置" value="1"></el-option>
+              <el-option label="手动设置" value="0"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="主站端口号" style="margin-left:30px;">
+            <el-input v-model="vcConfig.remoteport" style="padding-right:0;"></el-input>
+          </el-form-item>
+        </div>
+        <!---->
+        <div style="display:flex">
+          <el-form-item label="TCP/UDP标识">
+            <el-select v-model="vcConfig.tcporudp">
+              <el-option label="TCP" value="0"></el-option>
+              <el-option label="UDP" value="1"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="主通道类型" style="margin-left:30px;">
+            <el-select v-model="vcConfig.mainchannel">
+              <el-option label="虚拟集中器通道" :value="1"></el-option>
+              <el-option label="物理集中器通道" :value="2"></el-option>
+            </el-select>
+          </el-form-item>
+        </div>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addconcentrator= false" style="float:left">关闭</el-button>
-        <el-button type="primary" @click="addconcen" style="float:right">新增/更新</el-button>
+        <el-button type="primary" @click="addconcen" style="float:right">新增</el-button>
       </span>
     </el-dialog>
     <!--校时弹框-->
@@ -255,14 +399,27 @@ import {
   submittime,
   timetounix,
   startconnect,
-  addcon
+  addcon,
+  utc2beijing
 } from "@/api/login";
 import Parse from "parse";
+import { prototype } from 'stream';
 export default {
   data() {
     return {
       // value2: true,
       //  value1: true,
+      pickerOptionsStart: {
+        disabledDate: time => {
+            return time.getTime() < Date.now() - 8.64e7
+        }
+        
+        
+      },
+      treeprops: {
+        value: "objectId",
+        label: "name"
+      },
       loading: true,
       value6: true,
       value7: false,
@@ -294,43 +451,64 @@ export default {
         ipgetway: "",
         remoteport: "",
         mainchannel: "",
-        tcporudp: ""
-      },
-      concenForm: {
-        vcaddr: ""
+        tcporudp: "",
+        vctime:'',
+        gddw:'',
+        protocol_type:1
       },
       addconcentrator: false,
       vcConfig: {
-        channel_mod: 1,
-        local_ip: "127.0.0.1",
-        local_port: 9001,
-        local_mask: "255.255.000.001",
-        local_gateway: "172.016.023.255",
-        get_ip_mod: 1,
-        remote_ip: "183.129.189.154",
-        remote_port: 65004,
-        channel_type: 2,
-        hb_interval: 60,
-        recall_interval: 30,
-        recall_times: 3,
-        tcp_or_udp: 0
+        vcaddr: "",
+        region: "1",
+        type: 2,
+        ipaddress: "127.0.0.1",
+        hbinterval: 90,
+        port: 9001,
+        notonline: 60,
+        localmask: "255.255.000.001",
+        recalltimes: 3000,
+        localgateway: "172.016.023.255",
+        localip: "127.0.0.1",
+        ipgetway: "1",
+        remoteport: 16110,
+        mainchannel: 1,
+        tcporudp: "0",
+        vctime:'',
+        gddw:'',
+        gylx:'',
+        protocol_type:1
       },
       vcaddrid: "",
-      jsondata: {}
+      jsondata: {},
+      data:[]
     };
+  },
+   computed: {
+    treeData() {
+      let cloneData = JSON.parse(JSON.stringify(this.data)); // 对源数据深度克隆
+      return cloneData.filter(father => {
+        let branchArr = cloneData.filter(
+          child => father.objectId == child.ParentId
+        ); //返回每一项的子级数组
+        branchArr.length > 0 ? (father.children = branchArr) : ""; //如果存在子级，则给父级添加一个children属性，并赋值
+        return father.ParentId == 0; //返回第一层
+      });
+    }
   },
   mounted() {
     // this.getinformation();
-    this.vcConfig = JSON.stringify(this.vcConfig, null, 4);
+    // this.vcConfig = JSON.stringify(this.vcConfig, null, 4);
     this.getAllConcentrator();
+    this.getDepartment()
   },
   methods: {
+    //得到所有集中器
     getAllConcentrator() {
       var Vcon = Parse.Object.extend("Vcon");
       var vcon = new Parse.Query(Vcon);
 
       if (this.vcaddr != "") {
-        vcon.equalTo("vcaddr", this.vcaddr);
+        vcon.contains("vcaddr", this.vcaddr);
       }
       vcon.skip(this.start);
       vcon.limit(this.length);
@@ -341,6 +519,7 @@ export default {
             this.tableData3 = resultes;
             this.loading = false;
           });
+          
         },
         error => {
           if (error.code == "209") {
@@ -360,6 +539,7 @@ export default {
         }
       );
     },
+  //关闭校时
     Closechecktime() {
       this.checktimedialog = false;
     },
@@ -370,7 +550,7 @@ export default {
       var date = new Date(timestamp * 1000);
       var Y = date.getFullYear() + "-";
       var M =
-        (date.getMonth() + 1 <= 10
+        (date.getMonth() + 1 < 10
           ? "0" + (date.getMonth() + 1)
           : date.getMonth() + 1) + "-";
       var D =
@@ -389,6 +569,7 @@ export default {
           : date.getSeconds();
       return Y + M + D + h + m + s;
     },
+    //编辑
     handleEdit(index, row, id) {
       this.vcaddrid = id;
       this.sizeForm.vcaddr = row.vcaddr;
@@ -406,6 +587,13 @@ export default {
       this.sizeForm.tcporudp = String(row.jsondata.tcp_or_udp);
       this.sizeForm.region = String(row.jsondata.channel_mod);
       this.sizeForm.mainchannel = Number(row.jsondata.master_channel);
+      this.sizeForm.vctime = utc2beijing(row.createdAt)
+      this.sizeForm.gddw = this.getParent(this.data,row.organization.id,[])
+      if(row.jsondata.protocol_type){
+         this.sizeForm.protocol_type = Number(row.jsondata.protocol_type)
+      }else{
+        this.sizeForm.protocol_type = ''
+      }
       this.dialogVisible = true;
       for (var key in row.jsondata) {
         this.jsondata[key] = row.jsondata[key];
@@ -442,6 +630,7 @@ export default {
         (this.jsondata.tcp_or_udp = this.sizeForm.tcporudp),
         (this.jsondata.channel_mod = this.sizeForm.region),
         (this.jsondata.master_channel = this.sizeForm.mainchannel);
+        this.jsondata.protocol_type = this.sizeForm.protocol_type
       var Vcon = Parse.Object.extend("Vcon");
       var vcon = new Vcon();
       vcon.id = this.vcaddrid;
@@ -560,15 +749,15 @@ export default {
     },
     //连主站
     connect(val) {
-      this.vcaddr = val;
-      startconnect(this.vcaddr)
+      // this.vcaddr = val;
+      startconnect(val)
         .then(res => {
           if (res) {
             this.$message({
               message: "主站连接成功",
               type: "success"
             });
-            this.vcaddr = "";
+           
             this.getAllConcentrator();
           }
         })
@@ -622,25 +811,111 @@ export default {
       this.addconcentrator = true;
     },
     addconcen() {
-      var config = JSON.parse(this.vcConfig);
-      config.vcaddr = this.concenForm.vcaddr;
-      addcon(config)
-        .then(response => {
-          if (response) {
-            this.$message({
-              message: "新增/更新成功",
-              type: "success"
-            });
-            this.addconcentrator = false;
-            this.getinformation();
-          }
+      var departmentalias=''
+      var departmentId = this.vcConfig.gddw[this.vcConfig.gddw.length-1]
+      var Department = Parse.Object.extend("Department");
+      var department = new Parse.Query(Department);
+      var department1 = new Department()
+      department1.id = departmentId
+       department1.set('leafnode',true)
+        department1.save().then(response=>{
+          
         })
-        .catch(error => {
-          this.$message({
-            message: error.error,
-            type: "warning"
+      department.get(departmentId).then(resultes=>{
+       
+        departmentalias= resultes.attributes.alias
+        var Vcon = Parse.Object.extend('Vcon')
+        var vcon = new Vcon()
+        vcon.set('department',departmentalias)
+        vcon.set('organization',department1)
+        vcon.set('vctime',Math.floor(this.vcConfig.vctime/1000))
+        vcon.set('others',{})
+        vcon.set('jsondata',{
+              address: "for_test",
+              cbxx: {pns: "", msdiff: 0, vcaddr: "", channel: ""},
+              channel_mod: Number(this.vcConfig.region),
+              get_ip_mod: Number(this.vcConfig.ipgetway),
+              hb_interval:this.vcConfig.hbinterval,
+              local_gateway: this.vcConfig.localgateway,
+              local_ip: this.vcConfig.localip,
+              local_mask: this.vcConfig.localmask,
+              local_port: Number(this.vcConfig.port),
+              master_channel: Number(this.vcConfig.mainchannel),
+              nodename: "shuwa_dba@172.27.0.8",
+              recall_interval: Number(this.vcConfig.notonline),
+              recall_times: Number(this.vcConfig.recalltimes),
+              register: false,
+              remote_param: {remote_ip: this.vcConfig.ipaddress, remote_port: Number(this.vcConfig.remoteport), channel_type: this.vcConfig.type},
+              tcp_or_udp: Number(this.vcConfig.tcporudp),
+              protocol_type:this.vcConfig.protocol_type
+        })
+        vcon.set('vcaddr',this.vcConfig.vcaddr)
+        vcon.save().then(resultes=>{
+          if(resultes){
+            this.$message.success('创建成功')
+           this.addconcentrator=false
+            this.getAllConcentrator()
+          }
+        },error => {
+              if (error.code == "209") {
+                this.$message({
+                  type: "warning",
+                  message: "登陆权限过期，请重新登录"
+                });
+                this.$router.push({
+                  path: "/login"
+                });
+              } else if (error.code == 119) {
+                this.$message({
+                  type: "error",
+                  message: "没有操作权限"
+                });
+              } else {
+                this.$message.error(error.error);
+              }
+            })
+      })
+    },
+    //原数组data2 nodeId2点击树元素的parentId，arrRes新的数组
+     getParent(data2, nodeId2, arrRes) {
+      data2.map(items => {
+        if (items.objectId == nodeId2) {
+          arrRes.push(items.objectId);
+          this.getParent(data2, items.ParentId, arrRes);
+        } else if (items.ParentId == 0 && items.objectId == nodeId2) {
+          arrRes.push(items.objectId);
+        }
+      });
+      return arrRes.reverse();
+    },
+    //初始化供电单位
+    getDepartment() {
+      var Department = Parse.Object.extend("Department");
+      var department = new Parse.Query(Department);
+      department.limit(10000)
+      department.find().then(
+        resultes => {
+          // console.log(resultes)
+          resultes.map(items => {
+            var obj = {};
+            items.createtime = new Date(
+              items.attributes.createdAt
+            ).toLocaleDateString();
+            (obj.name = items.attributes.name),
+              (obj.ParentId = items.attributes.ParentId);
+            obj.objectId = items.id;
+            obj.level = items.attributes.level;
+            obj.createtime = items.createtime;
+            this.data.push(obj);
           });
-        });
+        },
+        error => {
+          this.$message({
+            type: "error",
+            message: error.error
+          });
+        }
+      );
     }
   }
 };
@@ -663,6 +938,9 @@ export default {
 <style>
 .concentrator .el-pagination {
   margin-top: 20px;
+}
+.concentrator .el-date-editor.el-input, .concentrator .el-date-editor.el-input__inner{
+  width:100%;
 }
 .concentrator .el-table {
   margin-top: 20px;
@@ -700,5 +978,8 @@ export default {
   background: #fafafa;
   color: #666666;
   font-weight: 600;
+}
+.concentrator .el-input--prefix .el-input__inner{
+  padding-left:20px;
 }
 </style>

@@ -9,7 +9,8 @@
             :data="datafortable"
             stripe
             style="width: 100%"
-            @expand-change="rowExpand($event)"
+            accordion
+            @expand-change="rowExpand($event,scope.$index)"
           >
             <el-table-column type="expand" label="取证" width="200">
               <template slot-scope="props">
@@ -19,6 +20,27 @@
                   class="demo-table-expand"
                   style="margin-bottom:10px;"
                 >
+                <!-- <div> -->
+                  <!-- <div id="Getdata" style="width:100%;height:300px;"></div>
+                    <el-table class="tableforfile" :data="Datafile" style="width:100%;text-align:center">
+                      <el-table-column label="数据来源" align="center">
+                        <template slot-scope="scope">
+                          <span>{{scope.row.attributes.data.source}}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column align="center" label="最近更新时间">
+                        <template slot-scope="scope">
+                          <span>{{utc2beijing(scope.row.attributes.createdAt)}}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column align="center" label="内容">
+                        <template slot-scope="scope">
+                          <el-button type="success" @click="detail(scope.row.attributes.data.data)">查 看</el-button>
+                          <el-button type="danger" @click="deleteimg(scope.row.id)">删 除</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                </div> -->
                   <el-button @click="flatEvidence(props.row.id)">平板取证</el-button>
                   <el-button @click="consoleEvidenvce(props.row.id,reportid)">控制台取证</el-button>
                   <el-button @click="controllerEvidence(props.row.id,reportid)">控制器取证</el-button>
@@ -74,12 +96,22 @@
                 </el-table>
               </template>
             </el-table-column>
-            <el-table-column prop="id" label="序号" width="180"></el-table-column>
-            <el-table-column prop="inspecting_item" label="检验项目"></el-table-column>
-            <el-table-column prop="title" label="保证值"></el-table-column>
-            <el-table-column prop="value" label="测试值"></el-table-column>
-            <el-table-column prop label="评定"></el-table-column>
+            <el-table-column prop="id" label="序号" align="center"></el-table-column>
+            <el-table-column prop="inspecting_item" label="检验项目" align="center"></el-table-column>
+            <el-table-column prop="title" label="保证值" align="center"></el-table-column>
+            <el-table-column prop="value" label="测试值" align="center"></el-table-column>
+            <el-table-column prop label="评定" align="center"></el-table-column>
           </el-table>
+          <!-- <div class="block" style="margin-top:10px;">
+            <el-pagination
+              @size-change="handleSizeChange1"
+              @current-change="handleCurrentChange1"
+              :page-sizes="[10, 20, 30, 40]"
+              :page-size="pagesize1"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="total1"
+            ></el-pagination>
+          </div> -->
         </el-col>
         <el-col
           :xs="24"
@@ -163,15 +195,30 @@ export default {
       tableData1: [],
       Datafile: [],
       tasknameid: "",
-      row: 0
+      row: 0,
+      start1:1,
+      pagesize1:10,
+      total1:0,
+      // extends:[],
+      // getRowKeys(row) {
+      //       return row.id;
+      //   },
     };
   },
   mounted() {
     this.getReportdetail();
-    this.Getchart();
+    // this.Getchart();
     this.init();
   },
   methods: {
+    //检验项目分页
+    handleSizeChange1(val) {
+      this.start1 = 1;
+      this.pagesize1 = val;
+    },
+    handleCurrentChange1(val) {
+      this.start1 = val;
+    },
     utc2beijing(utc_datetime) {
       // 转为正常的时间格式 年-月-日 时:分:秒
       var date = new Date(utc_datetime);
@@ -204,6 +251,7 @@ export default {
         });
       }, 20);
     },
+    //初始化数据
     getReportdetail() {
       this.reportid = this.$route.query.id;
       this.testbedid = this.$route.query.testbedid;
@@ -221,16 +269,34 @@ export default {
               child.type = "imgage";
               this.datafortable.push(child);
             });
+            //分页总条数
+            this.total1 = this.datafortable.length
           });
         },
         error => {
-          this.$message({
-            type: "error",
-            message: error.message
-          });
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
         }
       );
     },
+    // toggleRowExpansion(row){
+    //         this.expands = [];
+    //         this.expands.push(row.id);
+    //   },
     Getchart(head, power, effect) {
       // setTimeout(() => {
       let Echarts = document.getElementById("Getdata");
@@ -249,7 +315,6 @@ export default {
             }
           }
         },
-
         toolbox: {
           show: true
         },
@@ -388,20 +453,40 @@ export default {
       });
     },
     rowExpand(row) {
-      this.row = row;
-      this.tasknameid = row.id;
-      this.Datafile = [];
-      var PumpData = Parse.Object.extend("PumpData");
-      var pumpdata = new Parse.Query(PumpData);
-      pumpdata.equalTo("itemId", this.tasknameid.toString());
-      pumpdata.equalTo("reportId", this.reportid);
-      pumpdata.find().then(result => {
-        result.map(item => {
-          if (item.attributes.data.type == "file") {
-            this.Datafile.push(item);
-          }
-        });
-      });
+      setTimeout(()=>{
+        this.Getchart()
+      },1000)
+      // this.row = row;
+      // this.tasknameid = row.id;
+      // this.Datafile = [];
+      // var PumpData = Parse.Object.extend("PumpData");
+      // var pumpdata = new Parse.Query(PumpData);
+      // pumpdata.equalTo("itemId", this.tasknameid.toString());
+      // pumpdata.equalTo("reportId", this.reportid);
+      // pumpdata.find().then(result => {
+      //   result.map(item => {
+      //     if (item.attributes.data.type == "file") {
+      //       this.Datafile.push(item);
+      //     }
+      //   });
+      // },error => {
+      //     if (error.code == "209") {
+      //       this.$message({
+      //         type: "warning",
+      //         message: "登陆权限过期，请重新登录"
+      //       });
+      //       this.$router.push({
+      //         path: "/login"
+      //       });
+      //     } else if (error.code == 119) {
+      //       this.$message({
+      //         type: "error",
+      //         message: "没有操作权限"
+      //       });
+      //     } else {
+      //       this.$message.error(error.message);
+      //     }
+      //   });
     },
     //查看文件
     detail(data) {
@@ -424,8 +509,23 @@ export default {
             this.rowExpand(this.row);
           },
           error => {
-            console.log(error);
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
           }
+        }
         );
       });
     },
@@ -443,7 +543,24 @@ export default {
         query.find().then(res => {
           this.tableData1 = res;
         });
-      });
+      },error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
+        });
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);
@@ -490,6 +607,7 @@ export default {
         message: "上传成功"
       });
     },
+    //上传文件保存到库
     importdata() {
       var Flate = Parse.Object.extend("CloudFile");
       var flate = new Flate();
@@ -525,15 +643,46 @@ export default {
               this.dialogVisible = false;
             },
             error => {
-              console.log(error);
-            }
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
+        }
           );
         },
         error => {
-          console.log(error);
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
         }
       );
     },
+    //dtu取证
     controllerEvidence(taskdetailid, taskid) {
       var Testbed = Parse.Object.extend("Testbed");
       var testbed = new Parse.Query(Testbed);
@@ -544,8 +693,26 @@ export default {
         query.find().then(res => {
           this.tableData1 = res;
         });
-      });
+      },error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
+        });
     },
+    //视频取证
     liveEvidence(taskdetailid, taskid) {
       var Testbed = Parse.Object.extend("Testbed");
       var testbed = new Parse.Query(Testbed);
@@ -556,7 +723,24 @@ export default {
         query.find().then(res => {
           this.tableData1 = res;
         });
-      });
+      },error => {
+          if (error.code == "209") {
+            this.$message({
+              type: "warning",
+              message: "登陆权限过期，请重新登录"
+            });
+            this.$router.push({
+              path: "/login"
+            });
+          } else if (error.code == 119) {
+            this.$message({
+              type: "error",
+              message: "没有操作权限"
+            });
+          } else {
+            this.$message.error(error.message);
+          }
+        });
     },
     Gotodetail(type, taskid) {
       if (type == "PC") {

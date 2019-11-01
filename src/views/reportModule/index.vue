@@ -4,28 +4,28 @@
       <el-button type="primary" @click="addmodule">新 增</el-button>
     </div>
     <div class="reportlist">
-      <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column label="ID" width="180">
+      <el-table :data="tableData" stripe style="width: 100%;text-align:center">
+        <el-table-column label="ID" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.objectId}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="产品名称" width="180">
+        <el-table-column label="产品名称" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.data.sample}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="检验类别">
+        <el-table-column label="检验类别" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.data.category}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="检验标准">
+        <el-table-column label="检验标准" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.data.inspection_standard}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.row.objectId)">详 情</el-button>
             <el-button size="mini" type="primary" @click="editorDetail(scope.row.objectId)">编 辑</el-button>
@@ -51,18 +51,18 @@
       width="50%"
       style="padding:20px;box-sizing: border-box;"
     >
-      <el-table :data="gridData" border>
-        <el-table-column label="id" width="50">
+      <el-table :data="gridData" border style="width:100%;text-align:center">
+        <el-table-column label="id" align="center">
           <template slot-scope="scope">
             <el-tag size="medium">{{ scope.row.id }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="检验项目">
+        <el-table-column label="检验项目" align="center">
           <template slot-scope="scope">{{ scope.row.inspecting }}</template>
         </el-table-column>
-        <el-table-column property="title" label="保证值" width="200"></el-table-column>
-        <el-table-column property="value" label="测试值"></el-table-column>
-        <el-table-column property label="评定"></el-table-column>
+        <el-table-column property="title" label="保证值" align="center"></el-table-column>
+        <el-table-column property="value" label="测试值" align="center"></el-table-column>
+        <el-table-column property label="评定" align="center"></el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -137,7 +137,6 @@ export default {
       getReport(this.start, this.length).then(resultes => {
         this.tableData = resultes.data;
         this.total = resultes.data.length;
-        //					console.log(this.tableData)
       });
     },
     handleSizeChange(val) {

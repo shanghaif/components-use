@@ -4,19 +4,19 @@
       <el-button type="primary" @click="addTestbed()">工具矩阵</el-button>
     </div>
     <div class="bedtable">
-      <el-table :data="bedData" style="width: 100%">
-        <el-table-column prop="id" label="设备组编号"></el-table-column>
-        <el-table-column label="测试台提名称">
+      <el-table :data="bedData" style="width: 100%;text-align:center">
+        <el-table-column prop="id" label="设备组编号" align="center"></el-table-column>
+        <el-table-column label="测试台提名称" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态">
+        <el-table-column label="状态" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.status}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="编辑">
+        <el-table-column label="编辑" align="center">
           <template slot-scope="scope">
             <el-button size="mini" type="primary" @click="handleEdit(scope.row.id)">配 置</el-button>
             <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">撤 销</el-button>
@@ -42,22 +42,21 @@
           <label for>测试台名称:</label>
           <el-input style="width:200px" v-model="testbedname"></el-input>
         </div>
-
-        <el-table :data="devicesData" @selection-change="handleSelectionChange" ref="multipleTable">
-          <el-table-column type="selection"></el-table-column>
-          <el-table-column label="设备类别">
+        <el-table :data="devicesData" @selection-change="handleSelectionChange" ref="multipleTable" style="width:100%;text-align:center">
+          <el-table-column type="selection" align="center" width="100"></el-table-column>
+          <el-table-column label="设备类别" align="center" >
             <template slot-scope="scope">
               <span v-if="scope.row.attributes.basedata.type=='DTU'">控制器</span>
               <span v-else-if="scope.row.attributes.basedata.type=='PC'">控制台</span>
               <span v-else>摄像头</span>
             </template>
           </el-table-column>
-          <el-table-column label="设备编号">
+          <el-table-column label="设备编号" align="center">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.devaddr}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="当前状态">
+          <el-table-column label="当前状态" align="center" >
             <template slot-scope="scope">
               <span v-if="scope.row.attributes.basedata.status=='offline'" style="color:red">离线</span>
               <span v-if="scope.row.attributes.basedata.status=='ready'" style="color:green">在线</span>

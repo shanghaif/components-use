@@ -8,8 +8,8 @@
         <el-form-item label="集中器地址">
           <el-input v-model="form.vcaddr_web"></el-input>
         </el-form-item>
-        <el-form-item label="电能表地址">
-          <el-input v-model="form.addr_web"></el-input>
+        <el-form-item label="pn值">
+          <el-input v-model.number="form.addr_web"></el-input>
         </el-form-item>
         <el-form-item label="任务模板">
           <el-select v-model="form.task_value" @change="handleTaskChange" placeholder="请选择任务模板">
@@ -82,13 +82,14 @@
        
         <el-table-column prop="vcaddr_web" label="集中器地址" width="150"></el-table-column>
          <el-table-column prop="pn" label="pn" width="150"></el-table-column>
-        <el-table-column prop="task" label="任务模板" ></el-table-column>
+        <el-table-column prop="tasktype" label="任务模板" ></el-table-column>
         <el-table-column prop="data_type" label="数据类型" width="180"></el-table-column>
         <el-table-column prop="forward_power_total" label="正向有功电能总" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_1" label="正向有功费率1(尖)" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_2" label="正向有功费率2(峰)" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_3" label="正向有功费率3(平)" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_4" label="正向有功费率4(谷)" width="120"></el-table-column>
+        <el-table-column prop="rid" label="任务轮次" width="120"></el-table-column>
         <el-table-column prop="gather_time" label="采集时间" width="190"></el-table-column>
       </el-table>
       <PagingQuery
@@ -104,7 +105,7 @@
 </template>
  
 <script>
-import { getMeterDate, getMeterListDate } from "@/api/meterReading";
+import { getMeterDate, getMeterListDate,getMeterListDate1 } from "@/api/meterReading";
 import Resource1 from "@/components/resource/resource";
 import Parse from "parse";
 import { utc2beijing } from "@/utils/index";
@@ -247,7 +248,6 @@ export default {
     query(index) {
       this.collTime(); 
       this.isshowround = false
-      
       if(this.form.resource=='PG'){
         if(index==0){
          this.pager.page=1
@@ -265,7 +265,8 @@ export default {
         this.$message.error(error.error)
       });
       }else{
-        getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime,this.form.res,this.freeze).then(res=>{
+        if(this.form.addr_web!=''){
+           getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime,this.form.res,this.form.data_type_value).then(res=>{
           if(res){
              this.search_res=res.results;
               this.getForDate(res); 
@@ -275,6 +276,19 @@ export default {
         }).catch(error=>{
         this.$message.error(error.error)
       });
+        }else{
+           getMeterListDate1((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime,this.form.res,this.form.data_type_value).then(res=>{
+          if(res){
+             this.search_res=res.results;
+              this.getForDate(res); 
+             this.pager.count = res.count
+               this.loading=false;
+          }
+        }).catch(error=>{
+        this.$message.error(error.error)
+      });
+        }
+       
       }
       
     },
@@ -360,7 +374,7 @@ export default {
         this.form.vcaddr_web="";
       }
       if(this.form.resource=='PG'){
-           getMeterDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime+85399999,this.freeze,this.form.resource).then(res => {
+           getMeterDate1((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime+85399999,this.freeze,this.form.resource).then(res => {
         if(res){
             this.search_res=res.results;
             this.getForDate(res); 
@@ -371,16 +385,30 @@ export default {
         this.$message.error(error.error)
       });
       }else{
-        getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.addr_web,this.form.vcaddr_web,this.form.startTime, this.form.endTime+85399999,this.form.res,this.freeze).then(res=>{
+        
+       if(this.form.addr_web!=''){
+           getMeterListDate((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.addr_web,this.form.startTime, this.form.endTime,this.form.res,this.form.data_type_value).then(res=>{
           if(res){
              this.search_res=res.results;
               this.getForDate(res); 
-              this.pager.count = res.count
-              this.loading=false;
+             this.pager.count = res.count
+               this.loading=false;
           }
         }).catch(error=>{
         this.$message.error(error.error)
       });
+        }else{
+           getMeterListDate1((this.pager.page-1)*this.pager.rows, this.pager.rows,this.form.vcaddr_web,this.form.startTime, this.form.endTime,this.form.res,this.form.data_type_value).then(res=>{
+          if(res){
+             this.search_res=res.results;
+              this.getForDate(res); 
+             this.pager.count = res.count
+               this.loading=false;
+          }
+        }).catch(error=>{
+        this.$message.error(error.error)
+      });
+        }
       }
      
     },
@@ -404,6 +432,8 @@ export default {
         obj.gather_time = timestampToTime(r[i].date);
         obj.inversion_power_total = r[i].data.NotCount;
         obj.task_value = r[i].task;
+        obj.tasktype = r[i].tasktype
+        obj.rid = r[i].rid
         // 是否为空，是的话显示-
         obj.inversion_power_total = this.isNot(obj.inversion_power_total);
         obj.gather_time = this.isNot(obj.gather_time);
@@ -415,6 +445,8 @@ export default {
         obj.forward_work_rate_3 = this.isNot(obj.forward_work_rate_3);
         obj.forward_work_rate_4 = this.isNot(obj.forward_work_rate_4);
         obj.task = this.isNot(obj.task);
+        obj.tasktype = this.isNot(obj.tasktype)
+        obj.rid = this.isNot(obj.rid)
         this.table.push(obj);
       }
     },

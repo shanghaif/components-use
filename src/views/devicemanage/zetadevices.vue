@@ -1,6 +1,10 @@
 <template>
   <div class="zetadevices">
-    <div class="zetaheader">
+     <!-- <ResourceZeta
+      style="width:360px;height:100vh;overflow:scroll;flex-shrink:0;padding:10px;"
+    /> -->
+    <!-- <div style="width:calc(100% - 360px);padding-left:10px;"> -->
+      <div class="zetaheader">
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
         <el-form-item label="终端类型">
           <el-select v-model="formInline.zetagtype" placeholder="终端类型">
@@ -42,8 +46,8 @@
             <span style="color:green">{{'('+items.zetagid+')'}}</span>
             <span
               style="float:right;"
-              :style="{'color': items.status==1 ? 'green' : 'red'}"
-            >{{items.status==1 ? '打开' : '关闭'}}</span>
+              :style="{'color': items.status!=1 ? 'green' : 'red'}"
+            >{{items.status!=1 ? '打开' : '关闭'}}</span>
           </p>
           <p>
             <span>型号:C2</span>
@@ -106,11 +110,11 @@
                 <span style="margin-left:5px;">E：{{Number(scope.row.long).toFixed(6)}}</span>
               </template>
             </el-table-column>
-            <el-table-column label="信号强度" align="center">
+            <!-- <el-table-column label="信号强度" align="center">
               <template slot-scope="scope">
                 <span>{{scope.row.rssi+'dBm'}}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             <el-table-column label="上报时间" align="center" width="250">
               <template slot-scope="scope">
                 <span>{{timestampToTime(scope.row.timestamp)}}</span>
@@ -135,12 +139,18 @@
         <el-button type="primary" @click="dialogTableVisible = false">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- </div> -->
+    
   </div>
 </template>
 <script>
+// import ResourceZeta  from "@/components/resource/zetaindex";
 import "echarts/extension/bmap/bmap";
 import { ZetaEtag, ZetaEtagHistroy, ZetaEtagTopn } from "@/api/zeta";
 export default {
+  // components:{
+  //   ResourceZeta
+  // },
   data() {
     return {
       dialogTableVisible: false,
@@ -195,9 +205,7 @@ export default {
       // echarts配置
       this.getLineSeries(origindata);
       this.getScatterSeries(origindata);
-      origindata.length == 0
-        ? (this.effectScatterSeries = [])
-        : this.getEffectScatterSeries(origindata);
+      origindata.length == 0 ? (this.effectScatterSeries = []) : this.getEffectScatterSeries(origindata);
       this.chart = this.$echarts.init(this.$refs.map);
       this.chart.setOption({
         animation: false,
@@ -244,6 +252,7 @@ export default {
       //   styleId: '7b93b720528698c2c2cfe0294dd45eed'
       //   });
     },
+  
     //地图直线
     getLineSeries(data) {
       let series = [];
@@ -305,7 +314,7 @@ export default {
           coordinateSystem: "bmap",
           symbol: "circle",
           // symbol: this.trainIcon, // 使用自定义的SVG图标
-          symbolSize: 10,
+          symbolSize: 6,
           z: 2,
           label: {
             normal: {
@@ -320,9 +329,9 @@ export default {
           },
           itemStyle: {
             normal: {
-              color: "black",
+              color: "white",
               borderColor: "black",
-              borderWidth: 2
+              borderWidth: 1
             }
           },
           data: line.stations
@@ -336,11 +345,10 @@ export default {
       let series = [];
       const points = [data[0].stations[data[0].stations.length - 1]];
       const lengdata = points.map(train => {
-        const formatter = `{p2|${train.name}}
-                              {p3|\n当前位置:}
-                              {p4|\n经度：${train.value[0]}},纬度:${train.value[1]}`
+        const formatter = `{p3|\n当前位置:}
+                           {p4|\n经度：${train.value[0].toFixed(6)}},纬度:${train.value[1].toFixed(6)}`
         return {
-          name: train.name,
+          name: train.zetagid,
           itemStyle: {
             normal: {
               color: "red"
@@ -388,7 +396,7 @@ export default {
             align: "left",
             backgroundColor: "#FFFFFF",
             borderRadius: 5,
-            padding: 20,
+            padding: 10,
             shadowColor: "rgba(0,0,0,0.16)",
             shadowBlur: 6,
             shadowOffsetX: 0,
@@ -396,12 +404,12 @@ export default {
             width: 200,
             rich: {
               // 富文本标签样式
-              p2: {
-                fontSize: 16,
-                color: "#222222",
-                fontWeight: "bolder",
-                lineHeight: 40
-              },
+              // p2: {
+              //   fontSize: 16,
+              //   color: "#222222",
+              //   fontWeight: "bolder",
+              //   lineHeight: 40
+              // },
               p3: {
                 fontSize: 14,
                 color: "#222222",
@@ -428,7 +436,7 @@ export default {
       var date = new Date(timestamp * 1000);
       var Y = date.getFullYear() + "-";
       var M =
-        (date.getMonth() + 1 <= 10
+        (date.getMonth() + 1 < 10
           ? "0" + (date.getMonth() + 1)
           : date.getMonth() + 1) + "-";
       var D =
@@ -492,7 +500,7 @@ export default {
       this.getCurrentData();
     },
     getCurrentData() {
-      ZetaEtagTopn(this.pagesize, this.start)
+      ZetaEtagTopn(this.pagesize, this.start,this.formInline.status)
         .then(response => {
           this.nowdata = response.trace;
           this.total = response.count;
@@ -507,7 +515,7 @@ export default {
         this.getCurrentData();
       } else {
         this.nowdata = [];
-        ZetaEtag(tag)
+        ZetaEtag(tag,this.formInline.status)
           .then(response => {
             //请求成功
             if (response) {
@@ -521,6 +529,35 @@ export default {
           });
       }
     },
+        unique(arr){            
+            for(var i=0; i<arr.length; i++){
+                for(var j=i+1; j<arr.length; j++){
+                    if(arr[i].lat==arr[j].lat&&arr[i].long==arr[j].long){         //第一个等同于第二个，splice方法删除第二个
+                        arr.splice(j,1);
+                        j--;
+                    }
+                    // if(arr[i].timestamp==arr[j].timestamp){
+                    //     arr.splice(j,1)
+                    //      j--
+                    // }
+                }
+            }
+            
+          return arr;
+    },
+    objSort(prop){
+        return function (obj1, obj2) {
+        var val1 = obj1[prop];
+        var val2 = obj2[prop];
+        if (val1 < val2) {
+            return -1;
+        } else if (val1 > val2) {
+            return 1;
+        } else {
+            return 0;
+        }           
+    }
+},
     //历史数据tag标签
     getZetTagHistroy(tag, limit, timestamp) {
       this.start1 = 1;
@@ -530,7 +567,7 @@ export default {
       ZetaEtagHistroy(tag, limit, timestamp + 1800)
         .then(response => {
           //请求成功
-          var arr = [];
+         
           if (response) {
             var obj = {
               name: "",
@@ -540,18 +577,23 @@ export default {
             };
             var x = 0;
             var y = 0;
-            response.trace.map(items => {
-              obj.name = response.zetagid;
-              obj.stations.push({
-                value: [items.lat, items.long],
-                name: items.apuid
-              });
-              //取中心位置
-              x += items.lat;
-              y += items.long;
-              items.zetagid = response.zetagid;
-              this.tableData.push(items);
+            var arr= this.unique(response.trace)
+            arr=arr.sort(this.objSort('timestamp'));
+            obj.name = tag;
+            arr.map(items=>{
+                        obj.stations.push({
+                          value: [items.lat, items.long],
+                          name: items.apuid,
+                        });
+                        //取中心位置
+                        x += items.lat;
+                        y += items.long;
+              }) 
+              response.trace.map((items,index) => {
+              items.zetagid = tag;
+              this.tableData.push(items)
             });
+           this.tableData = this.tableData.reverse()
             var centerx = (x / response.trace.length).toFixed(6);
             var centery = (y / response.trace.length).toFixed(6);
             this.bmapdata.push(obj);
@@ -561,15 +603,8 @@ export default {
         })
         .catch(error => {
           //接口数据错误时的返回
-          console.log(error);
+          this.$message.error(error.msg)
         });
-      // }else{
-      //   this.obj.trace.map(items=>{
-      //     items.zetagid = tag
-      //   })
-      //   this.tableData = this.obj.trace
-      //   this.total1 = this.obj.trace.length
-      // }
     },
     /*params{}object重置查询条件 */
     resetForm() {},
@@ -593,9 +628,10 @@ export default {
 .zetadevices {
   height: 100%;
   width: 100%;
-  padding: 20px;
+  padding: 20px 0 20px 0 ;
   box-sizing: border-box;
   background: #fff;
+  // display: flex;
   .zetacontent {
     display: flex;
     flex-wrap: wrap;
@@ -628,9 +664,12 @@ export default {
   }
   /deep/ .el-dialog {
     width: 1000px;
+     .number:last-child{
+      display: inline-block;
+    }
   }
-  /deep/ .number:last-child {
-    display: none;
+  /deep/ .number:last-child{
+  display: none;
   }
 }
 </style>
