@@ -2,7 +2,7 @@
     <div class="log">
        
             <div class="left">
-                <el-button type="primary" icon="el-icon-circle-plus-outline" @click="install" size="small">加 入</el-button>
+                <el-button type="primary" icon="el-icon-circle-plus-outline" @click="install" size="small">{{$t('node.join')}}</el-button>
             </div>
            
         <el-table
@@ -11,11 +11,11 @@
             border
             >
                 <el-table-column
-                label="节点名称"
+                :label="$t('node.nodename')"
                 prop="name">
                 </el-table-column>
                 <el-table-column
-                label="Erlang/OTP版本"
+                :label="'Erlang/'+$t('node.OTPversion')"
                 prop="otp_release"
                 >
                 </el-table-column>
@@ -23,7 +23,7 @@
                 >
                 <template slot="header" slot-scope="scope">
                     <span>
-                      Erlang进程  
+                      {{'Erlang'+$t('node.process')}}
                     </span>
                     <p>used/avaliable</p>
                 </template>
@@ -45,11 +45,11 @@
                 </template>
                 </el-table-column>
                 <el-table-column
-                label="内存"
+                :label="$t('node.memory')"
                >
                 <template slot="header" slot-scope="scope">
                     <span>
-                      内存  
+                      {{$t('node.memory')}}  
                     </span>
                     <p>used/total</p>
                 </template>
@@ -58,18 +58,18 @@
                </template>
                 </el-table-column>
                 <el-table-column
-                label="最大句柄数"
+                :label="$t('node.Maximumnumberofhandles')"
                 prop="max_fds">
                 </el-table-column>
                 <el-table-column
-                label="状态"
+                :label="$t('node.state')"
                 prop="node_status">
                 </el-table-column>
                  <el-table-column
-                label="操作"
+                :label="$t('node.operation')"
                >
                <template slot-scope="scope">
-                  <el-button type="danger" size="small" @click="removeNode(scope.row)">移 除</el-button>
+                  <el-button type="danger" size="small" @click="removeNode(scope.row)">{{$t('node.remove')}}</el-button>
                </template>
                 </el-table-column>
         </el-table>
@@ -85,18 +85,18 @@
                     </el-pagination>
         </div>
         <el-dialog
-            title="加入集群"
+            :title="$t('node.joincluster')"
             :visible.sync="dialogVisible"
             width="30%"
             :before-close="handleClose">
            <el-form model="form">
-               <el-form-item label="节点名称">
+               <el-form-item :label="$t('node.nodename')">
                    <el-input v-model="form.nodename" type="text"></el-input>
                </el-form-item>
            </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="join">确 定</el-button>
+                <el-button @click="dialogVisible = false">{{$t('developer.cancel')}}</el-button>
+                <el-button type="primary" @click="join">{{$t('developer.determine')}}</el-button>
             </span>
             </el-dialog>
     </div>

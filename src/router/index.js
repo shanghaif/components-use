@@ -338,15 +338,15 @@ export const constantRouterMap = [
       },
       {
         path: '/monitoring/zetatag',
-        name: '终端监测',
+        name: '终端监控',
         component: () => import('@/views/devicemanage/zetadevices'),
-        meta: { title: '监控中心', icon: 'csc' }
+        meta: { title: '终端监控', icon: 'csc' }
       },
       {
         path: '/monitoring/gateway',
-        name: '网关监测',
+        name: '网关监控',
         component: () => import('@/views/devicemanage/zetagateway'),
-        meta: { title: '网关监测', icon: 'gateway' }
+        meta: { title: '网关监控', icon: 'gateway' }
       },
       {
         path: '/monitoring/zetatest',
@@ -614,6 +614,12 @@ export const constantRouterMap = [
         meta: { title: '产品管理',icon:'product' }
       },
       {
+        path: '/roles/taskcollection',
+        name: '任务采集',
+        component: () => import('@/views/equipment_management/task_collection'),
+        meta: { title: '任务采集',icon:'taskcollection'},
+      },
+      {
         path: '/roles/detailproduct',
         name: '产品详情',
         component: () => import('@/views/equipment_management/proddetail'),
@@ -644,9 +650,9 @@ export const constantRouterMap = [
       
       {
         path: '/roles/channelManage',
-        name: '服务通道管理',
+        name: '服务通道',
         component: () => import('@/views/equipment_management/channelManage'),
-        meta: { title: '服务通道管理',icon:'channelmanage' }
+        meta: { title: '服务通道',icon:'channelmanage' }
       },
      
       // 
@@ -686,7 +692,22 @@ export const constantRouterMap = [
         hidden:true,
       },
       
+      
     ]
+  },
+  {
+    path: '/app',
+    component: Layout,
+    redirect: '/app',
+    name:'应用（项目）服务',
+    meta: { title: '应用（项目）服务', icon: 'engine' }
+  },
+  {
+    path: '/pro',
+    component: Layout,
+    redirect: '/pro',
+    name:'产品管理',
+    meta: { title: '产品管理', icon: 'product' }
   },
   // {
   //   path: 'external-link',

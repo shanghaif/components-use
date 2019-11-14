@@ -8,12 +8,22 @@
              <li>用户描述:<span>{{userinfo.nick}}</span></li>
              <li>操作权限:<span>{{roles.join(',')}}</span></li>
           </ul>
+           <!-- <el-button type="primary" @click="testgraphql">
+               测试
+          </el-button>
+         <div><label id="plug-name"></label></div>
+            <pre id="editor" class="ace_editor" style="min-height:600px;width:400px"><textarea class="ace_text-input"></textarea></pre>-->
+         
+         
        </div>
     </div>
 </template>
 <script>
+var editor
 import Parse from 'parse'
 import ScrollPane from '@/components/ScrollPane';
+// import gql from "graphql-tag";
+// import {GameScores} from'@/api/search.graphql'
 export default {
    name:'userinfo', 
    data() {
@@ -26,11 +36,20 @@ export default {
             roles:'',
          },
          roles:[],
+         // graphql:''
       }
    },
+//    apollo:{
+//     query:{
+//       query() {
+//         return gql`query Health {
+//                 health
+//                }`
+//       },
+//     }
+//   },
    mounted() {
       this.userid = this.$route.params.userid
-      console.log(Parse.User.current())
       this.userinfo.name = Parse.User.current().attributes.username
       this.userinfo.nick = Parse.User.current().attributes.nick
       this.userinfo.id = Parse.User.current().id
@@ -38,9 +57,28 @@ export default {
       this.userinfo.roles.map(items=>{
          this.roles.push(items.alias)
       })
+       editor = ace.edit('editor')
+      editor.session.setMode('ace/mode/graphqlschema') // 设置语言
+      editor.setTheme('ace/theme/monokai')// 设置主题
+      // enable autocompletion and snippets
+      editor.setOptions({
+         enableBasicAutocompletion: true,
+         enableSnippets: true,
+         enableLiveAutocompletion: true// 设置自动提示
+      })
    },
    methods: {
+      testgraphql(){
+         this.$apollo.query({
+            query:gql`${editor.getValue()}`
+         }).then(resultes=>{
+            console.log(resultes)
+         }).catch(error=>{
+            console.log(error)
+         })
+     
    }
+}
 }
 </script>
 <style  lang="scss" scoped>

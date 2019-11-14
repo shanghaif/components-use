@@ -31,7 +31,7 @@ export default {
     // Parse.serverURL = "http://148.70.50.192:5080/iotapi"
     // Parse.serverURL = "http://prod.iotn2n.com/iotapi";//线上环境
     // Parse.serverURL = "http://148.70.105.66:5080/iotapi";//三千万环境
-    // Parse.serverURL = "http://47.97.75.58:80/iotapi"
+    // Parse.serverURL = "http://49.235.200.15:5080/iotapi"
     // Parse.serverURL = '/iotapi'
   },
   methods:{

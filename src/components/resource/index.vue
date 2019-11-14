@@ -1,7 +1,7 @@
 <template>
     <div class="resource">
         <div>
-            <el-input v-model="search" placeholder="请输入资源名称搜索" style="width:150px"></el-input>
+            <el-input v-model="search" placeholder="请输入用户名称搜索" style="width:150px"></el-input>
             <el-button type="primary" @click="searchuser" size="mini">搜索</el-button>
             <el-button type="primary" @click="resetuser" size="mini">重置</el-button>
             <el-tree
@@ -9,7 +9,7 @@
               :props="defaultProps"
               :expand-on-click-node="false"
               :highlight-current="true"
-              default-expand-all
+              :default-expand-all="false"
               style="margin-top:20px;"
               @node-click="handleNodeClick"
             >

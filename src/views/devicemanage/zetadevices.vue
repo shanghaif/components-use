@@ -6,11 +6,11 @@
     <!-- <div style="width:calc(100% - 360px);padding-left:10px;"> -->
       <div class="zetaheader">
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
-        <el-form-item label="终端类型">
-          <el-select v-model="formInline.zetagtype" placeholder="终端类型">
+        <el-form-item :label="$t('zetadevices.terminaltype')">
+          <el-select v-model="formInline.zetagtype" :placeholder="$t('zetadevices.terminaltype')">
             <el-option label="ZETAG标签" value="ZETAG"></el-option>
           </el-select>
-          <el-form-item label="终端型号">
+          <el-form-item :label="$t('zetadevices.terminalmodel')">
             <el-select v-model="formInline.zetag">
               <el-option label="ZETAG AP" value="AP" disabled></el-option>
               <el-option label="ZETAG C1" value="C1" disabled></el-option>
@@ -19,18 +19,18 @@
             </el-select>
           </el-form-item>
         </el-form-item>
-        <el-form-item label="标签编号">
-          <el-input v-model="formInline.number" placeholder="标签编号"></el-input>
+        <el-form-item :label="$t('zetadevices.labelnumber')">
+          <el-input v-model="formInline.number" :placeholder="$t('zetadevices.labelnumber')"></el-input>
         </el-form-item>
-        <el-form-item label="设备状态">
-          <el-select v-model="formInline.status" placeholder="设备状态">
-            <el-option label="打开" :value="1"></el-option>
-            <el-option label="关闭" :value="0"></el-option>
+        <el-form-item :label="$t('zetadevices.devicestatus')">
+          <el-select v-model="formInline.status" :placeholder="$t('zetadevices.devicestatus')">
+            <el-option :label="$t('zetadevices.open')" :value="1"></el-option>
+            <el-option :label="$t('zetadevices.close')" :value="0"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="getZeTag(formInline.number)">查 询</el-button>
-          <el-button type="primary" @click="resetForm">重 置</el-button>
+          <el-button type="primary" @click="getZeTag(formInline.number)">{{$t('developer.search')}}</el-button>
+          <el-button type="primary" @click="resetForm">{{$t('zetadevices.reset')}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -42,29 +42,29 @@
         </div>
         <div class="zetagright">
           <p>
-            ZETAG标签
+            {{'ZETAG'+$t('zetadevices.abel')}}
             <span style="color:green">{{'('+items.zetagid+')'}}</span>
             <span
               style="float:right;"
               :style="{'color': items.status!=1 ? 'green' : 'red'}"
-            >{{items.status!=1 ? '打开' : '关闭'}}</span>
+            >{{items.status!=1 ? $t('zetadevices.open') : $t('zetadevices.close')}}</span>
           </p>
           <p>
-            <span>型号:C2</span>
-            <span style="float:right;">发送次数:{{items.times}}</span>
+            <span>{{$t('zetadevices.model')+':C2'}}</span>
+            <span style="float:right;">{{$t('zetadevicves.sendingtimes')+':'+items.times}}</span>
           </p>
           <p>
-            最后上报时间：
+           {{$t('zetadevices.lastreportingtime')}}
             <span style="color:#84f">{{timestampToTime(items.timestamp)}}</span>
           </p>
           <p>
-            <span style="vertical-align:sub">最新位置:</span>
+            <span style="vertical-align:sub">{{$t('zetadevices.latestlocation')+':'}}</span>
             <span style="float:right">
               <el-button
                 type="primary"
                 size="mini"
                 @click="locusSearch(items.zetagid,items.timestamp)"
-              >轨迹查询</el-button>
+              >{{$t('zetadevices.trackquery')}}</el-button>
             </span>
           </p>
           <p>
@@ -86,25 +86,25 @@
       ></el-pagination>
     </div>
     <!--轨迹dialog-->
-    <el-dialog title="轨迹查询" :visible.sync="dialogTableVisible">
+    <el-dialog :title="$t('zetadevices.trackquery')" :visible.sync="dialogTableVisible">
       <el-tabs v-model="activeName" @tab-click="handleClick" type="border-card">
-        <el-tab-pane label="地图" name="first">
+        <el-tab-pane :label="$t('equipment.chart')" name="first">
           <div ref="map" class="map" id="map" style="height:600px;width:100%"></div>
         </el-tab-pane>
-        <el-tab-pane label="表格" name="second">
+        <el-tab-pane :label="$t('equipment.table')" name="second">
           <el-table
             :data="tableData.slice((start1-1)*pagesize1,start1*pagesize1)"
             style="width:100%;text-align:center"
           >
             <el-table-column
-              label="序号"
+              :label="$t('equipment.serialnumber')"
               type="index"
               align="center"
               width="100"
               :index="(index)=>{return (index+1) + (start1-1)*pagesize1}"
             ></el-table-column>
-            <el-table-column property="zetagid" label="设备编号" align="center"></el-table-column>
-            <el-table-column label="位置信息" align="center" width="250">
+            <el-table-column property="zetagid" :label="$t('equipment.devicenumber')" align="center"></el-table-column>
+            <el-table-column :label="$t('zetadevices.positioninformation')" align="center" width="250">
               <template slot-scope="scope">
                 <span>N：{{Number(scope.row.lat).toFixed(6)}}</span>
                 <span style="margin-left:5px;">E：{{Number(scope.row.long).toFixed(6)}}</span>
@@ -115,7 +115,7 @@
                 <span>{{scope.row.rssi+'dBm'}}</span>
               </template>
             </el-table-column> -->
-            <el-table-column label="上报时间" align="center" width="250">
+            <el-table-column :label="$t('zetadevices.reportingtime')" align="center" width="250">
               <template slot-scope="scope">
                 <span>{{timestampToTime(scope.row.timestamp)}}</span>
               </template>
@@ -135,11 +135,10 @@
       </el-tabs>
 
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogTableVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogTableVisible = false">确 定</el-button>
+        <el-button @click="dialogTableVisible = false">{{$t('devloper.cancel')}}</el-button>
+        <el-button type="primary" @click="dialogTableVisible = false">{{$t('devloper.determine')}}</el-button>
       </div>
     </el-dialog>
-    <!-- </div> -->
     
   </div>
 </template>
@@ -147,6 +146,7 @@
 // import ResourceZeta  from "@/components/resource/zetaindex";
 import "echarts/extension/bmap/bmap";
 import { ZetaEtag, ZetaEtagHistroy, ZetaEtagTopn } from "@/api/zeta";
+import { generateTitle } from '@/utils/i18n'
 export default {
   // components:{
   //   ResourceZeta
@@ -345,7 +345,7 @@ export default {
       let series = [];
       const points = [data[0].stations[data[0].stations.length - 1]];
       const lengdata = points.map(train => {
-        const formatter = `{p3|\n当前位置:}
+        const formatter = `{p3|\n${generateTitle('当前位置')}:}
                            {p4|\n经度：${train.value[0].toFixed(6)}},纬度:${train.value[1].toFixed(6)}`
         return {
           name: train.zetagid,

@@ -23,7 +23,8 @@ export default {
       this.$store.dispatch('setLanguage', lang)
       this.$message({
         message: 'Switch Language Success',
-        type: 'success'
+        type: 'success',
+        duration:1000
       })
     }
   }
@@ -32,7 +33,7 @@ export default {
 
 <style scoped>
 .international-icon {
-  font-size: 20px;
+  font-size: 25px;
   cursor: pointer;
   vertical-align: -5px!important;
 }

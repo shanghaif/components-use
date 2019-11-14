@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container" style="background:#1d1b1b;">
-     <div class="variable" style="text-align:left;padding-left:20px;box-sizing:border-box;position:relative;top:20px" v-show="dashboardrul!=''">
+     <div class="variable" style="text-align:left;padding-left:20px;box-sizing:border-box;position:relative;top:20px" v-show="dashboardrul!=''||dashboardrul!=undefined">
       <el-button-group>
         <el-button type="info" size="mini" @click="selectval(timerefesh.val1,1)"  :class="{'active':categoryIndex==1}">{{timerefesh.val1}}</el-button>
         <el-button type="info" size="mini" @click="selectval(timerefesh.val2,2)"  :class="{'active':categoryIndex==2}">{{timerefesh.val2}}</el-button>
@@ -13,7 +13,7 @@
         width="100%"
         height="800"
         frameborder="0"
-        v-show="dashboardrul!=''"
+        v-show="dashboardrul!=''||dashboardrul!=undefined"
       ></iframe>
     </div>
   </div>

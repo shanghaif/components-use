@@ -2,32 +2,32 @@
     <div id="addApp">
         <div class="head">
             <el-breadcrumb separator-class="el-icon-arrow-right">
-                <el-breadcrumb-item :to="{ path: '/roles/applicationManagement' }">应用管理</el-breadcrumb-item>
-                <el-breadcrumb-item>{{content.title}}</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: '/roles/applicationManagement' }">{{$t('application.applicationmanagement')}}</el-breadcrumb-item>
+                <el-breadcrumb-item>{{$t('route.新增应用')}}</el-breadcrumb-item>
             </el-breadcrumb>
-            <el-button type="primary" plain @click="handleClickBack" size="small">返回应用管理</el-button>
+            <el-button type="primary" plain @click="handleClickBack" size="small">{{$t('application.return')}}</el-button>
         </div>
         
         <div class="form">
             
             <div class="title">
-                <p style="color:#f00;">*为必须填</p>
+                <p style="color:#f00;">{{'*'+$t('application.mustfillin')}}</p>
             </div>
             
-            <el-form ref="form" :model="form" label-width="120px">
+            <el-form ref="form" :model="form" label-width="180px">
                 <!-- 应用名称 -->
                 <el-row>
                 <el-col :span="12">
                     <div class="grid-content bg-purple">
-                     <el-form-item label="应用名称" 
+                     <el-form-item :label="$t('application.applicationname')" 
                 prop="name"
                 :rules="[
                     { required: true, message: '应用名称不能为空'},
                 ]">
-                    <el-input v-model="form.name" placeholder="请填写应用名称"></el-input>
+                    <el-input v-model="form.name" :placeholder="$t('application.applicationname')"></el-input>
                 </el-form-item>
                  <!-- 应用链接 -->
-                 <el-form-item label="应用链接"
+                 <el-form-item :label="$t('application.applicationlink')"
                 prop="productIdentifier"
                 :rules="[
                     { required: true, message: '应用链接不能为空'},
@@ -37,22 +37,22 @@
                     </el-input>
                      <!-- 所属行业 -->
                 </el-form-item>
-                 <el-form-item label="所属行业" 
+                 <el-form-item :label="$t('application.industrytype')" 
                 prop="category"
                 :rules="[
                     { required: true, message: '请选择所属行业',trigger: 'blur'},
                 ]">
-                    <el-cascader ref="category" :options="treeData"  v-model="form.category" placeholder="请选择所属行业" clearable></el-cascader>
+                    <el-cascader ref="category" :options="treeData"  v-model="form.category" :placeholder="$t('application.industrytype')" clearable></el-cascader>
                 </el-form-item>
                  <!-- 应用描述 -->
-                 <el-form-item label="应用描述">
-                    <el-input type="textarea" :rows="4" v-model="form.des" maxlength="300" show-word-limit placeholder="请输入应用描述信息"></el-input>
+                 <el-form-item :label="$t('application.applicationdescription')">
+                    <el-input type="textarea" :rows="4" v-model="form.des" maxlength="300" show-word-limit :placeholder="$t('application.applicationdescription')"></el-input>
                 </el-form-item>
                     </div>
                 </el-col>
                 <el-col :span="12"><div class="grid-content bg-purple-light">
                 <!-- 应用图片 -->
-                <el-form-item label="应用图片">
+                <el-form-item :label="$t('application.applicationpictures')">
                     <el-upload
                         class="upload-demo"
                         ref="upload"
@@ -62,11 +62,11 @@
                         list-type="picture"
                         :limit="1"
                         :on-success="handleSuccess">
-                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                        <el-button slot="trigger" size="small" type="primary">{{$t('application.selectfile')}}</el-button>
+                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">{{$t('application.uploadtoserver')}}</el-button>
                         
-                        <span v-show="form.img != ''">路径:{{form.img}}</span>
-                        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                        <span v-show="form.img != ''">{{$t('developer.path')}}:{{form.img}}</span>
+                        <div slot="tip" class="el-upload__tip">{{$t('application.onlyJPG/PNGfilescanbeuploadedandnomorethan500kb')}}</div>
                     </el-upload>
                    
 
@@ -74,13 +74,13 @@
                
                
                 <!-- 版权信息 -->
-                    <el-form-item label="版权信息">
-                        <el-input type="textarea" :rows="3" v-model="form.copyright" maxlength="300" show-word-limit placeholder="请填写版权信息"></el-input>
+                    <el-form-item :label="$t('application.copyrightinformation')">
+                        <el-input type="textarea" :rows="3" v-model="form.copyright" maxlength="300" show-word-limit :placeholder="$t('application.copyrightinformation')"></el-input>
                     </el-form-item>
-                    <el-form-item label="面板地址">
-                         <el-input placeholder="面板地址" v-model="form.dashboard">
+                    <el-form-item :label="$t('application.monitoringpanel')">
+                         <el-input :placeholder="$t('application.monitoringpanel')" v-model="form.dashboard">
                                 <template slot="prepend">http://</template>
-                                <el-button slot="append" type="primary" style="background:#409eff;color:#ffffff;border-radius:1px 1px 1px 0" @click="open12">预览</el-button>
+                                <el-button slot="append" type="primary" style="background:#409eff;color:#ffffff;border-radius:1px 1px 1px 0" @click="open12">{{$t('application.preview')}}</el-button>
                         </el-input>
                         
                     </el-form-item>
@@ -88,22 +88,22 @@
                 </el-col>
                 </el-row>
                 <!-- 分割 -->
-                <el-divider><b>应用配置</b></el-divider>
+                <el-divider><b>{{$t('application.applicationconfiguration')}}</b></el-divider>
                 <el-row>
                 <el-col :span="12"><div class="grid-content bg-purple">
-                    <el-form-item label="应用接入规模"
+                    <el-form-item :label="$t('application.applicationaccessscale')"
                 prop="scale"
                 :rules="[
                     { required: true, message: '请选择应用接入规模',trigger: 'change'},
                 ]">
-                    <el-select v-model="form.scale" clearable placeholder="预计接入设备数量">
+                    <el-select v-model="form.scale" clearable >
                         <el-option v-for="item in form.scaleDate" :key="item.id" :label="item.label" :value="item.value"></el-option>
                     </el-select>
                 </el-form-item>
                  <!-- Token有效时间 -->
-                <el-form-item label="Token有效时间">
-                    <el-input controls-position="left" v-model.number="form.time" type="number" :min="1" placheholder="请输入Token有效时间">
-                        <template slot="append">秒</template>
+                <el-form-item :label="$t('application.tokeneffectivetime')">
+                    <el-input controls-position="left" v-model.number="form.time" type="number" :min="1" :placheholder="$t('application.tokeneffectivetime')">
+                        <template slot="append">{{$t('application.seconds')}}</template>
                     </el-input>
                     
                 </el-form-item>
@@ -122,8 +122,8 @@
                 
             </el-form>
             <div class="btns">
-                <el-button v-show="page=='add'" type="primary" @click="handleClickSubmit">提交</el-button>
-                <el-button v-show="page=='update'" type="primary" @click="handleClickUpdate">修改</el-button>
+                <el-button v-show="page=='add'" type="primary" @click="handleClickSubmit">{{$t('application.submission')}}</el-button>
+                <el-button v-show="page=='update'" type="primary" @click="handleClickUpdate">{{$t('application.submission')}}</el-button>
             </div>
         </div>
     </div>
@@ -160,7 +160,7 @@ export default {
                 img:"",//上传图片路径
                 copyright:"",//版权信息
                 desc:"",//应用描述
-                time:90,//Token有效时间
+                time:7200,//Token有效时间
                 secret:"",//App Secret
             },
             sessionToken:'',

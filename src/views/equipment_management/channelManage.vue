@@ -1,51 +1,51 @@
 <template>
   <div class="channelmanage">
-    <h3>服务通道管理</h3>
+    <h3>{{$t('developer.servicechannelmanagement')}}</h3>
     <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane :label="'设备通道'+'('+total+')'" name="first">
+      <el-tab-pane :label="$t('developer.equipmentchannel')+'('+total+')'" name="first">
         <div class="firsttable">
           <el-form :inline="true" :model="channelformsearch" class="demo-form-inline" size="small">
             <el-form-item>
-              <el-input v-model="channelformsearch.name" placeholder="请输入通道名称"></el-input>
+              <el-input v-model="channelformsearch.name" :placeholder="$t('developer.inputchannelname')"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="getChannel(0)">搜 索</el-button>
+              <el-button type="primary" @click="getChannel(0)">{{$t('developer.search')}}</el-button>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="addchanneltype">创建通道</el-button>
+              <el-button type="primary" @click="addchanneltype">{{$t('developer.createchannel')}}</el-button>
             </el-form-item>
           </el-form>
         </div>
         <el-table :data="tableData" style="width: 100%;" :row-class-name="getChannelEnable">
-          <el-table-column label="通道编号">
+          <el-table-column :label="$t('developer.channelnumber')">
             <template slot-scope="scope">
               <span>{{scope.row.id}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="通道名称">
+          <el-table-column :label="$t('developer.channelname')">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.name}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="通道类型">
+          <el-table-column :label="$t('developer.channeltype')">
             <template slot-scope="scope">
-              <span v-if="scope.row.attributes.type==1">采集通道</span>
-              <span v-else>资源通道</span>
+              <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+              <span v-else>{{$t('developer.resourcechannel')}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="服务类型">
+          <el-table-column :label="$t('developer.servicetype')">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.cType}}</span>
             </template>
           </el-table-column>
 
-          <el-table-column label="通道状态">
+          <el-table-column :label="$t('developer.channelstatus')">
             <template slot-scope="scope">
-              <span v-if="scope.row.attributes.isEnable==true" style="color:green">已启用</span>
-              <span v-else>已禁用</span>
+              <span v-if="scope.row.attributes.isEnable==true" style="color:green">{{$t('developer.enabled')}}</span>
+              <span v-else>{{$t('developer.disabled')}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="通道地址" width="200">
+          <el-table-column :label="$t('developer.channeladdr')" width="200">
             <!-- <template slot="header" slot-scope="scope">
               <span>
                 <el-tooltip content="${productId}为对应的产品Id,${addr}为对应的设备地址" placement="top">
@@ -61,31 +61,31 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="描述">
+          <el-table-column :label="$t('developer.describe')">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.desc}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200">
+          <el-table-column :label="$t('developer.operation')" width="250">
             <template slot-scope="scope">
               <el-button
                 type="success"
                 v-if="scope.row.attributes.isEnable==false"
                 size="mini"
                 @click="qyChannel(scope.row)"
-              >启用</el-button>
-              <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row)">禁用</el-button>
-              <el-button type="primary" size="mini" @click="updateChannel(scope.row)">编辑</el-button>
+              >{{$t('developer.enable')}}</el-button>
+              <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row)">{{$t('developer.prohibit')}}</el-button>
+              <el-button type="primary" size="mini" @click="updateChannel(scope.row)">{{$t('developer.edit')}}</el-button>
               <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                 <p>确定删除这个{{scope.row.attributes.name}}通道吗？</p>
                 <div style="text-align: right; margin: 0">
                   <el-button
                     size="mini"
                     @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                  >取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteChannel(scope)">确定</el-button>
+                  >{{$t('developer.cancel')}}</el-button>
+                  <el-button type="primary" size="mini" @click="deleteChannel(scope)">{{$t('developer.determine')}}</el-button>
                 </div>
-                <el-button type="danger" size="mini" slot="reference">删除</el-button>
+                <el-button type="danger" size="mini" slot="reference">{{$t('developer.delete')}}</el-button>
               </el-popover>
             </template>
           </el-table-column>
@@ -102,18 +102,18 @@
         </div>
         <!--通道管理弹窗---------------------------------------------------------------------------------------------->
         <el-dialog
-          :title="channelupdated+'服务通道'"
+          :title="$t('developer.servicechannelmanagement')"
           :visible.sync="channelForm"
           width="40%"
           top="0"
           :before-close="handleClose"
         >
           <!-- <div style="margin:20px 0;">服务通道设置</div> -->
-          <el-form :model="addchannel" label-width="100px" ref="addchannel" :rules="addrules">
-            <el-form-item label="服务类型" prop="region" class="lastchildren">
+          <el-form :model="addchannel" label-width="120px" ref="addchannel" :rules="addrules">
+            <el-form-item :label="$t('developer.servicetype')" prop="region" class="lastchildren">
               <el-select
                 v-model="addchannel.region"
-                placeholder="请选择服务类型"
+                :placeholder="$t('developer.servicetype')"
                 :disabled="channelId!=''"
                 @change="removeauto"
               >
@@ -125,8 +125,8 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="通道名称" prop="name" class="lastchildren">
-              <el-input v-model="addchannel.name" autocomplete="off" placeholder="请输入通道名称"></el-input>
+            <el-form-item :label="$t('developer.channelname')" prop="name" class="lastchildren">
+              <el-input v-model="addchannel.name" autocomplete="off" :placeholder="$t('developer.channelname')"></el-input>
             </el-form-item>
 
             <!--服务通道选择参数配置-->
@@ -641,7 +641,7 @@
               <el-input type="text" placeholder="CA证书文件路径" v-model="addchannel.MongoDBcapath"></el-input>
             </el-form-item> -->
             <!--PG配置------------------------------------------------------------------------------------------------>
-            <el-form-item
+            <!-- <el-form-item
               :label="addchannel.region+'服务器'"
               v-if="addchannel.region=='postgresql'||addchannel.region=='MongoDB'||addchannel.region=='MySQL'"
               class="notlastchildren notline"
@@ -781,7 +781,7 @@
 
               </el-option>
             </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <!--TCP和UDP部分配置--------------------------------------------------------------------------------------->
             <el-form-item
               label="IP"
@@ -791,17 +791,17 @@
               <el-input v-model="addchannel.ip" autocomplete="off" disabled></el-input>
             </el-form-item>
             <el-form-item
-              label="端口"
+              :label="$t('developer.port')"
               v-if="addchannel.region=='UDP'||addchannel.region=='TCP'|| addchannel.region=='HTTP'"
               prop="port"
               :rules='[{ required: true, message:"端口不能为空",trigger: "blur" }, { validator: validPort }]'
               class="notlastchildren"
             >
-              <el-input v-model="addchannel.port" autocomplete="off" placeholder="请输入通道端口"></el-input>
+              <el-input v-model="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
             </el-form-item>
 
             <el-form-item
-              label="缓存限定"
+              :label="$t('developer.cacheconstraint')"
               v-if="addchannel.region=='TCP'"
               prop="buff_size"
               :rules='[
@@ -815,18 +815,18 @@
               </el-input>
             </el-form-item>
             <el-form-item
-              label="路径"
+              :label="$t('developer.path')"
               v-if="addchannel.region=='HTTP'"
               prop="path"
               :rules='[
           { required: true, message: "需要输入正确的url", trigger: "blur" }]'
               class="notlastchildren"
             >
-              <el-input v-model="addchannel.path" autocomplete="off" placeholder="请输入通道路径"></el-input>
+              <el-input v-model="addchannel.path" autocomplete="off" :placeholder="$t('developer.path')"></el-input>
             </el-form-item>
             <!--Tdengine部分配置-------------------------------------------------------------------------------------->
             <el-form-item
-              label="服务链接"
+              :label="$t('developer.servicelink')"
               v-if="addchannel.region=='Tdengine'"
               prop="server"
               class="lastchildren"
@@ -835,12 +835,12 @@
               { validator: validUrl, trigger: "blur" }
             ]'
             >
-              <el-input v-model="addchannel.server" autocomplete="off" placeholder="请输入存储服务器地址">
+              <el-input v-model="addchannel.server" autocomplete="off" :placeholder="$t('developer.servicelink')">
                 <template slot="prepend">http://</template>
               </el-input>
             </el-form-item>
             <el-form-item
-              label="库登录账号"
+              :label="$t('developer.libraryname')"
               v-if="addchannel.region=='Tdengine'"
               prop="username"
               :rules='[
@@ -851,14 +851,14 @@
               <el-input
                 v-model="addchannel.username"
                 autocomplete="off"
-                placeholder="请输入用户名"
+                :placeholder="$t('developer.libraryname')"
                 type="text"
                 class="notauto"
                 readonly
               ></el-input>
             </el-form-item>
             <el-form-item
-              label="库登录密码"
+              :label="$t('developer.librarypassword')"
               v-if="addchannel.region=='Tdengine'"
               prop="password"
               :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]'
@@ -867,7 +867,7 @@
               <el-input
                 v-model="addchannel.password"
                 autocomplete="off"
-                placeholder="请输入密码"
+                :placeholder="$t('developer.librarypassword')"
                 :type="pwdType"
                 class="notauto"
                 readonly
@@ -881,7 +881,7 @@
             </el-form-item>
             <!--同步间隔提示---------------------------------------------------------------------------------->
             <el-form-item
-              label="同步间隔"
+              :label="$t('developer.synchronousinterval')"
               v-if="addchannel.region=='Tdengine'"
               prop="auto_save"
               :rules='[
@@ -894,32 +894,32 @@
                 v-model.number="addchannel.auto_save"
                 autocomplete="off"
                 :min="1"
-                placeholder="按照服务器配置建议（30-600）"
+                :placeholder="$t('developer.synchronousinterval')"
               >
                 <template slot="append">秒</template>
               </el-input>
             </el-form-item>
             <el-form-item
-              label="缓存数据量"
+              :label="$t('developer.amountdata')"
               v-if="addchannel.region=='Tdengine'"
               prop="max_size"
               :rules='[
-          { required: true, message: "最大条数不能为空", trigger: "blur" },
-          { type: "number", message: "最大条数必须为数字值" }
-        ]'
+              { required: true, message: "最大条数不能为空", trigger: "blur" },
+              { type: "number", message: "最大条数必须为数字值" }
+            ]'
               class="notlastchildren"
             >
               <el-input
                 v-model.number="addchannel.max_size"
                 autocomplete="off"
                 :min="1"
-                placeholder="达到设定值后进行存库操作"
+                :placeholder="$t('developer.amountdata')"
               >
                 <template slot="append">条</template>
               </el-input>
             </el-form-item>
             <el-form-item
-              label="缓存限定"
+              :label="$t('developer.cacheconstraint')"
               v-if="addchannel.region=='Tdengine'"
               prop="max_memory"
               :rules='[
@@ -942,14 +942,14 @@
               </span>
             </el-form-item>
             <el-form-item label="Topic" v-if="addchannel.region=='MQTT'" class="notlastchildren">
-              <el-input v-model="addchannel.topic" autocomplete="off" placeholder="填正则表达式"></el-input>
+              <el-input v-model="addchannel.topic" autocomplete="off" :placeholder="$t('developer.regularexpression')"></el-input>
             </el-form-item>
             <el-form-item label="Client" v-if="addchannel.region=='MQTT'" class="notlastchildren">
-              <el-input v-model="addchannel.client" autocomplete="off" placeholder="填正则表达式"></el-input>
+              <el-input v-model="addchannel.client" autocomplete="off" :placeholder="$t('developer.regularexpression')"></el-input>
             </el-form-item>
             <!--MQTTCLI配置------------------------------------------------>
             <el-form-item
-              label="主机地址"
+              :label="$t('developer.hostaddress')"
               v-if="addchannel.region=='MQTTCLI'"
               prop="address"
               class="notlastchildren"
@@ -958,19 +958,19 @@
               { validator: validUrl, trigger: "blur" }
               ]'
             >
-              <el-input v-model="addchannel.address" autocomplete="off" placeholder="请输入地址"></el-input>
+              <el-input v-model="addchannel.address" autocomplete="off" :placeholder="$t('developer.hostaddress')"></el-input>
             </el-form-item>
             <el-form-item
-              label="端口"
+              :label="$t('developer.port')"
               v-if="addchannel.region=='MQTTCLI'"
               prop="port"
               :rules='[{ required: true, trigger: "blur" }, { validator: validPort }]'
               class="notlastchildren"
             >
-              <el-input v-model="addchannel.port" autocomplete="off" placeholder="请输入通道端口"></el-input>
+              <el-input v-model="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
             </el-form-item>
             <el-form-item
-              label="用户名"
+              :label="$t('developer.username')"
               v-if="addchannel.region=='MQTTCLI'"
               prop="username"
               :rules='[
@@ -981,14 +981,14 @@
               <el-input
                 v-model="addchannel.username"
                 autocomplete="off"
-                placeholder="请输入用户名"
+                :placeholder="$t('developer.username')"
                 class="notauto"
                 type="text"
                 readonly
               ></el-input>
             </el-form-item>
             <el-form-item
-              label="密码"
+              :label="$t('developer.password')"
               v-if="addchannel.region=='MQTTCLI'"
               prop="password"
               :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]'
@@ -997,7 +997,7 @@
               <el-input
                 v-model="addchannel.password"
                 autocomplete="off"
-                placeholder="请输入密码"
+                :placeholder="$t('developer.password')"
                 :type="pwdType"
                 class="notauto"
                 readonly
@@ -1010,7 +1010,7 @@
               </el-input>
             </el-form-item>
             <el-form-item
-              label="心跳(秒)"
+              :label="$t('developer.heartbeat')"
               v-if="addchannel.region=='MQTTCLI'"
               prop="keepalive"
               :rules='[
@@ -1022,27 +1022,27 @@
               <el-input
                 v-model.number="addchannel.keepalive"
                 autocomplete="off"
-                placeholder="请输入心跳间隔"
+                :placeholder="$t('developer.heartbeat')"
                 :min="1"
               ></el-input>
             </el-form-item>
             <el-form-item label=" " v-if="addchannel.region=='MQTTCLI'">
-              <el-checkbox v-model="addchannel.clean_start">清除会话</el-checkbox>
+              <el-checkbox v-model="addchannel.clean_start">{{$t('developer.clearsession')}}</el-checkbox>
               <el-checkbox v-model="addchannel.ssl">SSL</el-checkbox>
             </el-form-item>
-            <el-form-item label="通道描述" class="lastchildren">
+            <el-form-item :label="$t('developer.describe')" class="lastchildren">
               <el-input
                 v-model="addchannel.desc"
                 autocomplete="off"
                 type="textarea"
                 :rows="3"
-                placeholder="请输入通道描述"
+                :placeholder="$t('developer.describe')"
               ></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="handleClose">取 消</el-button>
-            <el-button type="primary" @click="addchannelForm('addchannel')">确 定</el-button>
+            <el-button @click="handleClose">{{$t('developer.cancel')}}</el-button>
+            <el-button type="primary" @click="addchannelForm('addchannel')">{{$t('developer.determine')}}</el-button>
           </div>
         </el-dialog>
         <!-----------------------------------选择通道的类型----------------------------------------------------------------------->

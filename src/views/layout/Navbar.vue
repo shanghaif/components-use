@@ -18,9 +18,9 @@
           </span>
     </el-tooltip> -->
     <!--中英文切换-->
-    <!-- <div class="language">
+    <div class="language">
       <lang-select class="international right-menu-item"/>
-    </div> -->
+    </div>
      <div class="username" @click="userDetail">
       <!-- <span class="user" style="color:#ffffff">欢迎您：{{roles}}</span> -->
       <img src="../../imgages/tou.png">
@@ -182,6 +182,11 @@ export default {
     bottom:0;
     cursor: pointer;
   }
+  @media screen and (max-width: 1024px) {
+      .username {
+       display: none;
+    }
+      }
   .systitle{
     height: 50px;
     position: absolute;

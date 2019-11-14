@@ -1,6 +1,7 @@
 <template>
   <div class="login-container">
     <div class="loginbanner">
+      <!-- <Pointwave style="width:100%;height:100%"></Pointwave> -->
       <el-form ref="loginForm" :model="loginForm" class="login-form" auto-complete="on" label-position="left">
         <div class="logo">
           <img :src="logosrc" alt="logo" style="width:80px;height:80px;">
@@ -24,7 +25,7 @@
             <svg-icon icon-class="eye" />
           </span>
         </el-form-item>
-        <div style="margin-bottom:20px;height:30px;line-height:30px;">
+        <div style="margin-bottom:40px;height:30px;line-height:30px;">
           <el-checkbox v-model="checked" style="float:left;color:#409EFF">记住密码</el-checkbox>
           <span style="float:right;color:#409EFF;font-size:14px;cursor:pointer" @click="register">注册用户</span>
           <span style="float:right;color:#409EFF;font-size:14px;cursor:pointer;margin-right:20px;" @click="phonelogin">手机号登录</span>
@@ -51,8 +52,12 @@
     getsession
   } from "@/utils/wxscoket.js";
   import { Sitepro } from '@/api/login'
+  import Pointwave from '@/components/three'
   export default {
     name: "Login",
+    components:{
+      Pointwave
+    },
     data() {
       const validateUsername = (rule, value, callback) => {
         if (!isvalidUsername(value)) {
@@ -260,9 +265,16 @@
       background: #ffffff;
       box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
       border-radius: 5px;
-      // background:url('../../imgages/shuwalogin.png') no-repeat top center
- 
+      
     }
+    @media screen and (max-width: 1024px) {
+      .login-form {
+        width:auto;
+        max-width: 100%;
+        padding: 35px 35px 15px 35px;
+        margin: 1.2rem;
+    }
+      }
     .login_bottom {
       position: absolute;
       left: 0;
@@ -326,6 +338,7 @@
       font-weight: bold;
       margin: 25px 0;
     }
+    
   }
 </style>
 <style>

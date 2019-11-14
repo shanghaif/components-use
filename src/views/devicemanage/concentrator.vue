@@ -27,7 +27,7 @@
         <el-table-column type="selection" align="center" width="50"></el-table-column>
         <el-table-column prop :label="$t('concentrator.status')" align="center" width="100">
           <template slot-scope="scope">
-            <div v-if="scope.row.attributes.jsondata.isonline">
+            <div v-if="!scope.row.attributes.jsondata.isonline">
               <p
                 style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px;vertical-align:middle;"
               ></p>
@@ -62,11 +62,11 @@
             <el-switch
               v-model="value6"
               active-color="#13ce66"
-              v-if="scope.row.attributes.jsondata.iscon==true"
+              v-if="scope.row.attributes.jsondata.iscon!==true"
               disabled
             ></el-switch>
             <el-switch
-              v-if="scope.row.attributes.jsondata.iscon!=true"
+              v-if="scope.row.attributes.jsondata.iscon==true"
               v-model="value7"
               active-color="#cccccc"
               disabled
@@ -110,14 +110,16 @@
       ></el-pagination>
     </div>
     <!--弹出编辑对话框-->
-    <el-dialog title="集中器基本信息" :visible.sync="dialogVisible" width="35%" top="1vh" center>
+    <el-dialog :title="$t('concentrator.concentratordetail')" :visible.sync="dialogVisible" width="35%" top="1vh" center>
       <el-form ref="form" :model="sizeForm">
-        <el-divider content-position="left">基本信息</el-divider>
+        <el-divider content-position="left">{{$t('concentrator.basicinformation')}}</el-divider>
          <div style="display:flex">
-          <el-form-item label="集中器地址">
+           <!--集中器地址-->
+          <el-form-item :label="$t('concentrator.concentrator')">
             <el-input v-model="sizeForm.vcaddr" readonly></el-input>
           </el-form-item>
-           <el-form-item label="供电单位" style="margin-left:30px;">
+          <!--供电单位-->
+           <el-form-item :label="$t('concentrator.powersupply')" style="margin-left:30px;">
              <el-cascader
               placeholder="选择供电单位"
               v-model="sizeForm.gddw"
@@ -129,7 +131,7 @@
             ></el-cascader>
           </el-form-item>
         </div>
-        <!---->
+        <!--规约类型-->
          <div style="display:flex">
           <el-form-item label="规约类型">
             <el-select v-model="sizeForm.protocol_type" >
@@ -144,6 +146,7 @@
         </div>
         <el-divider content-position="left">通信信息</el-divider>
         <div style="display:flex">
+          <!--通道工作模式-->
           <el-form-item label="通信工作模式">
             <el-select v-model="sizeForm.region">
               <el-option label="客户机模式" value="1"></el-option>
@@ -151,6 +154,7 @@
               <el-option label="服务器模式" value="3"></el-option>
             </el-select>
           </el-form-item>
+          <!--通道类型-->
           <el-form-item label="通道类型" style="margin-left:30px;">
             <el-select v-model="sizeForm.type">
               <el-option label="GPRS/CDMA" :value="2"></el-option>
@@ -162,7 +166,7 @@
             </el-select>
           </el-form-item>
         </div>
-        <!---->
+        <!--终端IP地址-->
         <div style="display:flex">
           <el-form-item label="终端IP地址">
             <el-input v-model="sizeForm.ipaddress"></el-input>
@@ -172,7 +176,7 @@
           </el-form-item>
           <span style="line-height:45px;">秒</span>
         </div>
-        <!---->
+        <!--TCP监听端口-->
         <div style="display:flex">
           <el-form-item label="TCP监听端口">
             <el-input v-model="sizeForm.port"></el-input>
@@ -182,7 +186,7 @@
           </el-form-item>
           <span style="line-height:45px;">秒</span>
         </div>
-        <!---->
+        <!--终端子网掩码-->
         <div style="display:flex">
           <el-form-item label="终端子网掩码">
             <el-input v-model="sizeForm.localmask"></el-input>
@@ -191,16 +195,17 @@
             <el-input v-model="sizeForm.recalltimes" style="padding-right:0;"></el-input>
           </el-form-item>
         </div>
-        <!---->
+        <!--终端网关地址-->
         <div style="display:flex">
           <el-form-item label="终端网关地址">
             <el-input v-model="sizeForm.localgateway"></el-input>
           </el-form-item>
+          <!--主站通达信地址-->
           <el-form-item label="主站通信地址" style="margin-left:30px;">
             <el-input v-model="sizeForm.localip" style="padding-right:0;"></el-input>
           </el-form-item>
         </div>
-        <!---->
+        <!--IP地址获取方式-->
         <div style="display:flex">
           <el-form-item label="IP地址获取方式">
             <el-select v-model="sizeForm.ipgetway">
@@ -212,7 +217,7 @@
             <el-input v-model="sizeForm.remoteport" style="padding-right:0;"></el-input>
           </el-form-item>
         </div>
-        <!---->
+        <!--TCP/UDP标识-->
         <div style="display:flex">
           <el-form-item label="TCP/UDP标识">
             <el-select v-model="sizeForm.tcporudp">
@@ -220,6 +225,7 @@
               <el-option label="UDP" value="1"></el-option>
             </el-select>
           </el-form-item>
+          <!--主通道类型-->
           <el-form-item label="主通道类型" style="margin-left:30px;">
             <el-select v-model="sizeForm.mainchannel">
               <el-option label="虚拟集中器通道" :value="1"></el-option>
@@ -262,7 +268,6 @@
             value-format="timestamp"
             :picker-options="pickerOptionsStart"
           ></el-date-picker>
-            <!-- <el-input v-model="vcConfig.vctime"></el-input> -->
           </el-form-item>
            <el-form-item label="规约类型"  style="margin-left:30px;">
             <el-select v-model="vcConfig.protocol_type" >
@@ -404,6 +409,7 @@ import {
 } from "@/api/login";
 import Parse from "parse";
 import { prototype } from 'stream';
+import {returnLogin} from '@/utils/return'
 export default {
   data() {
     return {
@@ -522,20 +528,7 @@ export default {
           
         },
         error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          } else if (error.code == 119) {
-            this.$message({
-              type: "error",
-              message: "没有操作权限"
-            });
-          }
+         returnLogin(error)
         }
       );
     },

@@ -1,6 +1,7 @@
 <template>
   <div class="general">
     <Resource
+      class="resource"
       style="width:340px;max-height:100vh;overflow:scroll;flex-shrink:0;"
       :data="data"
       @change="addUser"
@@ -66,7 +67,7 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="设备编号">
-                <el-input v-model="formInline.hardware_number" placeholder="设备编号"></el-input>
+                <el-input v-model="formInline.hardware_number" placeholder="设备编号" style="width:200px"></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -84,36 +85,60 @@
               @selection-change="handleSelectionChange"
             >
               <el-table-column type="selection" width="55" align="center"></el-table-column>
-              <el-table-column prop="customer" label="客户名称" align="center"></el-table-column>
-              <el-table-column prop="hardwareType" label="设备类型" align="center"></el-table-column>
-              <el-table-column prop="hardware_number" label="设备编号" align="center" width="200"></el-table-column>
+              <el-table-column  label="客户名称" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.customer}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column  label="设备类型" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.hardwareType}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column  label="设备编号" align="center" width="250">
+                <template slot-scope="scope">
+                 <span>{{scope.row.attributes.hardware_number}}</span>
+                </template>
+              </el-table-column>
               <!-- <el-table-column prop="address" label="注册服务器" align="center"></el-table-column> -->
-              <el-table-column prop="yysName" label="服务商名称" align="center"></el-table-column>
+              <el-table-column  label="服务商名称" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.yysName}}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="在线状况" align="center" width="80">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.ol_status==1" style="color:green">在线</span>
+                  <span v-if="scope.row.attributes.ol_status==1" style="color:green">在线</span>
                   <span v-else style="color:red">离线</span>
                 </template>
               </el-table-column>
               <el-table-column label="使用状况" align="center">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.status==1" style="color:green">正常使用</span>
+                  <span v-if="scope.row.attributes.status==1" style="color:green">正常使用</span>
                   <span v-else style="color:red">废弃</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="cardId" label="授权码" align="center"></el-table-column>
+              <el-table-column label="授权码" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.cardId}}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="授权状态" align="center">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.auth==1" style="color:green">已获取授权</span>
+                  <span v-if="scope.row.attributes.auth==1" style="color:green">已获取授权</span>
                   <span v-else style="color:red">未获取授权</span>
                 </template>
               </el-table-column>
-              <el-table-column label="设备地址" align="center" prop="address"></el-table-column>
+              <el-table-column label="设备地址" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.address}}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="注册时间" align="center">
                 <template slot-scope="scope">
-                  <span>{{scope.row.createdAtdate}}</span>
-                  <br />
-                  <span>{{scope.row.createdAttime}}</span>
+                  <span>{{utc2beijing(scope.row.attributes.createdAt).substring(0,10)}}</span> 
+                  <br/>
+                  <span>{{utc2beijing(scope.row.attributes.createdAt).substring(10)}}</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作" align="center">
@@ -164,11 +189,11 @@
                 <el-button type="primary" @click="addsukeuser">添 加</el-button>
               </el-form-item>
             </el-form>
-            <el-table :data="userdata" stripe style="width: 100%;text-align:center">
-              <el-table-column label="ID" align="center">
-                <template slot-scope="scope">
+            <el-table :data="userdata" stripe style="width: 100%;text-align:center" height="300">
+              <el-table-column label="序号" align="center" type="index" width="50">
+                <!-- <template slot-scope="scope">
                   <span>{{scope.row.id}}</span>
-                </template>
+                </template> -->
               </el-table-column>
               <el-table-column label="客户名称" align="center">
                 <template slot-scope="scope">
@@ -214,10 +239,10 @@
               <el-form-item label="设备地址" :label-width="formLabelWidth">
                 <el-input v-model="userform.addr"></el-input>
               </el-form-item>
-              <el-form-item label="接口客户" :label-width="formLabelWidth">
+              <el-form-item label="服务商" :label-width="formLabelWidth">
                 <el-select
                   v-model="userform.hardwareType"
-                  placeholder="请选择接口客户"
+                  placeholder="请选择服务商"
                   style="width:100%"
                   @change="selsectserver"
                 >
@@ -346,6 +371,7 @@
 import Resource from "@/components/resource";
 import Parse from "parse";
 import { addCustomer } from "@/api/customernode";
+import {returnLogin} from '@/utils/return'
 import {
   addSukeyys,
   searchSuketype,
@@ -503,6 +529,17 @@ export default {
     }, 60000);
   },
   methods: {
+    utc2beijing(utc_datetime) {
+	// 转为正常的时间格式 年-月-日 时:分:秒
+    var date = new Date(utc_datetime);  
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
+    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
+    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+    return Y+M+D+h+m+s; 
+  },
     showPwd() {
        var readonly = document.getElementsByClassName('readonly')[0]
       if(this.isopen=='suo'){
@@ -561,6 +598,8 @@ export default {
             });
           });
         }
+      },error=>{
+        returnLogin(error)
       });
     },
     selsectserver(val) {
@@ -588,19 +627,47 @@ export default {
           this.DeviceTotal = response.count;
         });
       } else {
-        searchSukeuser(this.formInline, this.Userstart, this.UserPageSize).then(
-          resultes => {
-            this.tableData = JSON.parse(JSON.stringify(resultes.data));
-            this.tableData.map(items => {
-              items.createdAtdate = utc2beijing(items.createdAt).substring(
-                0,
-                10
-              );
-              items.createdAttime = utc2beijing(items.createdAt).substring(10);
-            });
-            this.UserTotal = resultes.count;
-          }
-        );
+     
+        var SukeDev =Parse.Object.extend('SukeDev')
+        var sukedev = new Parse.Query(SukeDev)
+        if(this.formInline.status!=9){
+           sukedev.equalTo('status',this.formInline.status)
+        }
+       if(this.formInline.ol_status!=9){
+          sukedev.equalTo('ol_status',this.formInline.ol_status)
+       }
+       if(this.formInline.auth!=9){
+         sukedev.equalTo('auth',this.formInline.auth)
+       }
+        
+        if(this.formInline.hardware_number!=''){
+          sukedev.matches('hardware_number',this.formInline.hardware_number,"i")
+        }
+        if(this.formInline.customer!=''){
+          sukedev.equalTo('customerId',this.formInline.customer)
+        }
+        if(this.formInline.hardwareType!=''){
+          sukedev.equalTo('hardwareType',this.formInline.hardwareType)
+        }
+        sukedev.skip(this.Userstart)
+        sukedev.limit(this.UserPageSize)
+        sukedev.ascending('createdAt')
+        sukedev.count().then(count=>{
+          this.UserTotal = count
+          sukedev.find().then(resultes=>{
+            this.tableData = resultes
+            // resultes.map(items=>{
+            //   var obj={}
+            //   obj.objectId = items.id
+            //   for(var key in items.attributes){
+            //     obj[key] = items.attributes[key]
+            //   obj.createdAtdate = utc2beijing(items.attributes.createdAt).substring(0,10);
+            //   obj.createdAttime = utc2beijing(items.attributes.createdAt).substring(10);
+            //   }
+            //     this.tableData.push(obj)
+            // })
+          })
+        })
       }
     },
     getsukesercver() {
@@ -642,6 +709,8 @@ export default {
               this.isadduser = false;
               this.getTree();
               this.getMainstation();
+            },error=>{
+              returnLogin(error)
             });
         }else{
           this.$message.error('请填写客户姓名')
@@ -667,10 +736,7 @@ export default {
           }
         },
         error => {
-          this.$message({
-            type: "error",
-            message: error.message
-          });
+          returnLogin(error)
         }
       );
     },
@@ -697,6 +763,8 @@ export default {
                         });
                         this.dialogFormVisible = false;  
                       });
+                  },error=>{
+                    returnLogin(error)
                   });
               },500);
                setTimeout(()=>{
@@ -715,13 +783,16 @@ export default {
       
     },
     editordevtype(row) {
-      console.log(row)
       this.userFormVisible = true;
-      this.userform.name = row.status;
-      this.userform.region = row.auth;
-      this.userdevid = row.objectId;
-      this.userform.addr = row.address;
-      this.userform.cardid = row.cardId
+      this.userform.name = row.attributes.status;
+      this.userform.region = row.attributes.auth;
+      this.userdevid = row.id;
+      this.userform.addr = row.attributes.address;
+      this.userform.cardid = row.attributes.cardId
+      this.userform.hardwareType = row.attributes.yysId
+      if(row.attributes.yysName!=''){
+        this.datafordev = row.attributes.yysName
+      }
     },
     updateusertype() {
       var SukeDev = Parse.Object.extend("SukeDev");
@@ -744,10 +815,7 @@ export default {
             this.handleClick({ name: "first" });
           },
           error => {
-            this.$message({
-              type: "error",
-              message: error
-            });
+           returnLogin(error)
           }
         );
       });
@@ -773,15 +841,7 @@ export default {
           });
         },
         error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          }
+         returnLogin(error)
         }
       );
     },
@@ -797,15 +857,7 @@ export default {
           this.handleClick({ name: "third" });
         },
         error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          }
+         returnLogin(error)
         }
       );
     },
@@ -817,16 +869,8 @@ export default {
       if(start==0){
         this.Userstart=0
       }
-      searchSukeuser(this.formInline, this.Userstart, this.UserPageSize).then(
-        resultes => {
-          this.tableData = JSON.parse(JSON.stringify(resultes.data));
-          this.tableData.map(items => {
-            items.createdAtdate = utc2beijing(items.createdAt).substring(0, 10);
-            items.createdAttime = utc2beijing(items.createdAt).substring(10);
-          });
-          this.UserTotal = resultes.count;
-        }
-      );
+      
+      this.handleClick({name:'first'})
     },
     getDetailforUser(data) {
       var SukeDev = Parse.Object.extend("SukeDev");
@@ -1058,4 +1102,12 @@ export default {
 .general .resource {
   margin-top: 20px;
 }
+@media screen and (max-width: 1024px) {
+      .resource {
+       display: none;
+    }
+    .el-dialog{
+      width:100%;
+    }
+  }
 </style>

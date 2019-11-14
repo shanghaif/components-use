@@ -2,8 +2,8 @@
   <div class="editproduct">
     <div class="editheader">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/roles/product' }">产品管理</el-breadcrumb-item>
-        <el-breadcrumb-item>产品详情</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/roles/product' }">{{$t('route.产品管理')}}</el-breadcrumb-item>
+        <el-breadcrumb-item>{{$t('route.产品详情')}}</el-breadcrumb-item>
       </el-breadcrumb>
       <div class="product">
         <ul>
@@ -20,7 +20,7 @@
                 type="primary"
                 style="margin-left:5px;cursor:pointer"
                 @click="isshow=true"
-              >显示</el-link>
+              >{{$t('product.display')}}</el-link>
             </span>
             <span v-else>
               {{ProductSecret}}
@@ -29,11 +29,11 @@
                 type="primary"
                 style="margin-left:5px;cursor:pointer"
                 @click="isshow=false"
-              >隐藏</el-link>
+              >{{$t('product.hidden')}}</el-link>
             </span>
           </li>
           <li>
-            <span>设备数:</span>
+            <span>{{$t('product.numberofequipment')}}:</span>
             <span>
               {{form.ProductAll}}
               <el-link
@@ -41,7 +41,7 @@
                 type="primary"
                 style="margin-left:10px;font-size:16px"
                 @click="goToDevices"
-              >前往设备</el-link>
+              >{{$t('product.gotoequipment')}}</el-link>
             </span>
           </li>
         </ul>
@@ -50,7 +50,7 @@
     <div>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <!--产品信息-->
-        <el-tab-pane label="产品信息" name="first">
+        <el-tab-pane :label="$t('product.productinformation')" name="first">
           <div style="background:#ffffff;padding:10px;box-sizing:border-box;">
             <div>
               <table
@@ -61,21 +61,21 @@
                 cellpadding="0"
               >
                 <tr>
-                  <td class="cloumn">产品名称</td>
+                  <td class="cloumn">{{$t('product.productname')}}</td>
                   <td>{{productdetail.name}}</td>
-                  <td class="cloumn">节点类型</td>
-                  <td v-if="productdetail.nodeType==1">网关</td>
-                  <td v-else>设备</td>
-                  <td class="cloumn">创建时间</td>
+                  <td class="cloumn">{{$t('product.nodetype')}}</td>
+                  <td v-if="productdetail.nodeType==1">{{$t('product.gateway')}}</td>
+                  <td v-else>{{$t('product.equipment')}}</td>
+                  <td class="cloumn">{{$t('product.addingtime')}}</td>
                   <td>{{productdetail.createdAt}}</td>
                 </tr>
                 <tr>
-                  <td class="cloumn">所属分类</td>
+                  <td class="cloumn">{{$t('product.classification')}}</td>
                   <td>{{productdetail.category}}</td>
                   <td class="cloumn">
-                    动态注册
+                    {{$t('product.dynamicregistration')}}
                     <el-tooltip
-                      content="您可以根据需要，开启或关闭动态注册，无需存库"
+                      :content="$t('product.text1')"
                       placement="top"
                       style="margin-left:5px;color:#cccccc"
                       effect="light"
@@ -84,8 +84,8 @@
                     </el-tooltip>
                   </td>
                   <td>
-                    <span v-if="dynamicReg==false" style="color:#cccccc">已关闭</span>
-                    <span v-else>已开启</span>
+                    <span v-if="dynamicReg==false" style="color:#cccccc">{{$t('product.close')}}</span>
+                    <span v-else>{{$t('product.open')}}</span>
                     <el-switch
                       v-model="dynamicReg"
                       active-color="#5eb058"
@@ -95,15 +95,15 @@
                       @change="handelUpdate($event,dynamicReg)"
                     ></el-switch>
                   </td>
-                  <td class="cloumn">连网协议</td>
+                  <td class="cloumn">{{$t('product.networking')}}</td>
                   <td v-if="productdetail.netType=='CELLULAR'">蜂窝(2G/3G/4G)</td>
                   <td v-else-if="productdetail.netType=='WIFI'">WiFi</td>
                   <td v-else-if="productdetail.netType=='ETHERNET'">以太网</td>
                   <td v-else-if="productdetail.netType=='LORA'">LoRaWAN</td>
-                  <td v-else>其他</td>
+                  <td v-else>{{$t('product.other')}}</td>
                 </tr>
                 <tr>
-                  <td class="cloumn">产品描述</td>
+                  <td class="cloumn">{{$t('developer.describe')}}</td>
                   <td colspan="6">{{productdetail.desc}}</td>
                 </tr>
               </table>
@@ -111,10 +111,10 @@
           </div>
         </el-tab-pane>
         <!--topic列表-->
-        <el-tab-pane label="Topic列表" name="second">
+        <el-tab-pane :label="'Topic'+$t('product.list')" name="second">
           <div style="background:#ffffff;padding:10px;box-sizing:border-box;">
             <div class="addtopic" style="text-align:right;margin-bottom:10px;">
-              <el-button type="primary" size="small" @click="topicdialogVisible=true">自定义Topic类</el-button>
+              <el-button type="primary" size="small" @click="topicdialogVisible=true">{{$t('product.customtopicclass')}}</el-button>
             </div>
             <el-table
               :data="topicData.slice((topicstart-1)*topiclength,topicstart*topiclength)"
@@ -125,35 +125,35 @@
                   <span>{{scope.row.topic.replace('\$\{ProductId\}', productId)}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作权限" align="center">
+              <el-table-column :label="$t('product.operationauthority')" align="center">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.type=='pub'">发布</span>
-                  <span v-if="scope.row.type=='sub'">订阅</span>
+                  <span v-if="scope.row.type=='pub'">{{$t('product.pub')}}</span>
+                  <span v-if="scope.row.type=='sub'">{{$t('product.sub')}}</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="desc" align="center" label="描述"></el-table-column>
-              <el-table-column label="操作" align="center">
+              <el-table-column prop="desc" align="center" :label="$t('developer.describe')"></el-table-column>
+              <el-table-column :label="$t('developer.operation')" align="center">
                 <template slot-scope="scope">
                   <el-button
                     type="primary"
                     size="mini"
                     v-if="!scope.row.isdef"
                     @click="updatetopic(scope.row,scope.$index)"
-                  >编辑</el-button>
+                  >{{$t('developer.edit')}}</el-button>
                   <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                     <p>确定删除这个{{scope.row.topic}}Topic类吗？</p>
                     <div style="text-align: right; margin: 0">
                       <el-button
                         size="mini"
                         @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                      >取消</el-button>
+                      >{{$t('product.cancel')}}</el-button>
                       <el-button
                         type="primary"
                         size="mini"
                         @click="deletetopic(scope,scope.$index)"
-                      >确定</el-button>
+                      >{{$t('developer.determine')}}</el-button>
                     </div>
-                    <el-button type="danger" size="mini" v-if="!scope.row.isdef" slot="reference">删除</el-button>
+                    <el-button type="danger" size="mini" v-if="!scope.row.isdef" slot="reference">{{$t('developer.delete')}}</el-button>
                   </el-popover>
                 </template>
               </el-table-column>
@@ -171,7 +171,7 @@
           </div>
           <!--topic弹窗-->
           <el-dialog
-            title="定义topic类"
+            :title="$t('proudct.definetopicclass')"
             :visible.sync="topicdialogVisible"
             width="40%"
             :before-close="handleClose"
@@ -179,7 +179,7 @@
             <div class="topiccontent">
               <div style="padding:10px;box-sizing:border-box;background:#e6f9fc;font-size:16px;">
                 <i class="el-icon-warning"></i>
-                Topic格式必须以“/”进行分层，第一个代表产品标识ProductId，第二个${DevAddr}通配devaddr设备连接之后为具体的设备地址。
+                {{$t('product.text2')}}
               </div>
               <div class="topicform">
                 <el-form ref="topicform" :model="topicform" :rules="topicrule">
@@ -188,30 +188,30 @@
                       <template slot="prepend">{{'thing/'+productId+'/${DevAddr}/'}}</template>
                     </el-input>
                   </el-form-item>
-                  <el-form-item label="设备操作权限：" prop="type">
-                    <el-select v-model="topicform.type" placeholder="请选择设备操作权限">
-                      <el-option label="订阅" value="sub"></el-option>
-                      <el-option label="发布" value="pub"></el-option>
+                  <el-form-item :label="$t('product.operationauthority')" prop="type">
+                    <el-select v-model="topicform.type" :placeholder="$t('product.selectdeviceoperationpermission')">
+                      <el-option :label="$t('product.sub')" value="sub"></el-option>
+                      <el-option :label="$t('product.pub')" value="pub"></el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="描述：">
+                  <el-form-item :label="$t('developer.describe')">
                     <el-input type="textarea" v-model="topicform.desc"></el-input>
                   </el-form-item>
                 </el-form>
               </div>
             </div>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="topicdialogVisible = false">取 消</el-button>
-              <el-button type="primary" @click="subTopic('topicform',topicform.isupdated)">确 定</el-button>
+              <el-button @click="topicdialogVisible = false">{{$t('developer.cancel')}}</el-button>
+              <el-button type="primary" @click="subTopic('topicform',topicform.isupdated)">{{$t('developer.determine')}}</el-button>
             </span>
           </el-dialog>
         </el-tab-pane>
         <!--功能定义-->
-        <el-tab-pane label="功能定义" name="third">
+        <el-tab-pane :label="$t('product.physicalmodel')" name="third">
           <div style="text-align:right">
-            <el-button type="primary" @click="checkschema" size="small">查看物模型</el-button>
-            <el-button type="primary" @click="wmxdialogVisible = true" size="small">新增自定义属性</el-button>
-            <el-button type="primary" @click="addcategory" size="small">新增标准属性</el-button>
+            <el-button type="primary" @click="checkschema" size="small">{{$t('product.viewobjectmodel')}}</el-button>
+            <el-button type="primary" @click="wmxdialogVisible = true" size="small">{{$t('product.newcustomattribute')}}</el-button>
+            <el-button type="primary" @click="addcategory" size="small">{{$t('product.newstandardattribute')}}</el-button>
           </div>
           <div>
             <el-table
@@ -232,18 +232,18 @@
                     :data="scope.row.dataType.specs"
                     style="width:60%;text-align:center;box-sizing:border-box;"
                   >
-                    <el-table-column label="标识符" align="center">
+                    <el-table-column :label="$t('product.identifier')" align="center">
                       <template slot-scope="scope">
                         <span>{{scope.row.identifier}}</span>
                       </template>
                     </el-table-column>
-                    <el-table-column label="功能类型" align="center">
+                    <el-table-column :label="$t('product.functionaltypes')" align="center">
                       <template slot-scope="scope">
-                        <span>属性</span>
+                        <span>{{$t('product.attribute')}}</span>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="name" label="功能名称" align="center"></el-table-column>
-                    <el-table-column label="数据定义" align="center">
+                    <el-table-column prop="name" :label="$t('product.functionname')" align="center"></el-table-column>
+                    <el-table-column :label="$t('product.datadefinition')" align="center">
                       <template slot-scope="scope">
                         <span>{{scope.row.dataType.type}}</span>
                       </template>
@@ -251,24 +251,24 @@
                   </el-table>
                 </template>
               </el-table-column>
-              <el-table-column prop="identifier" label="标识符"></el-table-column>
-              <el-table-column label="功能类型">
+              <el-table-column prop="identifier" :label="$t('product.identifier')"></el-table-column>
+              <el-table-column :label="$t('product.functionaltypes')">
                 <template slot-scope="scope">
-                  <span>属性</span>
+                  <span>{{$t('product.attribute')}}</span>
                 </template>
               </el-table-column>
-              <el-table-column prop="name" label="功能名称"></el-table-column>
-              <el-table-column label="数据类型">
+              <el-table-column prop="name" :label="$t('product.functionname')"></el-table-column>
+              <el-table-column :label="$t('product.datatype')">
                 <template slot-scope="scope">
                   <span>{{scope.row.dataType.type}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="数据定义">
+              <el-table-column :label="$t('product.datadefinition')">
                 <template slot-scope="scope">
                   <span
                     v-if="scope.row.dataType.specs&&(scope.row.dataType.type=='double'||scope.row.dataType.type=='float'||scope.row.dataType.type=='int')"
-                  >{{'取值范围:'+scope.row.dataType.specs.min+'~'+scope.row.dataType.specs.max}}</span>
-                  <span v-else-if="scope.row.dataType.type=='string'">{{'数据长度:'+scope.row.dataType.size+'字节'}}</span>
+                  >{{$t('proeuct.rangeofvalues')+scope.row.dataType.specs.min+'~'+scope.row.dataType.specs.max}}</span>
+                  <span v-else-if="scope.row.dataType.type=='string'">{{$t('product.datalength')+':'+scope.row.dataType.size+$t('product.byte')}}</span>
                   <span v-else-if="scope.row.dataType.type=='date'"></span>
                   <span v-else-if="scope.row.dataType.type!='struct'">{{scope.row.dataType.specs}}</span>
                   <span v-else></span>
@@ -276,9 +276,9 @@
                   <span v-if="scope.row.dataType.specs&&scope.row.dataType.type=='struct'"></span>-->
                 </template>
               </el-table-column>
-              <el-table-column label="操作">
+              <el-table-column :label="$t('developer.operation')">
                 <template slot-scope="scope">
-                  <el-button type="danger" size="mini" @click="deletewmx(scope.$index)">删除</el-button>
+                  <el-button type="danger" size="mini" @click="deletewmx(scope.$index)">{{$t('developer.delete')}}</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -294,33 +294,33 @@
             ></el-pagination>
           </div>
           <!--取物模型模板-->
-          <el-dialog title="功能添加" :visible.sync="originwmx" width="50%" :before-close="handleClose">
+          <el-dialog :title="$t('product.addfunction')" :visible.sync="originwmx" width="50%" :before-close="handleClose">
             <div>
               <div style="margin:20px 0">
-                <label for>所属分类</label>
+                <label for>{{$t('product.classification')}}</label>
                 <el-cascader v-model="category" :options="treeData" @change="handleChange"></el-cascader>
-                <el-button type="primary" @click="getPropData" size="mini">搜 索</el-button>
+                <el-button type="primary" @click="getPropData(0)" size="mini">{{$t('developer.search')}}</el-button>
               </div>
               <div style="text-align: center;margin-top:10px;">
                 <el-table :data="PropData" style="width:100%;text-align:center">
-                  <el-table-column label="名称" align="center">
+                  <el-table-column :label="$t('product.name')" align="center">
                     <template slot-scope="scope">
                       <span>{{scope.row.attributes.data.Name}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="标识符" align="center">
+                  <el-table-column :label="$t('product.identifier')" align="center">
                     <template slot-scope="scope">
                       <span>{{scope.row.attributes.data.Identifier}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="适用类型" align="center">
+                  <el-table-column :label="$t('product.applicabletype')" align="center">
                     <template slot-scope="scope">
                       <span>{{scope.row.attributes.data.CategoryName}}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" align="center">
+                  <el-table-column :label="$t('developer.operation')" align="center">
                     <template slot-scope="scope">
-                      <el-button type="primary" size="mini" @click="addProCategory(scope.row)">添加</el-button>
+                      <el-button type="primary" size="mini" @click="addProCategory(scope.row)">{{$t('product.add')}}</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -340,13 +340,13 @@
               </div>
             </div>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="originwmx = false" size="mini">取 消</el-button>
-              <el-button type="primary" @click="originwmx = false" size="mini">确 定</el-button>
+              <el-button @click="originwmx = false" size="mini">{{$t('developer.cancel')}}</el-button>
+              <el-button type="primary" @click="originwmx = false" size="mini">{{$t('developer.determain')}}</el-button>
             </span>
           </el-dialog>
           <!--添加物模型弹窗-->
           <el-dialog
-            title="添加属性参数"
+            :title="$t('product.newcustomattribute')"
             :visible.sync="wmxdialogVisible"
             width="40%"
             top="5vh"
@@ -361,33 +361,33 @@
                     <el-radio :label="3">复合型</el-radio>
                   </el-radio-group>
                 </el-form-item> -->
-                <el-form-item label="功能名称" prop="name">
+                <el-form-item :label="$t('product.functionname')" prop="name">
                   <el-input v-model="sizeForm.name"></el-input>
                 </el-form-item>
-                <el-form-item label="标识符" prop="identifier">
+                <el-form-item :label="$t('product.identifier')" prop="identifier">
                   <el-input v-model="sizeForm.identifier"></el-input>
                 </el-form-item>
-                <el-form-item label="数据类型" prop="type">
-                  <el-select v-model="sizeForm.type" placeholder="请选择数据类型" @change="selectStruct">
-                    <el-option label="整型" value="INT"></el-option>
-                    <el-option label="浮点型" value="FLOAT"></el-option>
-                    <el-option label="双精度型" value="DOUBLE"></el-option>
-                    <el-option label="布尔型" value="BOOL"></el-option>
-                    <el-option label="枚举型" value="ENUM"></el-option>
-                    <el-option label="结构体" value="STRUCT"></el-option>
-                    <el-option label="字符串" value="STRING"></el-option>
-                    <el-option label="时间型" value="DATE"></el-option>
+                <el-form-item :label="$t('product.datatype')" prop="type">
+                  <el-select v-model="sizeForm.type"  @change="selectStruct">
+                    <el-option :label="$t('product.struct')" value="STRUCT"></el-option>
+                    <el-option :label="$t('product.init')" value="INT"></el-option>
+                    <el-option :label="$t('product.float')" value="FLOAT"></el-option>
+                    <el-option :label="$t('product.double')" value="DOUBLE"></el-option>
+                    <el-option :label="$t('product.bool')" value="BOOL"></el-option>
+                    <el-option :label="$t('product.enum')" value="ENUM"></el-option>
+                    <el-option :label="$t('product.string')" value="STRING"></el-option>
+                    <el-option :label="$t('product.date')" value="DATE"></el-option>
                   </el-select>
                 </el-form-item>
                 <!--INT,FLOAT,DOUBLE数据类型添加模式-->
                 <div v-if="sizeForm.type=='INT'||sizeForm.type=='FLOAT'||sizeForm.type=='DOUBLE'">
-                  <el-form-item required label="取值范围">
+                  <el-form-item required :label="$t('product.rangeofvalues')">
                     <el-col :span="9">
                       <el-form-item prop="startnumber">
                         <el-input
                           v-model.number="sizeForm.startnumber"
                           type="number"
-                          placeholder="最小值"
+                          :placeholder="$t('product.minimumvalue')"
                         ></el-input>
                       </el-form-item>
                     </el-col>
@@ -397,23 +397,23 @@
                         <el-input
                           v-model.number="sizeForm.endnumber"
                           type="number"
-                          placeholder="最大值"
+                          :placeholder="$t('product.maximumvalue')"
                         ></el-input>
                       </el-form-item>
                     </el-col>
                   </el-form-item>
-                  <el-form-item label="步数" prop="step">
+                  <el-form-item :label="$t('product.step')" prop="step">
                     <el-input v-model.number="sizeForm.step" type="number" class="inputnumber" :precision="2" :step="0.1"></el-input>
                   </el-form-item>
-                  <el-form-item label="单位">
-                      <el-select v-model="sizeForm.unit" placeholder="单位">
+                  <el-form-item :label="$t('product.unit')">
+                      <el-select v-model="sizeForm.unit" :placeholder="$t('product.unit')">
                         <el-option v-for="(item,index) in allunit" :label="item.attributes.data.Name+'/'+item.attributes.data.Symbol" :key="index" :value="item.attributes.data.Symbol"></el-option>
                       </el-select>
                   </el-form-item>
                 </div>
                 <!--BOOL数据类型添加格式-->
                   <div v-if="sizeForm.type=='BOOL'">
-                    <el-form-item label="属性"  required>
+                    <el-form-item :label="$t('product.attribute')"  required>
                   <div style="height:40px;">
                        <el-col :span="11">
                     <el-form-item>
@@ -421,7 +421,7 @@
                         v-model="sizeForm.truevalue"
                         class="inputnumber"
                         type="number"
-                        placeholder="属性值"
+                        :placeholder="$t('product.attribute')"
                         readonly
                       ></el-input>
                     </el-form-item>
@@ -429,7 +429,7 @@
                   <el-col :span="2">-</el-col>
                   <el-col :span="11">
                     <el-form-item prop="true">
-                      <el-input v-model="sizeForm.true" class="inputnumber" placeholder="例如：开"></el-input>
+                      <el-input v-model="sizeForm.true" class="inputnumber" :placeholder="$t('product.egopen')"></el-input>
                     </el-form-item>
                   </el-col>
                   </div>
@@ -440,7 +440,7 @@
                           v-model="sizeForm.falsevalue"
                           class="inputnumber"
                           type="number"
-                          placeholder="属性值"
+                          :placeholder="$t('product.attribute')"
                           readonly
                         ></el-input>
                       </el-form-item>
@@ -448,7 +448,7 @@
                     <el-col :span="2">-</el-col>
                     <el-col :span="11">
                       <el-form-item prop="true">
-                        <el-input v-model="sizeForm.false" class="inputnumber" placeholder="例如：关"></el-input>
+                        <el-input v-model="sizeForm.false" class="inputnumber" :placeholder="$t('egclose')"></el-input>
                       </el-form-item>
                     </el-col>
                   </div>
@@ -458,15 +458,15 @@
                 <div v-if="sizeForm.type=='ENUM'">
                   <el-form-item v-for="(item, index) in sizeForm.specs" :key="index" required>
                     <el-col :span="9">
-                        <el-form-item :label="'属性'+index" :prop="'specs.'+index+'.attribute'" :rules="[{required: true, message: '输入属性'}]"> 
+                        <el-form-item :label="$t('product.attribute')+index" :prop="'specs.'+index+'.attribute'" :rules="[{required: true, message: '输入属性'}]"> 
                          
-                        <el-input v-model="item.attribute"  placeholder="例编号为'0''"></el-input>
+                        <el-input v-model="item.attribute"  :placeholder="$t('product.egnumber0')"></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col class="line" :span="2">-</el-col>
                     <el-col :span="9">
-                      <el-form-item :label="'属性值'+index" :prop="'specs.'+index+'.attributevalue'" :rules="[{required: true, message: '输入属性值'}]">
-                        <el-input v-model="item.attributevalue"  placeholder="对改枚举项的描述"></el-input>
+                      <el-form-item :label="$t('product.attributevalue')+index" :prop="'specs.'+index+'.attributevalue'" :rules="[{required: true, message: '输入属性值'}]">
+                        <el-input v-model="item.attributevalue"  :placeholder="$t('developer.describe')"></el-input>
                       </el-form-item>
                     </el-col>
                     <el-col class="line" :span="2"></el-col>
@@ -477,7 +477,7 @@
                         :underline="false"
                         icon="el-icon-minus"
                         style="margin-left:5px;margin-top:30px"
-                      >删除</el-link>
+                      >{{$t('developer.delete')}}</el-link>
                     </el-col>
                   </el-form-item>
                   <el-link
@@ -485,7 +485,7 @@
                     icon="el-icon-plus"
                     type="primary"
                     :underline="false"
-                  >添加枚举项</el-link>
+                  >{{$t('product.add')}}</el-link>
                 </div>
                 <!--结构体类型添加格式-->
                 <div v-if="sizeForm.type=='STRUCT'">
@@ -493,12 +493,12 @@
                           <ul style="margin:0;padding-left:20px;">
                             <li v-for="(item,index) in sizeForm.struct" :key="index" value="item" style="list-style:none;display:flex;">
                               <div>
-                                 <span>参数名称：</span>
+                                 <span>{{$t('product.parametername')+':'}}}</span>
                                  <span>{{item.name}}</span>
                               </div>
                               <div>
-                                <el-link :underline="false" type="primary" style="margin-left:20px" @click="editStruct(item,index)">编辑</el-link>
-                                <el-link :underline="false" type="primary" @click="deleteStruct(index)">删除</el-link>
+                                <el-link :underline="false" type="primary" style="margin-left:20px" @click="editStruct(item,index)">{{$t('developer.edit')}}</el-link>
+                                <el-link :underline="false" type="primary" @click="deleteStruct(index)">{{$t('developer.delete')}}</el-link>
                               </div> 
                             </li>
                           </ul>
@@ -507,42 +507,42 @@
                     icon="el-icon-plus"
                     type="primary"
                     :underline="false"
-                  >新增参数</el-link>
+                  >{{$t('product.addparameter')}}</el-link>
                     </el-form-item>
                   </div>
                   <!--字符串添加格式-->
                   <div v-if="sizeForm.type=='STRING'">
-                    <el-form-item label="数据长度" prop="string" >
+                    <el-form-item :label="$t('product.datalength')" prop="string" >
                     <el-input  v-model.number="sizeForm.string" type="number">
                       <template slot="append">
-                          字节
+                          {{$t('product.byte')}}
                       </template>
                     </el-input>
                   </el-form-item>
                   </div>
                   <!--date类型添加格式-->
                    <div v-if="sizeForm.type=='DATE'">
-                    <el-form-item label="时间格式">
+                    <el-form-item :label="$t('product.timeformat')">
                     <el-input  v-model="sizeForm.date" readonly>
                     </el-input>
                   </el-form-item>
                   </div>
-                <el-form-item label="读写类型" prop="isread">
+                <el-form-item :label="$t('product.readandwritetype')" prop="isread">
                   <el-radio-group v-model="sizeForm.isread" size="medium">
-                    <el-radio label="rw">读写</el-radio>
-                    <el-radio label="r">只读</el-radio>
+                    <el-radio label="rw">{{$t('product.readandwrite')}}</el-radio>
+                    <el-radio label="r">{{$t('product.onlyread')}}</el-radio>
                   </el-radio-group>
                 </el-form-item>
               </el-form>
             </div>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="wmxdialogVisible = false">取 消</el-button>
-              <el-button type="primary" @click="submitForm('sizeForm')">确 定</el-button>
+              <el-button @click="wmxdialogVisible = false">{{$t('developer.cancel')}}</el-button>
+              <el-button type="primary" @click="submitForm('sizeForm')">{{$t('developer.determine')}}</el-button>
             </span>
           </el-dialog>
           <!--物模型结构体-->
            <el-dialog
-            title="新增参数"
+            :title="$t('product.addparameter')"
             :visible.sync="structdialog"
             width="40%"
             top="15vh"
@@ -550,33 +550,33 @@
           >
             <div class="structheader">
               <el-form ref="structform" :model="structform" size="small" :rules="structrule">
-              <el-form-item label="功能名称" prop="name">
+              <el-form-item :label="$t('product.functionname')" prop="name">
                 <el-input v-model="structform.name"></el-input>
               </el-form-item>
-              <el-form-item label="标识符" prop="identifier">
+              <el-form-item :label="$t('product.identifier')" prop="identifier">
                 <el-input v-model="structform.identifier"></el-input>
               </el-form-item>
-              <el-form-item label="数据类型" prop="type">
-                <el-select v-model="structform.type" placeholder="请选择数据类型">
-                  <el-option label="整形" value="INT"></el-option>
-                  <el-option label="浮点型" value="FLOAT"></el-option>
-                  <el-option label="双精度型" value="DOUBLE"></el-option>
-                  <el-option label="布尔型" value="BOOL"></el-option>
-                  <el-option label="枚举型" value="ENUM"></el-option>
-                  <el-option label="字符串" value="STRING"></el-option>
-                  <el-option label="时间型" value="DATE"></el-option>
+              <el-form-item :label="$t('product.datatype')" prop="type">
+                <el-select v-model="structform.type" >
+                  <el-option :label="$t('product.init')" value="INT"></el-option>
+                  <el-option :label="$t('product.float')" value="FLOAT"></el-option>
+                  <el-option :label="$t('product.double')" value="DOUBLE"></el-option>
+                  <el-option :label="$t('product.bool')" value="BOOL"></el-option>
+                  <el-option :label="$t('product.enum')" value="ENUM"></el-option>
+                  <el-option :label="$t('product.string')" value="STRING"></el-option>
+                  <el-option :label="$t('product.date')" value="DATE"></el-option>
                 </el-select>
               </el-form-item>
               <div
                 v-if="structform.type=='INT'||structform.type=='FLOAT'||structform.type=='DOUBLE'"
               >
-                <el-form-item required label="取值范围">
+                <el-form-item required :label="$t('product.rangeofvalues')">
                   <el-col :span="9">
                     <el-form-item prop="startnumber">
                       <el-input
                         v-model.number="structform.startnumber"
                         type="number"
-                        placeholder="最小值"
+                        :placeholder="$t('product.minimumvalue')"
                       ></el-input>
                     </el-form-item>
                   </el-col>
@@ -586,12 +586,12 @@
                       <el-input
                         v-model.number="structform.endnumber"
                         type="number"
-                        placeholder="最大值"
+                        :placeholder="$t('product.maximumvalue')"
                       ></el-input>
                     </el-form-item>
                   </el-col>
                 </el-form-item>
-                <el-form-item label="步数" prop="step">
+                <el-form-item :label="$t('product.step')" prop="step">
                   <el-input
                     v-model.number="structform.step"
                     type="number"
@@ -600,8 +600,8 @@
                     :step="0.1"
                   ></el-input>
                 </el-form-item>
-                <el-form-item label="单位">
-                  <el-select v-model="structform.unit" placeholder="单位">
+                <el-form-item :label="$t('product.unit')">
+                  <el-select v-model="structform.unit" :placeholder="$t('product.unit')">
                     <el-option
                       v-for="(item,index) in allunit"
                       :label="item.attributes.data.Name+'/'+item.attributes.data.Symbol"
@@ -612,7 +612,7 @@
                 </el-form-item>
               </div>
               <div v-if="structform.type=='BOOL'">
-                <el-form-item label="属性" required>
+                <el-form-item :label="$t('product.attribute')" required>
                   <div style="height:40px;">
                     <el-col :span="11">
                       <el-form-item>
@@ -620,7 +620,7 @@
                           v-model="structform.truevalue"
                           class="inputnumber"
                           type="number"
-                          placeholder="属性值"
+                          :placeholder="$t('product.attributevalue')"
                           readonly
                         ></el-input>
                       </el-form-item>
@@ -628,7 +628,7 @@
                     <el-col :span="2">-</el-col>
                     <el-col :span="11">
                       <el-form-item prop="true">
-                        <el-input v-model="structform.true" class="inputnumber" placeholder="例如：开"></el-input>
+                        <el-input v-model="structform.true" class="inputnumber" :placeholder="$t('product.egopen')"></el-input>
                       </el-form-item>
                     </el-col>
                   </div>
@@ -639,7 +639,7 @@
                           v-model="structform.falsevalue"
                           class="inputnumber"
                           type="number"
-                          placeholder="属性值"
+                          :placeholder="$t('product.attributevalue')"
                           readonly
                         ></el-input>
                       </el-form-item>
@@ -647,7 +647,7 @@
                     <el-col :span="2">-</el-col>
                     <el-col :span="11">
                       <el-form-item prop="true">
-                        <el-input v-model="structform.false" class="inputnumber" placeholder="例如：关"></el-input>
+                        <el-input v-model="structform.false" class="inputnumber" :placeholder="$t('product.egclost')"></el-input>
                       </el-form-item>
                     </el-col>
                   </div>
@@ -657,21 +657,21 @@
                 <el-form-item v-for="(item, index) in structform.specs" :key="index" required>
                   <el-col :span="9">
                     <el-form-item
-                      :label="'属性'+index"
+                      :label="$t('product.attribute')+index"
                       :prop="'specs.'+index+'.attribute'"
                       :rules="[{required: true, message: '输入属性'}]"
                     >
-                      <el-input v-model="item.attribute" placeholder="例编号为'0''"></el-input>
+                      <el-input v-model="item.attribute" :placeholder="$t('product.egnumber0')"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col class="line" :span="2">-</el-col>
                   <el-col :span="9">
                     <el-form-item
-                      :label="'属性值'+index"
+                      :label="$t('product.attribute')+index"
                       :prop="'specs.'+index+'.attributevalue'"
                       :rules="[{required: true, message: '输入属性值'}]"
                     >
-                      <el-input v-model="item.attributevalue" placeholder="对改枚举项的描述"></el-input>
+                      <el-input v-model="item.attributevalue" :placeholder="$t('developer.describe')"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col class="line" :span="2"></el-col>
@@ -682,7 +682,7 @@
                         :underline="false"
                         icon="el-icon-minus"
                         style="margin-left:5px;margin-top:30px"
-                      >删除</el-link>
+                      >{{$t('developer.delete')}}</el-link>
                     </el-col>
                   </el-form-item>
                   <el-link
@@ -690,40 +690,40 @@
                     icon="el-icon-plus"
                     type="primary"
                     :underline="false"
-                  >添加枚举项</el-link>
+                  >{{$t('product.add')}}</el-link>
               </div>
               <div v-if="structform.type=='STRING'">
-                    <el-form-item label="数据长度" prop="string" >
+                    <el-form-item :label="$t('product.datalength')" prop="string" >
                     <el-input  v-model.number="structform.string" type="number">
                       <template slot="append">
-                          字节
+                          {{$t('product.byte')}}
                       </template>
                     </el-input>
                   </el-form-item>
                 </div>
                   <!--date类型添加格式-->
                  <div v-if="structform.type=='DATE'">
-                    <el-form-item label="时间格式">
+                    <el-form-item :label="$t('product.timeformat')">
                     <el-input  v-model="structform.date" readonly>
                     </el-input>
                   </el-form-item>
                   </div>
-                <el-form-item label="读写类型" prop="isread">
+                <el-form-item :label="$t('product.readandwritetype')" prop="isread">
                     <el-radio-group v-model="structform.isread" size="medium">
-                      <el-radio label="rw">读写</el-radio>
-                      <el-radio label="r">只读</el-radio>
+                      <el-radio label="rw">{{$t('product.readandwite')}}</el-radio>
+                      <el-radio label="r">{{$t('product.onlyread')}}</el-radio>
                     </el-radio-group>
                 </el-form-item>
             </el-form>
             </div>
              <span slot="footer" class="dialog-footer">
-              <el-button @click="structdialog = false">取 消</el-button>
-              <el-button type="primary" @click="submitStruct('structform')">确 定</el-button>
+              <el-button @click="structdialog = false">{{$t('developer.cancel')}}</el-button>
+              <el-button type="primary" @click="submitStruct('structform')">{{$t('developer.determine')}}</el-button>
             </span>
           </el-dialog>
         </el-tab-pane>
         <!--协议解析-->
-        <el-tab-pane label="协议解析" name="fourth">
+        <el-tab-pane :label="$t('product.contentparsing')" name="fourth">
           <div class="protolheader">
             <el-form
               :inline="true"
@@ -732,45 +732,45 @@
               :rules="addRules"
               ref="formInline"
             >
-              <el-form-item label="协议名称" prop="name">
-                <el-input v-model="formInline.name" placeholder="名称"></el-input>
+              <el-form-item :label="$t('product.protocolname')" prop="name">
+                <el-input v-model="formInline.name" :placeholder="$t('product.protocolname')"></el-input>
               </el-form-item>
-              <el-form-item label="版本">
-                <el-input v-model="formInline.version" placeholder="版本"></el-input>
+              <el-form-item :label="$t('plugins.version')">
+                <el-input v-model="formInline.version" :placeholder="$t('plugins.version')"></el-input>
               </el-form-item>
-              <el-form-item label="描述">
-                <el-input v-model="formInline.desc" placeholder="版本描述"></el-input>
+              <el-form-item :label="$t('developer.describe')">
+                <el-input v-model="formInline.desc" :placeholder="$t('developer.describe')"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="subAce('formInline')" size="small">保存</el-button>
-                <el-button type="primary" @click="chaxun" size="small">公共协议库</el-button>
+                <el-button type="primary" @click="subAce('formInline')" size="small">{{$t('product.preservation')}}</el-button>
+                <el-button type="primary" @click="chaxun" size="small">{{$t('product.publicagreementlibrary')}}</el-button>
               </el-form-item>
               <el-form-item style="display:block">
-                <el-button type="primary" @click="protol" size="small">编译</el-button>
+                <el-button type="primary" @click="protol" size="small">{{$t('product.compile')}}</el-button>
               </el-form-item>
             </el-form>
           </div>
           <!--公共协议库弹窗-->
-          <el-dialog title="公共协议库" :visible.sync="dialogTableVisible" width="50%">
+          <el-dialog :title="$t('product.publicagreementlibrary')" :visible.sync="dialogTableVisible" width="50%">
             <el-table :data="gridData" style="width:100%;text-align:center">
-              <el-table-column label="协议名称" align="center">
+              <el-table-column :label="$t('product.protocolname')" align="center">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.data.name}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="版本" align="center">
+              <el-table-column :label="$t('plugins.version')" align="center">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.data.version}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="描述" align="center" width="300">
+              <el-table-column :label="$t('developer.describe')" align="center" width="300">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.data.desc}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center" width="300">
+              <el-table-column :label="$t('developer.operation')" align="center" width="300">
                 <template slot-scope="scope">
-                  <el-button type="primary" size="mini" @click="editordata(scope.row)">克隆</el-button>
+                  <el-button type="primary" size="mini" @click="editordata(scope.row)">{{$t('product.clone')}}</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -784,7 +784,7 @@
               <label id="plug-name"></label>
             </div>
             <div style="color:#c2be9e;background:#272822;border-top:1px solid #dddddd;padding:5px">
-              <span>控制输出</span>
+              <span>{{$t('product.controloutput')}}</span>
             </div>
             <pre
               id="editor2"
@@ -793,34 +793,35 @@
             ><textarea class="ace_text-input"></textarea></pre>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="服务通道" name="fiveth">
+        <!-----------------服务通道------------------------------------------>
+        <el-tab-pane :label="$t('product.physicalaccess')" name="fiveth">
           <div class="productchannel" style="text-align:right;padding:10px;">
-            <el-button type="primary" size="small" @click="showAllChannel">添加通道</el-button>
+            <el-button type="primary" size="small" @click="showAllChannel">{{$t('developer.createchannel')}}</el-button>
           </div>
           <div>
             <el-table :data="channelData" style="width: 100%;">
-               <el-table-column label="通道编号">
+               <el-table-column :label="$t('developer.channelnumber')">
                 <template slot-scope="scope">
                   <span>{{scope.row.id}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="通道名称">
+              <el-table-column :label="$t('developer.channelname')">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.name}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="通道地址">
+              <el-table-column :label="$t('developer.channeladdr')">
                 <template slot-scope="scope">
                   <span>{{'channel/'+scope.row.id}}</span>
                 </template>
               </el-table-column>
-               <el-table-column label="通道类型">
+               <el-table-column :label="$t('developer.channeltype')">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.attributes.type==1">采集通道</span>
-                   <span v-else>资源通道</span>
+                  <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+                   <span v-else>{{$t('developer.resourcechannel')}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="服务类型">
+              <el-table-column :label="$t('developer.servicetype')">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.cType}}</span>
                 </template>
@@ -830,9 +831,9 @@
                   <span v-if="scope.row.attributes.config.port">{{scope.row.attributes.config.port}}</span>
                 </template>
               </el-table-column> -->
-              <el-table-column label="操作" >
+              <el-table-column :label="$t('developer.operation')" >
                 <template slot-scope="scope">
-                  <el-button type="danger" size="mini" @click="deleteRelation(scope.row)">移除通道</el-button>
+                  <el-button type="danger" size="mini" @click="deleteRelation(scope.row)">{{$t('developer.remove')}}</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -850,39 +851,39 @@
             <el-dialog title="添加通道" :visible.sync="innerVisible" append-to-body>
               <div class="addchannel">
                 <el-table :data="allchannelData" height="400" style="width: 100%">
-                  <el-table-column label="通道编号">
+                  <el-table-column :label="$t('developer.channelnumber')">
                 <template slot-scope="scope">
                   <span>{{scope.row.id}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="通道名称">
+              <el-table-column :label="$t('developer.channelname')">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.name}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="通道地址">
+              <el-table-column :label="$t('developer.channeladdr')">
                 <template slot-scope="scope">
                   <span>{{'channel/'+scope.row.id}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="通道类型">
+              <el-table-column :label="$t('developer.channeltype')">
                 <template slot-scope="scope">
-                  <span v-if="scope.row.attributes.type==1">采集通道</span>
-                   <span v-else>资源通道</span>
+                  <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+                   <span v-else>{{$t('developer.resourcechannel')}}</span>
                 </template>
               </el-table-column>
-          <el-table-column label="服务类型">
+          <el-table-column :label="$t('developer.servicetype')">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.cType}}</span>
             </template>
           </el-table-column>
-                  <el-table-column label="操作">
+                  <el-table-column :label="$t('developer.operation')">
                     <template slot-scope="scope">
                       <el-button
                         size="mini"
                         @click="addProductChannel(scope.row.id)"
                         type="primary"
-                      >添加</el-button>
+                      >{{$t('developer.add')}}</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -900,10 +901,43 @@
             </el-dialog>
           </div>
         </el-tab-pane>
+        <el-tab-pane :label="$t('product.newstorage')" name="sixeth">
+           <div style="width:40%">
+             <div>
+              <el-tag>{{$t('product.modeltemplate')}}</el-tag>
+             </div>
+              <pre id="editor6" class="ace_editor" style="min-height:300px;width:100%">
+               <textarea class="ace_text-input" style="overflow:scroll"></textarea>
+              </pre>
+              <el-divider direction="vertical"></el-divider>
+            </div>
+          
+           <div style="width:30%">
+             <div>
+              <el-tag>{{$t('product.modelstorage')}}</el-tag>
+             </div>
+             <pre id="editor4" class="ace_editor" style="min-height:300px;width:100%">
+              <textarea class="ace_text-input"></textarea>
+            </pre>
+            <el-divider direction="vertical"></el-divider>
+           </div>
+           
+            <div style="width:30%">
+              <div>
+              <el-tag>{{$t('product.modeldataoutput')}}</el-tag>
+              <el-button type="primary" size="small" @click="testgraphql">测试</el-button>
+             </div>
+             <pre id="editor5" class="ace_editor" style="min-height:300px;width:100%">
+              <textarea class="ace_text-input"></textarea>
+            </pre> 
+          </div>
+           
+            
+        </el-tab-pane>
       </el-tabs>
     </div>
     <!--物模型-->
-    <el-dialog title="查看物模型" :visible.sync="schemadialogVisible" :before-close="handleClose">
+    <el-dialog :title="$t('product.viewobjectmodel')" :visible.sync="schemadialogVisible" :before-close="handleClose">
       <div>
         <div style="background:#ffffff">
           <label id="plug-name"></label>
@@ -911,7 +945,7 @@
         <pre id="editor1" class="ace_editor" style="min-height:400px"><textarea class="ace_text-input" style="overflow:scroll"></textarea></pre>
       </div>
       <span slot="footer" class="dialog-footer" style="height:30px;">
-        <el-button type="primary" @click="preserve">保 存</el-button>
+        <el-button type="primary" @click="preserve">{{$t('developer.determine')}}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -921,12 +955,16 @@ import Parse from "parse";
 var editor;
 var editor1;
 var editor2;
+var editorgraphql
+var editor5
+var editor6
 let Base64 = require("js-base64").Base64;
 var setdata = "";
 var isallchannel = false;
 import { Compile } from "@/api/systemmanage/system";
 import { getIndustry } from "@/api/applicationManagement";
 import { setTimeout } from "timers";
+import gql from "graphql-tag";
 export default {
   data() {
     var validCode = (rule, value, callback) => {
@@ -1209,6 +1247,27 @@ export default {
       enableSnippets: true,
       enableLiveAutocompletion: true // 设置自动提示
     });
+    //物存储graphql写入
+    editorgraphql = ace.edit("editor4");
+    editorgraphql.session.setMode("ace/mode/graphqlschema"); // 设置语言
+    editorgraphql.setTheme("ace/theme/monokai"); // 设置主题
+    editorgraphql.setOptions({
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true // 设置自动提示
+    });
+    editorgraphql.setValue('')
+    //物存储控制输出
+    editor5 = ace.edit("editor5");
+    editor5.session.setMode("ace/mode/json"); // 设置语言
+    editor5.setTheme("ace/theme/gob"); // 设置主题
+    editor5.setReadOnly(true);
+    editor5.setOptions({
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true // 设置自动提示
+    });
+    editor5.setValue('')
     this.Industry();
     this.getAllunit()
   },
@@ -1735,7 +1794,9 @@ export default {
         .replace(/\.[\d]{3}Z/, "");
       return date; // 2017-03-31 16:02:06
     },
-    getPropData() {
+    getPropData(start) {
+      if(start==0){
+        this.productstart=0}
       this.CategoryKey = this.$route.query.CategoryKey;
       var Datas = Parse.Object.extend("Datas");
       var datas = new Parse.Query(Datas);
@@ -1793,6 +1854,16 @@ export default {
         enableSnippets: true,
         enableLiveAutocompletion: true // 设置自动提示
       });
+      
+        editor6 = ace.edit("editor6");
+        editor6.session.setMode("ace/mode/json"); // 设置语言
+        editor6.setTheme("ace/theme/twilight"); // 设置主题
+        editor6.setOptions({
+          enableBasicAutocompletion: true,
+          enableSnippets: true,
+          enableLiveAutocompletion: true // 设置自动提示
+        });
+        
       this.productId = this.$route.query.id;
       var Product = Parse.Object.extend("Product");
       var product = new Parse.Query(Product);
@@ -1833,6 +1904,7 @@ export default {
             }
  
             editor.setValue(Base64.decode(setdata));
+            editor6.setValue(JSON.stringify(this.productdetail.thing, null, 4));
             var Devices = Parse.Object.extend("Devices");
             var devices = new Parse.Query(Devices);
  
@@ -2202,7 +2274,17 @@ export default {
           }
         );
       });
-    }
+    },
+    testgraphql(){ 
+       this.$apollo.query({
+            query:gql`${editorgraphql.getValue()}`
+         }).then(resultes=>{
+            editor5.setValue(JSON.stringify(resultes, null, 4));
+         }).catch(error=>{
+           console.log(error)
+            this.$message.error(error)
+         })
+  }
   }
 };
 </script>
@@ -2264,6 +2346,7 @@ export default {
   height: 50px;
   line-height: 50px;
   font-family: auto;
+  width: 150px;
 }
 .editproduct .el-tabs__header {
   margin: 0;
@@ -2337,10 +2420,8 @@ export default {
 .editproduct .el-table__expanded-cell .el-table th.is-leaf {
   background: #ced7de9c;
 }
-/* .editproduct ul{
-  margin:0;
+.editproduct #pane-sixeth{
+  display:flex;
 }
-.editproduct ul li{
-  list-style: none;
-} */
+
 </style>

@@ -2,7 +2,7 @@
     <div class="appmarage">
         <div class="header">
             <el-button type="primary" @click="checkupdateall" size="small">
-                检查更新
+                {{$t('plugins.checkupdate')}}
             </el-button>
         </div>
         <div class="block" style="margin-top:10px;">
@@ -12,20 +12,20 @@
                     <span :style="{'color': (scope.row.active==true ? 'green':'red')}">{{scope.row.app}}</span>
                 </template>
                 </el-table-column>
-                <el-table-column prop="version" label="版本" align="center" sortable></el-table-column>
-                <el-table-column prop="desc" label="描述" align="center" sortable></el-table-column>
-                <el-table-column label="操作" align="right">
+                <el-table-column prop="version" :label="$t('plugins.version')" align="center" sortable></el-table-column>
+                <el-table-column prop="desc" :label="$t('developer.describe')" align="center" sortable></el-table-column>
+                <el-table-column :label="$t('developer.operation')" align="right">
                     <template slot="header" slot-scope="scope">
                         <el-input
                         v-model="search"
                         size="mini"
                         @change="changevalue"
-                        placeholder="输入app搜索"/>
+                        :placeholder="$t('plugins.enterappsearch')"/>
                     </template>
                 <template slot-scope="scope">
-                    <el-button  type="info" size="small" @click="startup(scope.row.app)" v-if="scope.row.active==false" plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div>启动</el-button>
-                    <el-button  type="info"  size="small" @click="stopup(scope.row.app)" v-if="scope.row.active==true"  plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"></div>停止</el-button>
-                    <el-button type="info"  size="small" plain @click="checkupdate(scope.row.app)">检查更新</el-button>
+                    <el-button  type="info" size="small" @click="startup(scope.row.app)" v-if="scope.row.active==false" plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"></div>{{$t('plugins.start')}}</el-button>
+                    <el-button  type="info"  size="small" @click="stopup(scope.row.app)" v-if="scope.row.active==true"  plain><div style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"></div>{{$t('plugins.stop')}}</el-button>
+                    <el-button type="info"  size="small" plain @click="checkupdate(scope.row.app)">{{$t('plugins.checkupdate')}}</el-button>
                 </template>
                 </el-table-column>
             </el-table>
@@ -43,7 +43,7 @@
             ></el-pagination>
         </div>
         <el-dialog
-        title="模块列表"
+        :title="$t('plugins.modulelist')"
         :visible.sync="dialogVisible"
         width="40%"
         :before-close="handleClose">
@@ -51,10 +51,10 @@
            <el-table :data="tableData1.slice((start1-1)*length1,start1*length1)"
            height="300"
            style="width: 100%;text-align:center;margin-top:20px">
-               <el-table-column prop="path" label="模块名称" sortable align="center">
+               <el-table-column prop="path" :label="$t('plugins.modulename')" sortable align="center">
 
                </el-table-column>
-               <el-table-column prop="is_changed" label="是否修改" sortable align="center">
+               <el-table-column prop="is_changed" :label="$t('plugins.ischange')" sortable align="center">
 
                </el-table-column>
            </el-table>
@@ -72,8 +72,8 @@
         </div>
        </div>
         <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false" style="float:left">关 闭</el-button>
-            <el-button style="float:right" type="primary" @click="reupload">热更新</el-button>
+            <el-button @click="dialogVisible = false" style="float:left">{{$t('developer.cancel')}}</el-button>
+            <el-button style="float:right" type="primary" @click="reupload">{{$t('developer.determine')}}</el-button>
         </span>
         </el-dialog>
     </div>

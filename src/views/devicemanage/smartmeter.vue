@@ -104,13 +104,16 @@ export default {
       loading: true,
       // 展开
       isShow: false,
-      index: -1
+      index: -1,
+      arr:[],
     };
   },
   mounted() {
     this.getinformation();
+   
   },
   methods: {
+    
     //展开
     handleClickLook(scope) {
       if (this.index == scope.$index) {

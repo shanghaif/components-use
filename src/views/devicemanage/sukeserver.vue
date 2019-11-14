@@ -22,17 +22,26 @@
                   <el-option label="等待发送" value="WAIT_SEND"></el-option>
                 </el-select>
               </el-form-item>
+               <el-form-item label="设备编号">
+                 <el-input type="text" v-model="zlForm.hardware_number"></el-input>
+              </el-form-item>
                <el-form-item>
-              <el-button type="primary" size="mini" @click="getServerlist">查询</el-button>
+              <el-button type="primary" size="mini" @click="getServerlist(0)">查询</el-button>
               <el-button type="primary" size="mini" @click="resetserver">重置</el-button>
             </el-form-item>
+           
           </el-form>
         </div>
          <div class="firsttable" style="margin-top:10px">
           <el-table :data="zlData" style="width: 100%;text-align:center;">
-            <el-table-column  label="设备" align="center">
+            <el-table-column  label="设备类型" align="center">
               <template slot-scope="scope">
                 <span>{{scope.row.attributes.hardwareType}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column  label="设备编号" align="center">
+              <template slot-scope="scope">
+                <span>{{scope.row.attributes.hardware_number}}</span>
               </template>
             </el-table-column>
             <el-table-column  label="应用商" align="center">
@@ -45,9 +54,9 @@
                 <span >{{scope.row.attributes.paras}}</span>
               </template>
             </el-table-column>
-            <el-table-column  label="发送时间" align="center">
+            <el-table-column  label="推送时间" align="center">
               <template slot-scope="scope">
-                <span>{{timestampToTime(scope.row.attributes.ts)}}</span>
+                <span>{{utc2beijing(scope.row.createdAt)}}</span>
               </template>
             </el-table-column>
             <el-table-column  label="发送状态" align="center">
@@ -183,6 +192,8 @@
 <script>
 import {addSukeyys,searchSuketype,editSukeyys,queryyysinfo,querydevinfo} from '@/api/sukeserver'
 import Parse from 'parse'
+import {returnLogin} from '@/utils/return'
+import { utc2beijing } from '@/utils/index';
 export default {
   data() {
     var validCode = (rule, value, callback) => {
@@ -230,6 +241,7 @@ export default {
       zlForm: {
         hardwareType: "",
         status: "",
+        hardware_number:''
       },
       activeName:'first',
       deviceData:[],
@@ -291,6 +303,7 @@ export default {
       this.zlForm={
          hardwareType: "",
          status: "",
+         hardware_number:''
       }
     },
     timestampToTime(timestamp) {
@@ -303,6 +316,17 @@ export default {
       var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
       return Y+M+D+h+m+s;
     },
+     utc2beijing(utc_datetime) {
+	// 转为正常的时间格式 年-月-日 时:分:秒
+    var date = new Date(utc_datetime);  
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
+    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
+    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+    return Y+M+D+h+m+s; 
+  } ,
     //初始化数据
     getAllserver(){
       queryyysinfo({}).then(response=>{
@@ -441,7 +465,10 @@ export default {
      
     },
     //记录查询
-    getServerlist(){
+    getServerlist(start){
+      if(start==0){
+        this.zlStart=0
+      }
       var Sukelog = Parse.Object.extend('SukeLog')
          var sukelog = new Parse.Query(Sukelog)
          if(this.zlForm.hardwareType!=""){
@@ -450,12 +477,18 @@ export default {
          if(this.zlForm.status!=''){
            sukelog.equalTo('status',this.zlForm.status)
          }
+         if(this.zlForm.hardware_number!=''){
+           sukelog.matches('hardware_number',this.zlForm.hardware_number,'i')
+         }
           sukelog.limit(this.zlPageSize)
           sukelog.skip(this.zlStart)
+          sukelog.ascending('-createdAt')
           sukelog.count().then(count=>{
          this.zlTotal =count
          sukelog.find().then(results=>{
            this.zlData = results
+         },error=>{
+           returnLogin(error)
          })
         })
     },

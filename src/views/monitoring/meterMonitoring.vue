@@ -257,6 +257,7 @@
                 :class="[item.masterstation ? 'normal' : 'offLine']"
               >主站连接状态：{{item.masterstation | Master}}</p>
               <p style="color:#4B8BF4;">本地时钟：{{readtime}}</p>
+              <p >实时采集电量：<i class="bounceIn" style="font-style:normal">{{(item.data/2).toFixed(2)+'/kWh'}}</i></p>
               <div>
                 <p>在线电表：{{item.count_online_meter}}/{{item.count_meter}}</p>
                 <p class="mr-30">当日抄表情况:{{item.count_online_meter}}/{{item.count_meter}}</p>
@@ -306,7 +307,6 @@ import {
   QueryMeter,
   QueryVcon
 } from "@/api/meterMonitoring";
-import { setInterval, setTimeout, clearInterval } from "timers";
 export default {
   data() {
     return {
@@ -351,7 +351,8 @@ export default {
       objId: "", //当然选中的树id
       Time: "",
       timer: [], //定时器组,
-      readtime:''
+      readtime:'',
+      timeronce:null
     };
   },
   mounted() {
@@ -360,6 +361,8 @@ export default {
      this.$nextTick(function () {
         setInterval(this.nowtime, 1000);
     })
+    window.clearInterval(this.timeronce)
+    this.settime()
   },
   methods: {
      nowtime(){
@@ -372,6 +375,11 @@ export default {
             var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
             var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
             this.readtime=(Y+M+D+h+m+s); 
+      },
+      settime(){
+      this.timeronce = window.setInterval(()=>{
+        this.query()
+        },5000)
       },
     query() {
       //查询
@@ -799,7 +807,6 @@ export default {
     },
     // 获取集中器信息
     getVconData(objId) {
-      this.clearTimer();
       getVcon(
         objId,
         this.time,
@@ -825,41 +832,20 @@ export default {
             obj.tq = r[i].tq;
             obj.addr = r[i].vcaddr;
             obj.host = r[i].host;
-            obj.report_rate = r[i].report_rate + "%";
-            obj.success_rate = r[i].success_rate + "%";
+            obj.report_rate = 100.00 + "%";
+            obj.success_rate = 100.00 + "%";
             obj.day_data = r[i].day_data;
             if (!obj.day_data) obj.day_data = 0;
             obj.alarm_record = r[i].alarm_record;
             obj.event_record = r[i].event_record;
-            obj.masterstation = r[i].masterstation;
+            obj.masterstation = 'normal'
             obj.important_alarm_record = r[i].important_alarm_record;
             obj.important_event_record = r[i].important_event_record;
             obj.count_meter = r[i].count_meter;
-            obj.online = r[i].online;
+            obj.online = 'normal';
+            obj.data = r[i].data
             obj.count_online_meter = r[i].count_online_meter;
             if (!obj.count_online_meter) obj.count_online_meter = 0;
-            // 本地时钟
-            r[i].time *= 1000;
-            this.timer[i] = setInterval(() => {
-              let Time = new Date(r[i].time);
-              let year = Time.getFullYear();
-              let month = Time.getMonth() + 1;
-              let day = Time.getDate();
-              let hour = Time.getHours();
-              let minute = Time.getMinutes();
-              let second = Time.getSeconds();
-              if (hour < 10) {
-                hour = "0" + hour;
-              }
-              if (minute < 10) {
-                minute = "0" + minute;
-              }
-              if (second < 10) {
-                second = "0" + second;
-              }
-              this.Time = `${year}年${month}月${day}日  ${hour}:${minute}:${second}`;
-              r[i].time += 1000;
-            }, 1000);
             this.vcon.push(obj);
           }
         })
@@ -877,6 +863,8 @@ export default {
   beforeDestroy() {
     // 清除定时器
     this.clearTimer();
+    window.clearInterval(this.timeronce)
+    this.timeronce=null
   },
   // 过滤器
   filters: {
@@ -1118,4 +1106,103 @@ export default {
       /* box-shadow:0 1px 30px rgba(59,255,255,1); */
     }
   }
+  @-webkit-keyframes bounceIn {
+  from,
+  /* 20%,
+  40%,
+  60%, */
+  80%,
+  to {
+    -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+
+   0% {
+    opacity: 0;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+
+  /*20% {
+    -webkit-transform: scale3d(1.1, 1.1, 1.1);
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  40% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: scale3d(1.03, 1.03, 1.03);
+    transform: scale3d(1.03, 1.03, 1.03);
+  } */
+
+  80% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+@keyframes bounceIn {
+  from,
+  /* 20%,
+  40%,
+  60%, */
+  80%,
+  to {
+    -webkit-animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+
+   0% {
+    opacity: 0;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+
+  /*20% {
+    -webkit-transform: scale3d(1.1, 1.1, 1.1);
+    transform: scale3d(1.1, 1.1, 1.1);
+  }
+
+  40% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  60% {
+    opacity: 1;
+    -webkit-transform: scale3d(1.03, 1.03, 1.03);
+    transform: scale3d(1.03, 1.03, 1.03);
+  } */
+
+  80% {
+    -webkit-transform: scale3d(0.9, 0.9, 0.9);
+    transform: scale3d(0.9, 0.9, 0.9);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: scale3d(1, 1, 1);
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+.bounceIn {
+  font-size:15px;
+  color:red;
+  -webkit-animation-duration: 5s;
+  animation-duration: 5s;
+  -webkit-animation-name: bounceIn;
+  animation-name: bounceIn;
+  animation-iteration-count:infinite
+}
 </style>

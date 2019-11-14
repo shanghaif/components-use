@@ -1,17 +1,12 @@
 <template>
   <div class="equipment">
-    <h3 style="margin:0;">设备统计</h3>
+    <h3 style="margin:0;">{{$t('equipment.equipmentstatistics')}}</h3>
     <div class="equ_header">
       <ul>
-        <!-- <li>
-          <el-select v-model="equvalue" placeholder="请选择">
-             <el-option v-for="(item,index) in proTableData" :label="item.name" :key="index" :value="item.id"></el-option>
-          </el-select>
-        </li>-->
         <li>
           <p>
-            设备总数
-            <el-tooltip content="当前指定产品设备总数" placement="top">
+            {{$t('equipment.totalequipment')}}
+            <el-tooltip :content="$t('equipment.totalequipment')" placement="top">
               <i class="el-icon-question"></i>
             </el-tooltip>
           </p>
@@ -21,8 +16,8 @@
           <p>
             <span
               style="height:5px;width:5px;border-radius:5px;background:#409eff;display:inline-block;vertical-align:middle;margin-right:5px;"
-            ></span>激活设备
-            <el-tooltip content="当前已激活设备总数" placement="top">
+            ></span>{{$t('equipment.activationdevice')}}
+            <el-tooltip :content="$t('equipment.totalactive')" placement="top">
               <i class="el-icon-question"></i>
             </el-tooltip>
           </p>
@@ -32,8 +27,8 @@
           <p>
             <span
               style="height:5px;width:5px;border-radius:5px;background:#67c23a;display:inline-block;vertical-align:middle;margin-right:5px;"
-            ></span>在线设备
-            <el-tooltip content="当前指在线设备总数" placement="top">
+            ></span>{{$t('equipment.onlinedevices')}}
+            <el-tooltip :content="$t('equipment.totalonline')" placement="top">
               <i class="el-icon-question"></i>
             </el-tooltip>
           </p>
@@ -47,15 +42,15 @@
     <div class="equtabs">
       <!--tabs第一个标签页-->
       <el-tabs v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane label="设备管理" name="first">
+        <el-tab-pane :label="$t('route.设备管理')" name="first">
           <div>
             <div style="text-align:right">
-              <el-button>批量添加</el-button>
-              <el-button type="primary" @click="devicedialogVisible=true">添加设备</el-button>
+              <el-button>{{$t('equipment.batchaddition')}}</el-button>
+              <el-button type="primary" @click="devicedialogVisible=true">{{$t('equipment.adddevice')}}</el-button>
             </div>
           </div>
           <div style="margin-top:20px;" class="equdevices">
-            <el-select v-model="equvalue" placeholder="请选择" class="selectdetail">
+            <el-select v-model="equvalue"  class="selectdetail">
               <el-option
                 v-for="(item,index) in proTableData"
                 :label="item.name"
@@ -64,16 +59,16 @@
               ></el-option>
             </el-select>
             <el-select v-model="selectdevice" class="selectdetail">
-              <el-option value="设备名称"></el-option>
-              <el-option value="设备编号"></el-option>
+              <el-option :value="$t('equipment.devicename')"></el-option>
+              <el-option :value="$t('equipment.devicenumber')"></el-option>
             </el-select>
-            <el-input v-model="deviceinput" placeholder="请输入设备名称" v-if="selectdevice=='设备名称'" class="selectdetail"></el-input>
-            <el-input v-model="deviceinput" placeholder="请输入设备编号" v-else class="selectdetail"></el-input>
+            <el-input v-model="deviceinput" :placeholder="$t('equipment.enterproductname')" v-if="selectdevice==$t('equipment.devicename')" class="selectdetail"></el-input>
+            <el-input v-model="deviceinput" :placeholder="$t('equipment.enterdevicenumber')" v-else class="selectdetail"></el-input>
             <!-- <el-input v-model="devicenumber" placeholder="请输入设备编号" style="margin:0;"></el-input> -->
-            <el-button type="primary" @click="getDevices(0)" class="selectdetail">查 询</el-button>
-            <el-button type="primary" :disabled="multipleTable.length==0" @click="deleteDevcie" class="selectdetail">删 除</el-button>
-            <el-button type="primary" :disabled="multipleTable.length==0" @click="unactiveDevice" class="selectdetail">禁 用</el-button>
-            <el-button type="primary" :disabled="multipleTable.length==0" @click="activeDevice" class="selectdetail">启 用</el-button>
+            <el-button type="primary" @click="getDevices(0)" class="selectdetail">{{$t('developer.search')}}</el-button>
+            <el-button type="primary" :disabled="multipleTable.length==0" @click="deleteDevcie" class="selectdetail">{{$t('developer.delete')}}</el-button>
+            <el-button type="primary" :disabled="multipleTable.length==0" @click="unactiveDevice" class="selectdetail">{{$t('developer.prohibit')}}</el-button>
+            <el-button type="primary" :disabled="multipleTable.length==0" @click="activeDevice" class="selectdetail">{{$t('developer.enable')}}</el-button>
           </div>
           <!--第一个表格-->
           <div class="tabstable">
@@ -85,25 +80,25 @@
               :row-style="rowClass"
             >
               <el-table-column type="selection" align="center" width="55"></el-table-column>
-              <el-table-column label="设备编号/名称" align="center">
+              <el-table-column :label="$t('equipment.devicenumber')+'/'+$t('equipment.name')" align="center">
                 <template slot-scope="scope">
                   <span  >{{scope.row.devaddr}}</span>
                   <p  style="margin:0;color:green">{{scope.row.name}}</p>
                 </template>
               </el-table-column>
-                <el-table-column label="状态" align="center">
+                <el-table-column :label="$t('equipment.state')" align="center">
                 <template slot-scope="scope">
-                  <span  :class="scope.row.status" v-if="scope.row.status=='ACTIVE'">已激活</span><el-tooltip content="设备已注册" placement="top" v-if="scope.row.status=='ACTIVE'">
+                  <span  :class="scope.row.status" v-if="scope.row.status=='ACTIVE'">{{$t('product.active')}}</span><el-tooltip content="设备已注册" placement="top" v-if="scope.row.status=='ACTIVE'">
                 <i class="el-icon-question"></i>
               </el-tooltip>
                
-                  <span  :class="scope.row.status" v-if="scope.row.status=='UNACTIVE'">未激活</span><el-tooltip content="设备已注册" placement="top" v-if="scope.row.status=='UNACTIVE'">
+                  <span  :class="scope.row.status" v-if="scope.row.status=='UNACTIVE'">{{$t('product.unactive')}}</span><el-tooltip content="设备未注册" placement="top" v-if="scope.row.status=='UNACTIVE'">
                   <i class="el-icon-question"></i>
                 </el-tooltip>
-                  <span  :class="scope.row.status" v-if="scope.row.status=='ONLINE'">在线</span><el-tooltip content="设备已经上线" placement="top" v-if="scope.row.status=='ONLINE'">
+                  <span  :class="scope.row.status" v-if="scope.row.status=='ONLINE'">{{$t('product.online')}}</span><el-tooltip content="设备已经上线" placement="top" v-if="scope.row.status=='ONLINE'">
                 <i class="el-icon-question"></i>
               </el-tooltip>
-                  <span  :class="scope.row.status" v-if="scope.row.status=='OFFLINE'">离线</span>
+                  <span  :class="scope.row.status" v-if="scope.row.status=='OFFLINE'">{{$t('product.offline')}}</span>
                   <el-tooltip content="设备已经离线" placement="top" v-if="scope.row.status=='OFFLINE'">
                 <i class="el-icon-question"></i>
               </el-tooltip>
@@ -115,12 +110,12 @@
                  <span v-else>{{scope.row.desc}}</span> 
                 </template>
               </el-table-column>-->
-              <el-table-column label="所属产品" align="center">
+              <el-table-column :label="$t('equipment.product')" align="center">
                 <template slot-scope="scope">
                   <span type="success">{{scope.row.productName}}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="节点类型" align="center">
+              <el-table-column :label="$t('equipment.nodetype')" align="center">
                 <template slot-scope="scope">
                   <svg-icon icon-class="iot" v-if="scope.row.nodeType==0" style="width:2rem;height:2rem"/>
                   <svg-icon icon-class="wgicon" style="width:2rem;height:2rem" v-else></svg-icon>
@@ -128,7 +123,7 @@
                   <el-tag type="success" v-else>网关</el-tag> -->
                 </template>
               </el-table-column>
-              <el-table-column label="启用/禁用" align="center">
+              <el-table-column :label="$t('developer.enable')+'/'+$t('developer.prohibit')" align="center">
                 <template slot-scope="scope">
                   <!-- <span
                     style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#cccccc;vertical-align:middle"
@@ -150,7 +145,7 @@
                 </template>
               </el-table-column>
             
-              <el-table-column label="最后上线时间" align="center">
+              <el-table-column :label="$t('equipment.lastonlinetime')" align="center">
                 <template slot-scope="scope">
                   <span
                     v-if="scope.row.lastOnlineTime"
@@ -158,29 +153,29 @@
                   <span v-else>—</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center">
+              <el-table-column :label="$t('developer.operation')" align="center">
                 <template slot-scope="scope">
                   <el-link
                     type="primary"
                     :underline="false"
                     icon="el-icon-view"
                     @click="deviceToDetail(scope.row)"
-                  >查看</el-link>
+                  >{{$t('equipment.see')}}</el-link>
                   <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                     <p>确定删除这个{{scope.row.name}}设备吗？</p>
                     <div style="text-align: right; margin: 0">
                       <el-button
                         size="mini"
                         @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                      >取消</el-button>
-                      <el-button type="primary" size="mini" @click="makeSure(scope)">确定</el-button>
+                      >{{$t('developer.cancel')}}</el-button>
+                      <el-button type="primary" size="mini" @click="makeSure(scope)">{{$t('developer.determine')}}</el-button>
                     </div>
                     <el-link
                       slot="reference"
                       :underline="false"
                       icon="el-icon-delete"
                       type="danger"
-                    >删除</el-link>
+                    >{{$t('developer.delete')}}</el-link>
                   </el-popover>
                   <el-link
                     type="primary"
@@ -188,7 +183,7 @@
                     icon="el-icon-s-unfold"
                     v-if="scope.row.nodeType==1"
                     @click="deviceToChildren(scope.row)"
-                  >子设备</el-link>
+                  >{{$t('equipment.subdevice')}}</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -204,15 +199,15 @@
             </div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="批次管理" name="second">
+        <el-tab-pane :label="$t('equipment.batchmanagement')" name="second">
           <el-table :data="pctableData"  style="width: 100%;text-align:center">
-            <el-table-column type="index" label="序号" align="center" width="50"></el-table-column>
-            <el-table-column label="批次名称" align="center">
+            <el-table-column type="index" :label="$t('equipment.serialnumber')" align="center" width="200"></el-table-column>
+            <el-table-column :label="$t('equipment.batchname')" align="center">
               <template slot-scope="scope">
                 <span>{{scope.row.attributes.data.batch_name}}</span>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间">
+            <el-table-column align="center" :label="$t('equipment.createdAt')">
               <template slot-scope="scope">
                 <span>{{utc2beijing(scope.row.createdAt)}}</span>
               </template>
@@ -237,28 +232,28 @@
       </el-tabs>
       <!--添加设备弹窗-->
       <el-dialog
-        title="添加设备"
+        :title="$t('equipment.adddevice')"
         :visible.sync="devicedialogVisible"
         width="50%"
         :before-close="handleClose"
       >
         <div slot="title" class="header-title">
           <span class="title-name">
-            添加设备
-            <el-tooltip content="创建设备后可以使用平台颁发的身份信息连接到平台" placement="top" style="margin-left:5px">
+           {{$t('equipment.adddevice')}}
+            <el-tooltip :content="$t('equipment.text')" placement="top" style="margin-left:5px">
               <i class="el-icon-question"></i>
             </el-tooltip>
           </span>
         </div>
         <div class="devicecontent">
-          <el-form ref="deviceform" :model="deviceform" label-width="80px" :rules="rules">
-            <el-form-item label="设备名称" prop="name">
+          <el-form ref="deviceform" :model="deviceform" label-width="150px" :rules="rules">
+            <el-form-item :label="$t('equipment.devicename')" prop="name">
               <el-input v-model="deviceform.name"></el-input>
             </el-form-item>
-            <el-form-item label="设备编号" prop="devaddr">
+            <el-form-item :label="$t('equipment.devicenumber')" prop="devaddr">
               <el-input v-model="deviceform.devaddr"></el-input>
             </el-form-item>
-            <el-form-item label="设备批次" prop="batchId">
+            <el-form-item :label="$t('equipment.batchname')" prop="batchId">
               <el-input v-model="deviceform.batchId" disabled>
                 <i slot="suffix" class="el-icon-plus" @click="addDeviceBatch"></i>
               </el-input>
@@ -272,8 +267,8 @@
             <!-- <el-form-item label="设备类型" prop="devType">
                 <el-input v-model="deviceform.devType" placeholder="请输入设备类型"></el-input>
             </el-form-item>-->
-            <el-form-item label="产品名称" prop="productName">
-              <el-select v-model="deviceform.productName" placeholder="请选择产品名称">
+            <el-form-item :label="$t('product.productname')" prop="productName">
+              <el-select v-model="deviceform.productName" :placeholder="$t('equipment.entername')">
                 <el-option
                   v-for="(item,index) in proTableData1"
                   :label="item.name"
@@ -285,19 +280,19 @@
             <!-- <el-form-item label="父级设备" prop="fathername">
               <el-input v-model="deviceform.fathername"></el-input>
             </el-form-item>-->
-            <el-form-item label="资产编号">
+            <el-form-item :label="$t('equipment.assetnumber')">
               <el-input v-model="deviceform.assetNum"></el-input>
             </el-form-item>
-            <el-form-item label="设备型号">
+            <el-form-item :label="$t('equipment.equipmenttype')">
               <el-input v-model="deviceform.devModel"></el-input>
             </el-form-item>
-            <el-form-item label="设备品牌">
+            <el-form-item :label="$t('equipment.equipmentbrand')">
               <el-input v-model="deviceform.brand"></el-input>
             </el-form-item>
-            <el-form-item label="安装位置">
+            <el-form-item :label="$t('equipment.installationlocation')">
               <el-input v-model="deviceform.address"></el-input>
             </el-form-item>
-            <el-form-item label="备注">
+            <el-form-item :label="$t('developer.describe')">
               <el-input
                 type="textarea"
                 v-model="deviceform.desc"
@@ -307,53 +302,52 @@
           </el-form>
         </div>
         <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="submitForm('deviceform')">确 定</el-button>
-          <el-button @click="devicedialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitForm('deviceform')">{{$t('developer.determine')}}</el-button>
+          <el-button @click="devicedialogVisible = false">{{$t('developer.cancel')}}</el-button>
         </span>
       </el-dialog>
       <!--第二个个弹窗批次添加-->
       <el-dialog
-        title="批次添加"
+        :title="$t('equipment.batchaddition')"
         :visible.sync="pcdialogVisible"
         width="50%"
         :before-close="handleClose1"
       >
         <div class="pccontent">
           <el-form :inline="true" :model="pcformInline" class="demo-form-inline">
-            <el-form-item label="批次名称">
-              <el-input v-model="pcformInline.pcname" placeholder="批次名称"></el-input>
+            <el-form-item :label="$t('equipment.batchname')">
+              <el-input v-model="pcformInline.pcname" :placeholder="$t('equipment.batchname')"></el-input>
             </el-form-item>
-            <el-form-item label="创建时间">
+            <el-form-item :label="$t('equipment.createdAt')">
               <el-date-picker
                 v-model="pcformInline.createdtime"
                 type="datetime"
-                placeholder="选择创建日期时间"
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="addbatch">创建批次</el-button>
+              <el-button type="primary" @click="addbatch">{{$t('equipment.addbatch')}}</el-button>
             </el-form-item>
           </el-form>
           <el-table :data="pctableData" height="450" style="width: 100%;text-align:center">
-            <el-table-column type="index" label="序号" align="center" width="50"></el-table-column>
-            <el-table-column label="批次名称" align="center">
+            <el-table-column type="index" :label="$t('equipment.serialnumber')" align="center" width="50"></el-table-column>
+            <el-table-column :label="$t('equipment.batchname')" align="center">
               <template slot-scope="scope">
                 <span>{{scope.row.attributes.data.batch_name}}</span>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间">
+            <el-table-column align="center" :label="$t('equipment.createdAt')">
               <template slot-scope="scope">
                 <span>{{utc2beijing(scope.row.createdAt)}}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" width="300">
+            <el-table-column :label="$t('developer.operation')" align="center" width="300">
               <template slot-scope="scope">
                 <el-button
                   type="primary"
                   @click="updatebatch(scope.row,scope.row.id)"
                   size="mini"
-                >编辑</el-button>
-                <el-button type="danger" @click="deletebatch(scope.row.id)" size="mini">删除</el-button>
+                >{{$t('developer.edit')}}</el-button>
+                <el-button type="danger" @click="deletebatch(scope.row.id)" size="mini">{{$t('developer.delete')}}</el-button>
                 <el-button
                   type="success"
                   @click="selectbatch(scope.row,scope.row.id)"
@@ -370,6 +364,8 @@
 <script>
 import Parse from "parse";
 import { Promise } from "q";
+import Cookies from 'js-cookie';
+var language
 export default {
   data() {
     return {
@@ -382,7 +378,7 @@ export default {
       equvalue: "0",
       cities: [],
       activeName: "first",
-      selectdevice: "设备名称",
+      selectdevice: '',
       deviceinput: "",
       devicenumber: "",
       multipleTable: [],
@@ -455,6 +451,7 @@ export default {
     console.log(this.userId);
     this.getRole();
     this.searchProduct();
+    language = Cookies.get('language')
     
   },
   methods: {
@@ -464,7 +461,7 @@ export default {
       var devices = new Parse.Query(Devices);
       devices.equalTo('status','ACTIVE')
       if (this.deviceinput != "") {
-        if (this.selectdevice == "设备名称") {
+        if (this.selectdevice == "设备名称"||this.selectdevice=='Device Name') {
           devices.equalTo("name", this.deviceinput);
         } else {
           devices.equalTo("devaddr", this.deviceinput);
@@ -518,7 +515,8 @@ export default {
             this.proTableData.push(obj);
             this.proTableData1.push(obj);
           });
-          this.proTableData.unshift({ name: "全部产品", id: "0" });
+          
+          this.proTableData.unshift({ name: language=='zh' ? '全部产品':'All Products', id: "0" });
           if (this.$route.query.productid) {
             this.equvalue = this.$route.query.productid;
           }

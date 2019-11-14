@@ -2,12 +2,12 @@
     <div class="gateway">
         <div class="gatewayheader">
           <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small" label-width="120px">
-            <el-form-item label="终端类型">
-              <el-select v-model="formInline.gatetype" placeholder="终端类型">
-                <el-option label="网关" value="net"></el-option>
+            <el-form-item :label="$t('zetadevices.terminaltype')">
+              <el-select v-model="formInline.gatetype" :placeholder="$t('zetadevices.terminaltype')">
+                <el-option :label="$t('product.gateway')" value="net"></el-option>
               </el-select>
-              <el-form-item label="终端型号">
-                <el-select v-model="formInline.gate" placeholder="终端型号">
+              <el-form-item :label="$t('zetadevices.terminalmodel')">
+                <el-select v-model="formInline.gate" :placeholder="$t('zetadevices.terminalmodel')">
                   <el-option label="APZ1ZT" value="APZ1ZT"></el-option>
                   <!-- <el-option label="ZETAG C1" value="C1"></el-option>
                   <el-option label="ZETAG C2" value="C2"></el-option>
@@ -15,19 +15,19 @@
                 </el-select>
               </el-form-item>
             </el-form-item>
-            <el-form-item label="终端地址">
-              <el-input v-model="formInline.address" placeholder="终端地址"></el-input>
+            <el-form-item :label="$t('zetadevices.terminaladdress')">
+              <el-input v-model="formInline.address" :placeholder="$t('zetadevices.terminaladdress')"></el-input>
             </el-form-item>
-            <el-form-item label="在线状态">
-              <el-select v-model="formInline.status" placeholder="设备状态">
-                <el-option label="全部" :value="9"></el-option>
-                <el-option label="在线" value="ACTIVE"></el-option>
-                <el-option label="离线" value="OFFLINE"></el-option>
+            <el-form-item :label="$t('zetadevices.onlinestate')">
+              <el-select v-model="formInline.status" :placeholder="$t('zetadevices.onlinestate')">
+                <el-option :label="$t('zetadevices.all')" :value="9"></el-option>
+                <el-option :label="$t('zetadevices.online')" value="ACTIVE"></el-option>
+                <el-option :label="$t('zetadevices.offline')" value="OFFLINE"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="getZetaGateway(1)">查 询</el-button>
-              <el-button type="primary" @click="resetForm">重 置</el-button>
+              <el-button type="primary" @click="getZetaGateway(1)">{{$t('developer.search')}}</el-button>
+              <el-button type="primary" @click="resetForm">{{$t('zetadevices.reset')}}</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -38,25 +38,25 @@
               </div>
               <div class="content">
                 <!--ZETA网关-->
-                <p><span>ZETA网关:<span style="color:green">{{'('+item.attributes.devaddr+')'}}</span></span>
+                <p><span>{{'ZETA'+$t('product.gateway')+":"}}<span style="color:green">{{'('+item.attributes.devaddr+')'}}</span></span>
                 <span v-if="breathe==true" class="breathe-btn" style="display:inline-block;float:right;" :style="{'background-image':item.attributes.status=='ACTIVE' ? '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(green))': '-webkit-gradient(linear,left top,left bottom,from(#ffffff),to(red))'}"></span>
-                <span  v-else  class="animated fadeInDown" style="float:right" :style="{'color':item.attributes.status ==  'ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ? '运行中 ':'未运行'}}</span>
+                <span  v-else  class="animated fadeInDown" style="float:right" :style="{'color':item.attributes.status ==  'ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ?  $t('zetadevices.inoperation'):$t('zetadevices.notruning')}}</span>
                 </p>
-                <p>型号:<span style="color:#409EFF">{{'APA1ZT'}}</span><span style="float:right;display:inline-block;width:60%;">终端地址:<span style="color:#409EFF">{{item.attributes.ip}}</span></span></p>
-                <p>网络环境:<span style="color:#409EFF">{{item.attributes.rssi==-255 ? (item.attributes.rssi==-99 ? '无信号': '网线' ): '无线网络'}}</span><span style="float:right;display:inline-block;width:60%;">网络格式:<span style="color:#409EFF">{{item.attributes.basedata.WCDMA}}</span></span></p>
+                <p>{{$t('zetadevices.model')+':'}}<span style="color:#409EFF">{{'APA1ZT'}}</span><span style="float:right;display:inline-block;width:50%;">{{$t('zetadevices.terminaladdress')+':'}}<span style="color:#409EFF">{{item.attributes.ip}}</span></span></p>
+                <p>{{$t('zetadevices.networkenvironment')}}:<span style="color:#409EFF">{{item.attributes.rssi==-255 ? (item.attributes.rssi==-99 ? $t('zetadevices.nosignal'): $t('zetadevices.Reticle') ): $t('zetadevices.wirelessnetwork')}}</span><span style="float:right;display:inline-block;width:50%;">{{$t('zetadevices.networkformat')}}:<span style="color:#409EFF">{{item.attributes.basedata.WCDMA}}</span></span></p>
                 <!--SIM卡号-->
                 <p><span>SIM卡号:</span><span style="color:#409EFF">{{item.attributes.basedata.tel}}</span></p>
                 <!--ICCID-->
                  <p><span>ICCID:{{item.attributes.basedata.ICCID}}</span></p>
                 <!--服务器连接状态-->
-                <p><span>服务器连接状态：</span><span style="float:right;display:inline-block;width:60%;">本地时钟：</span></p>
-                <p><span :style="{'color':item.attributes.status=='ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ? '已连接':'未连接'}}</span><span style="float:right;color:rgb(75, 139, 244);display:inline-block;width:60%;">{{readtime}}</span></p>
+                <p><span>{{$t('zetadevices.serverconnection')+':'}}</span><span style="float:right;display:inline-block;width:50%;">{{$t('zetadevices.localclock')}}</span></p>
+                <p><span :style="{'color':item.attributes.status=='ACTIVE' ? 'green':'red'}">{{item.attributes.status=='ACTIVE' ? $t('zetadevices.Connected'):$t('zetadevices.Unconnected')}}</span><span style="float:right;color:rgb(75, 139, 244);display:inline-block;width:50%;">{{readtime}}</span></p>
                 <!--RSSI-->
-                <p><span>最新RSSI:<span style="color:#666">{{item.attributes.basedata.rssi+'dbm'}}</span></span>
-                <span style="float:right;width:60%;">15分钟内数据包:<span></span></span>
+                <p><span>{{$t('zetadevices.newest')+' RSSI:'}}<span style="color:#666">{{item.attributes.basedata.rssi+'dbm'}}</span></span>
+                <span style="float:right;width:50%;">{{$t('zetadevices.datapacket')}}<span></span></span>
                 </p>
                  <!--当前位置-->
-                <p><span>位置:</span><span>N：-22.123456</span><span style="margin-left:10px">E：-11.002233</span></p>
+                <p><span>{{$t('zetadevices.Position')+':'}}</span><span>N：-22.123456</span><span style="margin-left:10px">E：-11.002233</span></p>
                 <p></p>
               </div>
           </div>

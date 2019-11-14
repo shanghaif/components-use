@@ -1,18 +1,18 @@
 <template>
     <div class="devproduct">
-        <h3>产品管理</h3>
+        <h3>{{$t('route.产品管理')}}</h3>
         <el-tabs v-model="activeName" @tab-click="handleClick">
-            <el-tab-pane :label="'我的产品'+'('+total+')'" name="first">
+            <el-tab-pane :label="$t('product.myproduct')+'('+total+')'" name="first">
                 <div class="prosecond">
                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                     <el-form-item>
-                        <el-input v-model="formInline.productname" placeholder="请输入产品名称搜索"></el-input>
+                        <el-input v-model="formInline.productname" :placeholder="$t('product.searchproductname')"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="searchProduct(0)">搜 索</el-button>
+                        <el-button type="primary" @click="searchProduct(0)">{{$t('developer.search')}}</el-button>
                     </el-form-item>
                     <el-form-item style="float:right;text-align:right">
-                        <el-button type="primary" @click="dialogFormVisible=true">创建产品</el-button>
+                        <el-button type="primary" @click="dialogFormVisible=true">{{$t('product.createproduct')}}</el-button>
                     </el-form-item>
                     </el-form>
                     <div class="protable">
@@ -25,29 +25,29 @@
                                 >
                             </el-table-column>
                             <el-table-column
-                                label="产品名称"
+                                :label="$t('product.productname')"
                                 >
                                 <template slot-scope="scope">
                                    <span>{{scope.row.attributes.name}}</span>
                                 </template>
                             </el-table-column>
                              <el-table-column
-                                label="产品分组"
+                                :label="$t('product.productgrouping')"
                                 >
                                 <template slot-scope="scope">
                                    <span>{{scope.row.attributes.devType}}</span>
                                 </template>
                             </el-table-column>
                             <el-table-column
-                                label="节点类型"
+                                :label="$t('product.nodetype')"
                                 >
                                 <template slot-scope="scope">
-                                   <span v-if="scope.row.attributes.nodeType==1">网关</span>
-                                   <span v-if="scope.row.attributes.nodeType==0">设备</span>
+                                   <span v-if="scope.row.attributes.nodeType==1">{{$t('product.gateway')}}</span>
+                                   <span v-if="scope.row.attributes.nodeType==0">{{$t('product.equipment')}}</span>
                                 </template>
                             </el-table-column>
                             <el-table-column
-                                label="所属分类"
+                                :label="$t('product.classification')"
                                 >
                                 <template slot-scope="scope">
                                    <span>{{scope.row.CategoryKey}}</span>
@@ -55,40 +55,40 @@
                             </el-table-column>
                             <el-table-column
                                 
-                                label="添加时间"
+                                :label="$t('product.addingtime')"
                                 >
                                 <template slot-scope="scope">
                                    <span>{{utc2beijing(scope.row.createdAt)}}</span>
                                 </template>
                             </el-table-column>
                             <el-table-column
-                                label="操作"
+                                :label="$t('developer.operation')"
+                                width="250"
                                 >
                                 <template slot-scope="scope">
-                                    <el-link type="primary" :underline="false" icon="el-icon-view" @click="deviceToDetail(scope.row)">详情</el-link>
+                                    <el-link type="primary" :underline="false" icon="el-icon-view" @click="deviceToDetail(scope.row)">{{$t('product.details')}}</el-link>
                                    <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                                         <p>确定删除这个{{scope.row.name}}产品吗？</p>
                                         <div style="text-align: right; margin: 0">
                                         <el-button
                                             size="mini"
                                             @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                                        >取消</el-button>
-                                        <el-button type="primary" size="mini" @click="makeSure(scope)">确定</el-button>
+                                        >{{$t('developer.cancel')}}</el-button>
+                                        <el-button type="primary" size="mini" @click="makeSure(scope)">{{$t('developer.determine')}}</el-button>
                                         </div>
                                         <el-link
                                         slot="reference"
                                         :underline="false"
                                         icon="el-icon-delete"
                                         type="danger"
-                                     >删除</el-link>
+                                     >{{$t('developer.delete')}}</el-link>
                                      </el-popover>
                                       <el-link
                                         :underline="false"
                                         icon="el-icon-attract"
                                         @click="GoTodevices(scope.row)"
                                         type="primary"
-                                        
-                                     >设备</el-link>
+                                     >{{$t('product.equipment')}}</el-link>
                                 </template>
                             </el-table-column>
                             </el-table>
@@ -107,24 +107,24 @@
             </el-tab-pane>
         </el-tabs>
         <div class="prodialog">
-            <el-dialog title="新建产品" :visible.sync="dialogFormVisible" width="40%"
+            <el-dialog :title="$t('product.createproduct')" :visible.sync="dialogFormVisible" width="40%" top="5vh"
         :before-close="handleClose">
         <div class="content">
             <!--产品信息-->
             <div class="contentone">
                 <div style="display:flex;">
-                    <span>产品信息</span>
+                    <span>{{$t('product.productinformation')}}</span>
                     <p style="height:1px;width:auto;border-top:1px dashed #dddddd;flex-grow:2;margin:10px;"></p>
                 </div>
                 
                 <el-form :model="form" :rules="rules" ref="ruleForm">
-                    <el-form-item label="产品名称" prop="name">
+                    <el-form-item :label="$t('product.productname')" prop="name">
                     <el-input v-model="form.name" autocomplete="off"></el-input>
                     </el-form-item>
-                      <el-form-item label="产品标识" prop="devType">
+                      <el-form-item :label="$t('product.productidentification')" prop="devType">
                     <el-input v-model="form.devType" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="所属分类" prop="category">
+                    <el-form-item :label="$t('product.classification')" prop="category">
                     <el-cascader
                         v-model="form.category"
                         :options="treeData"
@@ -136,15 +136,15 @@
             <!--节点类型-->
             <div class="contenttwo" style="margin-top:20px;">
                 <div style="display:flex;">
-                    <span>节点类型</span>
+                    <span>{{$t('product.nodetype')}}</span>
                     <p style="height:1px;width:auto;border-top:1px dashed #dddddd;flex-grow:2;margin:10px;"></p>
                 </div>
                 
                 <el-form :model="form" :rules="rules" ref="ruleForm">
-                    <el-form-item label="节点类型" prop="nodeType">
+                    <el-form-item :label="$t('product.nodetype')" prop="nodeType">
                     <el-radio-group v-model="form.nodeType" >
-                        <el-radio :label="0">设备</el-radio>
-                        <el-radio :label="1">网关</el-radio>
+                        <el-radio :label="0">{{$t('product.equipment')}}</el-radio>
+                        <el-radio :label="1">{{$t('product.gateway')}}</el-radio>
                     </el-radio-group>
                     </el-form-item>
                     <!-- <el-form-item label="是否接入网关" v-show="form.resource=='网关'">
@@ -158,20 +158,20 @@
             <!--连网方式-->
              <div class="contentthird" style="margin-top:20px;">
                 <div style="display:flex;">
-                    <span>连网与描述</span>
+                    <span>{{$t('product.networkinganddescription')}}</span>
                     <p style="height:1px;width:auto;border-top:1px dashed #dddddd;flex-grow:2;margin:10px;"></p>
                 </div>
                 <el-form :model="form" :rules="rules" ref="ruleForm">
-                    <el-form-item label="连网方式" prop="netType">
-                     <el-select v-model="form.netType" placeholder="请选择连网方式">
+                    <el-form-item :label="$t('product.networking')" prop="netType">
+                     <el-select v-model="form.netType" :placeholder="$t('product.selectgateway')">
                         <el-option label="WiFi" value="WIFI"></el-option>
-                        <el-option label="蜂窝(2G/3G/4G)" value="CELLULAR"></el-option>
-                        <el-option label="以太网" value="ETHERNET"></el-option>
+                        <el-option :label="$t('product.honeycomb')+'(2G/3G/4G)'" value="CELLULAR"></el-option>
+                        <el-option :label="$t('product.ethernet')" value="ETHERNET"></el-option>
                         <el-option label="LoRaWAN" value="LORA"></el-option>
-                        <el-option label="其他" value="OTHER"></el-option>
+                        <el-option :label="$t('product.ethernet')" value="OTHER"></el-option>
                     </el-select>
                     </el-form-item>
-                    <el-form-item label="产品描述" prop="desc">
+                    <el-form-item :label="$t('developer.describe')" prop="desc">
                         <el-input type="textarea" v-model="form.desc"></el-input>
                     </el-form-item>
                 </el-form>
@@ -179,8 +179,8 @@
         </div>
                 
                 <div slot="footer" class="dialog-footer">
-                    <el-button type="primary" @click="submitForm('ruleForm')">完 成</el-button>
-                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="submitForm('ruleForm')">{{$t('developer.determine')}}</el-button>
+                    <el-button @click="dialogFormVisible = false">{{$t('developer.cancel')}}</el-button>
                     
                 </div>
             </el-dialog>
@@ -202,6 +202,7 @@ export default {
           formInline:{
               productname:''
           },
+          productIdentifier:'',
           proTableData:[],
           formLabelWidth:'80px',
           dialogFormVisible:false,
@@ -250,10 +251,6 @@ export default {
    mounted() {
        this.Industry()
        this.getRole()
-    //    setTimeout(()=>{
-    //         this.searchProduct()
-    //    },1)
-      
    },
 
    methods: {
@@ -280,10 +277,14 @@ export default {
            if(start==0){
                this.start=0
            }
+           this.productIdentifier = this.$route.query.product
             var Product = Parse.Object.extend('Product')
             var product = new Parse.Query(Product)
             if(this.formInline.productname!=''){
                 product.equalTo('name',this.formInline.productname)
+            }
+            if(this.productIdentifier){
+                 product.equalTo('devType',this.productIdentifier)
             }
             product.ascending('-updatedAt')
             product.skip(this.start)

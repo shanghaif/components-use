@@ -1,14 +1,14 @@
 <template>
     <div id="application">
-            <h3>应用管理</h3>
+            <h3>{{$t('application.applicationmanagement')}}</h3>
             <el-tabs v-model="activeName" @tab-click="handleClick">
-                <el-tab-pane :label="label" name="app">
+                <el-tab-pane :label="$t('application.myapplication')" name="app">
                     <div class="form">
                         <div class="search">
-                            <el-input v-model="name" placeholder="请输入应用名称"></el-input>
-                            <el-button type="primary" @click="getAppMange(0)">搜索</el-button>
+                            <el-input v-model="name" :placeholder="$t('application.applicationname')"></el-input>
+                            <el-button type="primary" @click="getAppMange(0)">{{$t('application.search')}}</el-button>
                         </div>
-                        <el-button type="primary" @click="handleClickAdd">新增应用</el-button>
+                        <el-button type="primary" @click="handleClickAdd">{{$t('application.newapplication')}}</el-button>
                     </div>
                     <el-table
                     :data="tableData"
@@ -19,28 +19,28 @@
                         </el-table-column>
                         <el-table-column
                             prop="productIdentifier"
-                            label="应用标识">
+                            :label="$t('application.applicationidentification')">
                         </el-table-column>
                         <el-table-column
                             prop="title"
-                            label="应用名称">
+                            :label="$t('application.applicationname')">
                         </el-table-column>
                         <el-table-column
                             prop="scale"
-                            label="服务规模"
+                            :label="$t('application.scaleofservice')"
                             sortable>
                         </el-table-column>
                         <el-table-column
                             prop="category"
-                            label="所属行业">
+                            :label="$t('application.industrytype')">
                         </el-table-column>
                         <el-table-column
                             prop="creation_time"
-                            label="创建时间">
+                            :label="$t('application.createtime')">
                         </el-table-column>
                         <el-table-column
                             prop="operation"
-                            label="操作"
+                            :label="$t('developer.operation')"
                             >
                             <template slot-scope="scope">
                                 <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
@@ -49,19 +49,20 @@
                                         <el-button
                                             size="mini"
                                             @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                                        >取消</el-button>
-                                        <el-button type="primary" size="mini" @click="makeSure(scope)">确定</el-button>
+                                        >{{$t('developer.cancel')}}</el-button>
+                                        <el-button type="primary" size="mini" @click="makeSure(scope)">{{$t('developer.determine')}}</el-button>
                                         </div>
                                         <el-link
                                         slot="reference"
                                         :underline="false"
                                         icon="el-icon-delete"
                                         type="danger"
-                                     >删除</el-link>
+                                     >{{$t('developer.delete')}}</el-link>
                                      </el-popover>
-                                <el-button @click="handleClickUpdate(scope)" type="text" size="small">编辑</el-button>
-                                <el-button @click="handleClickLook(scope)" type="text" size="small">密钥</el-button>
-                                <el-button type="text" size="small" @click="handleClickVisit(scope)">访问</el-button>
+                                <el-button @click="handleClickUpdate(scope)" type="text" size="small" icon="el-icon-edit">{{$t('developer.edit')}}</el-button>
+                                <el-button @click="handleClickLook(scope)" type="text" size="small" icon="el-icon-key">{{$t('application.secretkey')}}</el-button>
+                                <el-button type="text" size="small" @click="handleClickVisit(scope)" >{{$t('application.visit')}}<i class="el-icon-arrow-right"></i></el-button>
+                                <el-button type="text" size="small" @click="Gotoproduct(scope)">{{$t('application.detail')}}<i class="el-icon-right"></i></el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -107,13 +108,52 @@ export default {
             tableData: [],
             // 查看展开
             isShow:false,
+            arr:[]
         }
     },
     created(){
         this.getAppMange();
+        // this.gaiacl()
     },
     methods:{
         // 访问
+    //     gaiacl(){
+    //   var DataItem = Parse.Object.extend('DataItem')
+    //   var dataitem = new Parse.Query(DataItem)
+    //   dataitem.limit(1000)
+    //   dataitem.select('objectId')
+    //   dataitem.ascending('updatedAt')
+    //   dataitem.find().then(resultes=>{
+    //       resultes.map(items=>{
+    //         this.arr.push(
+    //            new Promise((resolve, reject) => {
+    //           var DataItem = Parse.Object.extend('DataItem')
+    //           var dataitem = new DataItem();
+    //           var acl = new Parse.ACL();
+    //           dataitem.id = items.id;
+    //            acl.setRoleReadAccess("developer", true);
+    //           acl.setRoleWriteAccess("developer", true);
+    //            acl.setRoleReadAccess("electric", true);
+    //           acl.setRoleWriteAccess("electric", true);
+    //           dataitem.set('ACL',acl)
+    //           return dataitem.save().then(
+    //             resultes => {
+    //               resolve(resultes);
+    //             },
+    //             error => {
+    //               reject(error.message);
+    //             }
+    //           );
+    //         })
+    //         )
+    //         Promise.all(this.arr).then(data => {
+
+    //         }).catch(error=>{
+
+    //         })
+    //       })
+    //   })
+    // },
         handleClickVisit(scope){
             let index=scope.$index;
             let productIdentifier=this.tableData[index].productIdentifier;
@@ -266,7 +306,15 @@ export default {
       })
       
     },
-    },
+    Gotoproduct(scope){
+       this.$router.push({
+            path:'/roles/product',
+            query:{
+                product:scope.row.productIdentifier
+            }
+       })
+    }
+  },
 }
 </script>
 
