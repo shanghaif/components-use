@@ -22,7 +22,7 @@ export default {
     },
     top: {
       type: Number,
-      default: 350
+      default: 0
     }
   },
   data() {

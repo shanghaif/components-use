@@ -1,14 +1,12 @@
 <template>
   <div class="login-container">
     <div class="loginbanner">
-      <!-- <Pointwave style="width:100%;height:100%"></Pointwave> -->
+      <Pointwave style="width:100%;height:100%"></Pointwave>
       <el-form ref="loginForm" :model="loginForm" class="login-form" auto-complete="on" label-position="left">
         <div class="logo">
           <img :src="logosrc" alt="logo" style="width:80px;height:80px;">
-          <p>{{title}}</p>
+          <p>个人应用</p>
         </div>
- 
-        <!-- <h5 style="text-align:center;font-size:20px;color:rgba(0, 0, 0, 0.647058823529412);margin:20px 0;">账号密码登录</h5> -->
         <el-form-item prop="username">
           <span class="svg-container">
             <svg-icon icon-class="user" />
@@ -46,7 +44,7 @@
   import { login } from "@/api/login";
   import Cookies from "js-cookie";
   import { Parse } from "parse";
-  // import {  setToken } from '@/utils/auth'
+  import {  setToken } from '@/utils/auth'
   import Config from '@/config'
   import {
     getsession
@@ -207,7 +205,7 @@
   /* reset element-ui css */
  
   .login-container {
-    background: url("../../imgages/loginbanner.jpg") no-repeat;
+    background: url("../../imgages/banner.jpeg") no-repeat;
     height: 100%;
     background-size: cover;
     overflow-y: scroll; // opacity:0.8;
@@ -252,20 +250,23 @@
   .login-container {
     position: fixed;
     height: 100%;
-    width: 100%;
-    background-color: $bg;
+    width:100%;
+    background-color: teal;
     .login-form {
       position: absolute;
       height: 500px;
-      right: 5%;
+      left:0;
+      top:0;
+      right:0;
+      bottom:0;
       width: 520px;
       max-width: 100%;
       padding: 35px 35px 15px 35px;
-      margin: 120px;
       background: #ffffff;
       box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
       border-radius: 5px;
-      
+      margin:auto;
+      opacity: .8;
     }
     @media screen and (max-width: 1024px) {
       .login-form {
@@ -281,6 +282,7 @@
       right: 0;
       bottom: 20px;
       width: 520px;
+     
       max-width: 100%;
       padding: 35px 35px 15px 35px;
       margin: 0 auto;
