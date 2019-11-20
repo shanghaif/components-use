@@ -78,11 +78,6 @@ export default {
        this.copyright = sessionStorage.getItem('copyright')
    },
   },
-  created(){
-    
-      
-       
-  }
 }
 </script>
 

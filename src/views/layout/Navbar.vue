@@ -1,28 +1,15 @@
 <template>
   <el-menu class="navbar" style="background:#549ce6">
-    <!-- <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container"/> -->
-    <!-- <breadcrumb  class="breadcrumb-container"/> -->
-     <div class="systitle">
-      <img :src="imgsrc">
-      <h2>{{title}}</h2>
-      <!-- <h2 v-if="type=='pump'">水泵智能检测大数据平台</h2> -->
-    </div>
     <sidebar/>
     <el-tooltip :content="isscreenfull" effect="dark" placement="bottom" style="height:20px">
           <screenfull class="screenfull right-menu-item"/>
          
     </el-tooltip>
-    <!-- <el-tooltip :content="isscreenfull" effect="dark" placement="bottom" style="height:20px" v-else>
-            <span class="screenfull right-menu-item">
-            <svg-icon icon-class="out"/>
-          </span>
-    </el-tooltip> -->
     <!--中英文切换-->
     <div class="language">
       <lang-select class="international right-menu-item"/>
     </div>
      <div class="username" @click="userDetail">
-      <!-- <span class="user" style="color:#ffffff">欢迎您：{{roles}}</span> -->
       <img src="../../imgages/tou.png">
       <p style="height:40px">{{$t('navbar.userinfo')}}</p>
     </div>
@@ -33,27 +20,6 @@
       <p style="height:40px">{{$t('navbar.logOut')}}</p>
     </div>
     
-    <!-- <el-dropdown class="avatar-container" trigger="click">
-      <div class="avatar-wrapper">
-        <img :src="imgsrc" class="user-avatar">
-        <i class="el-icon-caret-bottom"/>
-      </div>
-      <el-dropdown-menu slot="dropdown">
-          <router-link to="/">
-            <el-dropdown-item>
-              {{ $t('navbar.Home') }}
-            </el-dropdown-item>
-          </router-link>
-            <router-link to="/userinfo">
-            <el-dropdown-item>
-              个人中心
-            </el-dropdown-item>
-          </router-link>
-          <el-dropdown-item divided>
-            <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-    </el-dropdown> -->
   </el-menu>
 </template>
  
@@ -99,17 +65,6 @@ export default {
   },
   created(){
    this.getTitle()
-  //  var _self = this
-    // this.$nextTick(function () {
-    //   document.addEventListener('keyup', function (e) {
-    //   //此处填写你的业务逻辑即可
-    //    if (e.keyCode == 27) {
-         
-    //         _self.isscreenfull = '全屏'
-    //         console.log(_self.isscreenfull)
-    //       }
-    //     })
-    //   })
   },
   methods: {
     getTitle(){
