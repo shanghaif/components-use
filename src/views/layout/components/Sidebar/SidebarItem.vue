@@ -1,6 +1,6 @@
 <template>
-  <div v-if="!item.hidden" class="menu-wrapper" style="height:40px;">
-    <!--根据取回来菜单生成-->
+   <div v-if="!item.hidden" class="menu-wrapper">
+   
      <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&(!item.children)" >
       <app-link v-if="onlyOneChild.name" :to="resolvePath(onlyOneChild.url)" >
         <el-menu-item :index="resolvePath(onlyOneChild.url)" :class="{'submenu-title-noDropdown':!isNest}" @click.native="reloadnow(onlyOneChild.url,onlyOneChild.name)">
@@ -125,11 +125,4 @@ export default {
 }
 </script>
 <style>
-.nest-menu .svg-icon{
-  margin-right:16px;
-}
-.el-submenu__title *{
-  box-sizing:border-box;
-  /* color:#ffffff; */
-}
 </style>
