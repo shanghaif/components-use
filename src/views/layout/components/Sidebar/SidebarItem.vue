@@ -8,7 +8,6 @@
         </el-menu-item>
       </app-link>
     </template>
-
     <el-submenu v-else ref="subMenu" :index="resolvePath(item.url)" :key="item.id" popper-append-to-body>
       <template slot="title">
         <item v-if="item.name" :icon="item.name && item.icon" :title="generateTitle(item.name)" />

@@ -709,6 +709,13 @@ export const constantRouterMap = [
     name:'产品管理',
     meta: { title: '产品管理', icon: 'product' }
   },
+  {
+    path: '/help',
+    component: Layout,
+    redirect: '/help',
+    name:'帮助中心',
+    meta: { title: '帮助中心', icon: 'help' }
+  },
   // {
   //   path: 'external-link',
   //   component: Layout,
