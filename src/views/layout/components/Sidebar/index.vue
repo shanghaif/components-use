@@ -44,34 +44,35 @@ export default {
       'sidebar'
     ]),
      routes() {
-      this.username=sessionStorage.getItem('username')
-      this.token = sessionStorage.getItem('token')
-      // this.type = sessionStorage.getItem('type')
-      if(!this.username||!this.token){
-        this.$router.push('/login')
-      }else{
-      // this.originroute = this.$router.options.routes
+       return this.$router.options.routes
+    //   this.username=sessionStorage.getItem('username')
+    //   this.token = sessionStorage.getItem('token')
+    //   // this.type = sessionStorage.getItem('type')
+    //   if(!this.username||!this.token){
+    //     this.$router.push('/login')
+    //   }else{
+    //   // this.originroute = this.$router.options.routes
        
-      let cloneData = JSON.parse(JSON.stringify(this.routes1)); // 对源数据深度克隆
-        cloneData.unshift({
-          name:'首页',
-          icon:'dashboard',
-          url:'/dashboard'
-        })
-      cloneData.map(items=>{
-        if(items.url=='/swagger/'){
-          items.url='http://'+location.host+'/swagger/'
-        }
-          if(items.name=='帮助中心'){
-            items.children.map(child=>{
-              if(child.url=='/swagger/'){
-                  child.url='http://'+location.host+'/swagger/'
-              }
-           })
-          }
-      })
-      return cloneData
-    }
+    //   let cloneData = JSON.parse(JSON.stringify(this.routes1)); // 对源数据深度克隆
+    //     cloneData.unshift({
+    //       name:'首页',
+    //       icon:'dashboard',
+    //       url:'/dashboard'
+    //     })
+    //   cloneData.map(items=>{
+    //     if(items.url=='/swagger/'){
+    //       items.url='http://'+location.host+'/swagger/'
+    //     }
+    //       if(items.name=='帮助中心'){
+    //         items.children.map(child=>{
+    //           if(child.url=='/swagger/'){
+    //               child.url='http://'+location.host+'/swagger/'
+    //           }
+    //        })
+    //       }
+    //   })
+    //   return cloneData
+    // }
     },
     activeMenu() {
       const route = this.$route
@@ -87,10 +88,14 @@ export default {
     },
     isCollapse() {
       return !this.sidebar.opened
-    }
+    },
+     showLogo() {
+      return this.$store.state.settings.sidebarLogo
+    },
   },
   mounted() {
-    this.routes1= JSON.parse(sessionStorage.getItem('list'))
+    // this.routes1= JSON.parse(sessionStorage.getItem('list'))
+    console.log(this.showLogo)
   },
 }
 </script>

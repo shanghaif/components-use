@@ -4,8 +4,8 @@
       <Pointwave style="width:100%;height:100%"></Pointwave>
       <el-form ref="loginForm" :model="loginForm" class="login-form" auto-complete="on" label-position="left">
         <div class="logo">
-          <img :src="logosrc" alt="logo" style="width:80px;height:80px;">
-          <p>个人应用</p>
+          <!-- <img :src="imgsrc" alt="logo" style="width:80px;height:80px;"> -->
+          <p>JohnQian</p>
         </div>
         <el-form-item prop="username">
           <span class="svg-container">
@@ -89,7 +89,7 @@
         checked: false,
         imgsrc: require("../../imgages/u50.png"),
         logosrc: '',
-        backgroundsrc: require("../../imgages/loginbanner.jpg"),
+        backgroundsrc: require("../../imgages/login_background.png"),
         redirect: undefined,
         routes: [],
       };
@@ -205,14 +205,15 @@
   /* reset element-ui css */
  
   .login-container {
-    background: url("../../imgages/banner.jpeg") no-repeat;
+    background: url("../../imgages/banner.jpg") no-repeat;
     height: 100%;
     background-size: cover;
-    overflow-y: scroll; // opacity:0.8;
+    overflow-y: hidden;
     .loginbanner {
       background: transparent;
       padding: 16px;
       box-sizing: border-box;
+      overflow: hidden;
       .el-input {
         display: inline-block;
         height: 47px;
@@ -262,11 +263,11 @@
       width: 520px;
       max-width: 100%;
       padding: 35px 35px 15px 35px;
-      background: #ffffff;
+      background: rgba(40, 144, 250, 0.2);
       box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
       border-radius: 5px;
       margin:auto;
-      opacity: .8;
+      border: 1px solid #2890fa;
     }
     @media screen and (max-width: 1024px) {
       .login-form {

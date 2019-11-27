@@ -587,7 +587,8 @@ export const constantRouterMap = [
         path: '/applicationManagement/addApp',
         name: '新增应用',
         component: () => import('@/views/roles/appOperate/addApp'),
-        meta: { title: '新增应用', icon: 'department' }
+        meta: { title: '新增应用', icon: 'department' },
+        hidden:true
       },
       {
         path: '/roles/appmanage',
@@ -637,8 +638,8 @@ export const constantRouterMap = [
         path: '/roles/onlinetest',
         name: '在线调试',
         component: () => import('@/views/equipment_management/onlinetest'),
-        meta: { title: '在线调试', icon:'onlinetest'}
-       
+        meta: { title: '在线调试', icon:'onlinetest'},
+       hidden:true
       },
       {
         path: '/roles/nodes',
@@ -695,27 +696,27 @@ export const constantRouterMap = [
       
     ]
   },
-  {
-    path: '/app',
-    component: Layout,
-    redirect: '/app',
-    name:'应用（项目）服务',
-    meta: { title: '应用（项目）服务', icon: 'engine' }
-  },
-  {
-    path: '/pro',
-    component: Layout,
-    redirect: '/pro',
-    name:'产品管理',
-    meta: { title: '产品管理', icon: 'product' }
-  },
-  {
-    path: '/help',
-    component: Layout,
-    redirect: '/help',
-    name:'帮助中心',
-    meta: { title: '帮助中心', icon: 'help' }
-  },
+  // {
+  //   path: '/app',
+  //   component: Layout,
+  //   redirect: '/app',
+  //   name:'应用（项目）服务',
+  //   meta: { title: '应用（项目）服务', icon: 'engine' }
+  // },
+  // {
+  //   path: '/pro',
+  //   component: Layout,
+  //   redirect: '/pro',
+  //   name:'产品管理',
+  //   meta: { title: '产品管理', icon: 'product' }
+  // },
+  // {
+  //   path: '/help',
+  //   component: Layout,
+  //   redirect: '/help',
+  //   name:'帮助中心',
+  //   meta: { title: '帮助中心', icon: 'help' }
+  // },
   // {
   //   path: 'external-link',
   //   component: Layout,

@@ -222,7 +222,7 @@
               :default-expand-all="false"
               :row-class-name="getRowClass"
             >
-              <el-table-column type="expand">
+              <el-table-column type="expand" >
                 <template
                   slot-scope="scope"
                   v-if="scope.row.dataType.type=='struct'"
@@ -267,13 +267,11 @@
                 <template slot-scope="scope">
                   <span
                     v-if="scope.row.dataType.specs&&(scope.row.dataType.type=='double'||scope.row.dataType.type=='float'||scope.row.dataType.type=='int')"
-                  >{{$t('proeuct.rangeofvalues')+scope.row.dataType.specs.min+'~'+scope.row.dataType.specs.max}}</span>
+                  >{{$t('product.rangeofvalues')+scope.row.dataType.specs.min+'~'+scope.row.dataType.specs.max}}</span>
                   <span v-else-if="scope.row.dataType.type=='string'">{{$t('product.datalength')+':'+scope.row.dataType.size+$t('product.byte')}}</span>
                   <span v-else-if="scope.row.dataType.type=='date'"></span>
                   <span v-else-if="scope.row.dataType.type!='struct'">{{scope.row.dataType.specs}}</span>
                   <span v-else></span>
-                  <!--<span v-if="scope.row.dataType.specs&&scope.row.dataType.type=='text'">{{'长度:'+scope.row.dataType.specs.length}}</span> 
-                  <span v-if="scope.row.dataType.specs&&scope.row.dataType.type=='struct'"></span>-->
                 </template>
               </el-table-column>
               <el-table-column :label="$t('developer.operation')">
@@ -303,14 +301,14 @@
               </div>
               <div style="text-align: center;margin-top:10px;">
                 <el-table :data="PropData" style="width:100%;text-align:center">
-                  <el-table-column :label="$t('product.name')" align="center">
+                  <el-table-column label="ID" align="center">
                     <template slot-scope="scope">
-                      <span>{{scope.row.attributes.data.Name}}</span>
+                      <span>{{scope.row.attributes.data.SuperId}}</span>
                     </template>
                   </el-table-column>
                   <el-table-column :label="$t('product.identifier')" align="center">
                     <template slot-scope="scope">
-                      <span>{{scope.row.attributes.data.Identifier}}</span>
+                      <span>{{scope.row.attributes.type}}</span>
                     </template>
                   </el-table-column>
                   <el-table-column :label="$t('product.applicabletype')" align="center">
@@ -341,7 +339,7 @@
             </div>
             <span slot="footer" class="dialog-footer">
               <el-button @click="originwmx = false" size="mini">{{$t('developer.cancel')}}</el-button>
-              <el-button type="primary" @click="originwmx = false" size="mini">{{$t('developer.determain')}}</el-button>
+              <el-button type="primary" @click="originwmx = false" size="mini">{{$t('developer.determine')}}</el-button>
             </span>
           </el-dialog>
           <!--添加物模型弹窗-->
@@ -710,7 +708,7 @@
                   </div>
                 <el-form-item :label="$t('product.readandwritetype')" prop="isread">
                     <el-radio-group v-model="structform.isread" size="medium">
-                      <el-radio label="rw">{{$t('product.readandwite')}}</el-radio>
+                      <el-radio label="rw">{{$t('product.readandwrite')}}</el-radio>
                       <el-radio label="r">{{$t('product.onlyread')}}</el-radio>
                     </el-radio-group>
                 </el-form-item>
@@ -1765,26 +1763,28 @@ export default {
     },
     Industry() {
       this.option = [];
-      getIndustry({ limit: 1000, where: { type: "category" } })
-        .then(res => {
-          if (res) {
-            res.results.map(items => {
+      var Datas = Parse.Object.extend("Datas");
+      var datas = new Parse.Query(Datas);
+      datas.equalTo("data.key", "category");
+      datas.limit(1000);
+      datas.find().then(
+        response => {
+          if (response) {
+            response.map(items => {
               var obj = {};
-              obj.value = items.data.CategoryKey;
-              obj.label = items.data.CategoryName;
-              obj.id = items.data.Id;
-              obj.parentid = items.data.SuperId;
+              obj.value = items.attributes.type;
+              obj.label = items.attributes.data.CategoryName;
+              obj.id = items.attributes.data.Id;
+              obj.parentid = items.attributes.data.SuperId;
               this.option.push(obj);
             });
             this.getProDetail();
           }
-        })
-        .catch(error => {
-          this.$message({
-            type: "error",
-            message: error.error
-          });
-        });
+        },
+        error => {
+          this.$message.error(error.message);
+        }
+      );
     },
     utc2beijing(utc_datetime) {
       // 转为正常的时间格式 年-月-日 时:分:秒
@@ -1804,11 +1804,11 @@ export default {
       datas.skip(this.productstart);
       if (this.category.length != 0) {
         datas.equalTo(
-          "data.CategoryType",
+          "type",
           this.category[this.category.length - 1]
         );
       }
-      datas.equalTo("type", "abilityInfo"),
+      datas.equalTo("data.key", "category"),
         datas.count().then(count => {
           this.producttotal = count;
           datas.find().then(
@@ -1902,7 +1902,6 @@ export default {
             } else {
               this.wmxData = this.productdetail.thing.properties.concat([]);
             }
- 
             editor.setValue(Base64.decode(setdata));
             editor6.setValue(JSON.stringify(this.productdetail.thing, null, 4));
             var Devices = Parse.Object.extend("Devices");
@@ -2053,6 +2052,7 @@ export default {
     },
     //用于处理定义好的物模型模板
     TypeInstall(origin, arr) {
+      console.log(arr)
       arr.map((items, index) => {
         if (items.DataType == "enum" || items.DataType == "bool") {
           var obj = {
@@ -2095,6 +2095,63 @@ export default {
             obj.dataType.specs.unit = JSON.parse(items.DataSpecs)["unit"];
           }
           origin.push(obj);
+          //分开结构体单独遍历
+        }else if(items.DataType=='struct'){
+          var structobj={
+            dataType:{
+              specs:[]
+            }
+          }
+          structobj.name = items.Name;
+          structobj.dataType.type = items.DataType;
+          structobj.required = items.Required ? false:true;
+          structobj.identifier = items.Identifier;
+          structobj.accessMode = items.RwFlag == 1 ? "r" : "rw";
+          JSON.parse(items.DataSpecsList).map(children=>{
+            if (children.childDataType == "ENUM" || children.childDataType == "BOOL") {
+            var obj = {
+              dataType: {
+                specs: {}
+              }
+            };
+            obj.name = children.childName;
+            obj.dataType.type = children.childDataType.toLowerCase();
+            obj.required = children.Required;
+            obj.identifier = children.identifier;
+            obj.accessMode = children.RwFlag == 1 ? "r" : "rw";
+            children.childEnumSpecsDTO.map(child => {
+              for (var key in child) {
+                var attribute = child["value"];
+                var value = child["name"];
+                obj.dataType.specs[attribute] = value;
+              }
+            });
+            structobj.dataType.specs.push(obj);
+          } else if (
+            children.childDataType == "DOUBLE" ||
+            children.childDataType == "INT" ||
+            children.childDataType == "FLOAT"
+          ) {
+            var obj = {
+              dataType: {
+                specs: {}
+              }
+            };
+            obj.name = children.childName;
+            obj.dataType.type = children.childDataType.toLowerCase();
+            obj.required = children.Required;
+            obj.identifier = children.identifier;
+            obj.accessMode = children.RwFlag == 1 ? "r" : "rw";
+            for (var key in children.childSpecsDTO) {
+              obj.dataType.specs.min = children.childSpecsDTO["min"];
+              obj.dataType.specs.max = children.childSpecsDTO["max"];
+              obj.dataType.specs.step = children.childSpecsDTO["precise"];
+              obj.dataType.specs.unit = children.childSpecsDTO["unit"];
+            }
+            structobj.dataType.specs.push(obj);
+            }
+          })
+          origin.push(structobj)
         }
       });
       var update = {};
@@ -2105,14 +2162,16 @@ export default {
         return cur;
       }, []);
     },
+    //添加物模型模板
     addProCategory(row) {
       var Product = Parse.Object.extend("Product");
       var product = new Parse.Query(Product);
       var Datas = Parse.Object.extend("Datas");
       var datas = new Parse.Query(Datas);
-      datas.equalTo("type", row.attributes.data.CategoryType);
+      datas.equalTo("type", row.attributes.type);
+      datas.equalTo('data.key','detail')
       datas.find().then(res => {
-        if (res) {
+        if (res.length) {
           if (res[0].attributes.data.Ability) {
             this.TypeInstall(
               this.productdetail.thing.properties,
@@ -2131,12 +2190,6 @@ export default {
           } else {
             console.log("此选项没有属性功能");
           }
- 
-          // let obj = {}
-          // this. productdetail.thing.properties = this.productdetail.thing.properties.reduce((cur,next) => {
-          //         obj[next.identifier] ? "" : obj[next.identifier] = true && cur.push(next);
-          //         return cur;
-          // },[])
         }
       });
     },
@@ -2407,9 +2460,9 @@ export default {
 .editproduct .row-expand-cover td:first-child .el-icon-arrow-right {
   visibility: hidden;
 }
-.editproduct .row-expand-cover + tr {
+/* .editproduct .row-expand-cover + tr {
   display: none;
-}
+} */
 .editproduct .el-table__expanded-cell {
   padding: 20px 0 !important;
   text-align: center;
@@ -2422,6 +2475,9 @@ export default {
 }
 .editproduct #pane-sixeth{
   display:flex;
+}
+.editproduct .el-col-2{
+  text-align: center;
 }
 
 </style>
