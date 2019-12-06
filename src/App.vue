@@ -36,12 +36,11 @@ export default {
   },
   methods:{
     getuser(){
-      //  Parse.current()
-      // this.username=sessionStorage.getItem('username')||''
-      // this.token = sessionStorage.getItem('token')||''
-      // if(!this.username||!this.token){
-      //   this.$router.push('/login')
-      // }
+      this.username=sessionStorage.getItem('username')||''
+      this.token = sessionStorage.getItem('token')||''
+      if(!this.username||!this.token){
+        this.$router.push('/login')
+      }
     },
     reload () {
       this.isRouterAlive = false
@@ -49,6 +48,9 @@ export default {
         this.isRouterAlive = true
       })
     }
+  },
+  created(){
+    this.getuser()
   }
 }
 </script>

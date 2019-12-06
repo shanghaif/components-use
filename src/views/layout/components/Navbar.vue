@@ -6,9 +6,8 @@
     
     <div class="right-menu">
       <lang-select class="international right-menu-item"/>
-       <el-tooltip content="全屏" effect="dark" placement="bottom" style="height:20px">
+        <el-tooltip :content="isscreenfull" effect="dark" placement="bottom" style="height:20px">
           <screenfull class="screenfull right-menu-item"/>
-         
        </el-tooltip>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
@@ -36,7 +35,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import LangSelect from '@/components/LangSelect'
 import Screenfull from '@/components/Screenfull'
-
+import { eventBus } from '@/api/eventBus';
 export default {
   components: {
     Breadcrumb,
@@ -45,6 +44,11 @@ export default {
     Screenfull,
     
   },
+  data(){
+    return{
+       isscreenfull:'全屏',
+    }
+  },
   computed: {
     ...mapGetters([
       'sidebar',
@@ -52,6 +56,11 @@ export default {
     ])
   },
   methods: {
+      getsccreen(){
+      eventBus.$on('isshow',data=>{
+        this.isscreenfull = data;
+      })
+    },
     toggleSideBar() {
       console.log(this.$store)
       this.$store.dispatch('toggleSideBar')
@@ -60,6 +69,9 @@ export default {
       await this.$store.dispatch('logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     }
+  },
+  mounted(){
+     this.getsccreen() 
   }
 }
 </script>

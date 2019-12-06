@@ -205,7 +205,7 @@
   /* reset element-ui css */
  
   .login-container {
-    background: url("../../imgages/banner.jpg") no-repeat;
+    background: url("../../imgages/login_background.png") no-repeat;
     height: 100%;
     background-size: cover;
     overflow-y: hidden;
