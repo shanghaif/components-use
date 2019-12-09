@@ -31,7 +31,61 @@
    Vue.prototype.$parse = parse
    
    ```
-   然后在页面直接引用就可以了
-   ### 2.2 库图片
-   ![Parse](http://chuantu.xyz/t6/702/1571304946x1031866013.png)
-   
+    
+ ## packjson.json打包命令添加
+ ```JSON
+  // "d": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+  // "b": "node build/build.js",
+  ```
+## config build.js
+```JavaScript
+    // 下面这行代码
+   // 拿到命令行里参数，比如执行（npm run b projectA）,这个时候projectName就等于projectA
+  // 有了这个变量，就可以根据这个名字来读取projectConfig里面的配置了
+  let projectName = process.argv[2]
+
+  // 下面两行代码 获取projectName后把保存起来，写入到project.js里，方便其它js文件里引入使用
+  let fs = require('fs')
+  fs.writeFileSync('./config/project.js', `exports.name = '${projectName}'`)
+
+// 下面两行代码继续执行命令（npm run build），执行默认命令开始进行打包
+let exec = require('child_process').execSync;
+exec('npm run build', {stdio: 'inherit'});
+## config dev.js
+let projectName = process.argv[2]
+let fs = require('fs')
+
+fs.writeFileSync('./config/project.js', `exports.name = '${projectName}'`)
+
+let exec = require('child_process').execSync;
+exec('npm run dev', {stdio: 'inherit'});
+```
+## config projectconfig.js
+```JavaScript
+const projectName = require('./project')
+
+const config = {
+  //活动1
+  projectA:{
+    localPath:'./src/projects/projectA/',
+    uploadPath:'/h5/test/cb/',
+    outPut:'projectA'
+  },
+  //活动2
+}
+
+const configObj = config[projectName.name]
+module.exports = configObj
+//如果想修改不同的路径需要将config/index.js里面build的路径修改
+ // assetsRoot: path.resolve(__dirname, '../'+projectconfig.outPut),
+ const projectconfig = require('../config/projectconfig')
+  index: path.resolve(__dirname, '../'+projectconfig.outPut+'/index.html'),
+
+     // Paths
+  assetsRoot: path.resolve(__dirname, '../'+projectconfig.outPut),
+  //然后在修改build 内的/webpack.base.conf.js内的module.exports内部的app
+  app: projectconfig.localPath+'main.js'//分项目打包
+  //最后修改webpack.prod.conf.js
+   template: projectconfig.localPath+'index.html',//多项目打包
+```
+
