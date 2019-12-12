@@ -23,28 +23,28 @@ export default {
       type: String,
       default: '250px'
     },
-    barchartdata:{
-      type:Array,
-      default:()=>{
-        data:[]
-      }
+    persondata:{
+        type:Object,
+        default:()=>{
+            data:[]
+        }
     }
   },
   data() {
     return {
-      chart: null
+      chart: null,
     }
   },
   watch:{
-    barchartdata:{
-      deep:true,
-       handler(val) {
-      this.initChart(val)
+      persondata:{
+          deep:true,
+          handler(val){
+              this.initChart(val)
+          }
       }
-    }
   },
   mounted() {
-    this.initChart(this.barchartdata)
+    this.initChart(this.persondata)
     this.__resizeHandler = debounce(() => {
       if (this.chart) {
         this.chart.resize()
@@ -61,7 +61,7 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart(barchartdata) {
+    initChart(persondata) {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.setOption({
         tooltip: {
@@ -69,67 +69,67 @@ export default {
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           },
-           formatter: '{a} <br/>{b} : {c}%'
+        //   formatter: '{a} <br/>{b} : {c}个'
         },
         grid: {
-          // top:20,
-          left: '5%',
+          top:20,
+          left: '2%',
           right: '2%',
-          bottom: '7%',
+          bottom: '3%',
           containLabel: true
         },
+        // title:{
+        //   text:'日用量趋势'
+        // },
         xAxis: [{
-          type: 'category',
-          data: ['2012年', '2013年', '2014年', '2015年', '2016年','2017年'],
+          name:'(家)',
+          type: 'value',
+          boundaryGap: [0, 0.01],
           axisTick: {
             alignWithLabel: true,
             show:false,
           }
         }],
          legend: {
-          data: ['销售增长'],
+          data: ['水泵企业数量','上市企业数量'],
            textStyle:{
             color:'#ffffff'
           }
         },
         yAxis: [{
-          name:'销售增长(%)',
-          type: 'value',
+          type: 'category',
+          data: ['2012年', '2013年', '2014年', '2015年', '2016年','2017年'],
+          inverse: true,
           axisTick: {
             show: false
-          },
-          axisLabel: {
-              textStyle: {
-                color: "#fff" //坐标值得具体的颜色
-              }
-            },
-            nameTextStyle:{
-                color:"#ffffff",
-                padding:10,
-                fontSize:14
-            }
+          }
         }],
         series: [{
-          name: '销售增长',
+          name: '水泵企业数量',
           type: 'bar',
-          // stack: 'vistors',
-          barWidth: '40%',
-          itemStyle: {
-              normal: {
-                color: "#e67070"
+          stack: 'vistors',
+          barWidth: '60%',
+          data: persondata.data,
+          itemStyle:{
+              normal:{
+                  color:'#0066FF'
               }
-            },
-          data: barchartdata.data,
+          },
           animationDuration
-        } 
-        // {
-        //   name: 'pageB',
-        //   type: 'bar',
-        //   // stack: 'vistors',
-        //   // barWidth: '40%',
-        //   data: [80, 52, 200, 334, 390, 330, 220],
-        //   animationDuration
-        // }
+        }, 
+        {
+          name: '上市企业数量',
+          type: 'bar',
+          stack: 'vistors',
+          barWidth: '60%',
+          data: [2,2,2,2,3,4],
+          itemStyle:{
+              normal:{
+                  color:'#33FFFF'
+              }
+          },
+          animationDuration
+        }
         ]
       })
     }

@@ -130,19 +130,20 @@
             <!--运行状态卡片-->
               <ul style="display: flex;flex-wrap: wrap">
                 <li v-for="(item,index) in properties" :key="index" class="updatedtable">
-                  <div style="font-family: cursive;text-align:center"><span>{{item.name}}</span></div>
+                  <div style="font-family: cursive;height:70px;"><span style="font-size:16px;">{{item.name}}</span><span style="float:right;margin-right:10px;"><svg-icon :icon-class="item.name"></svg-icon></span></div>
                   <!-- <div><span>ID：</span><span>{{item.identifier}}</span></div> -->
-                 <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='double'||item.dataType=='float'||item.dataType=='int'"><span >{{item.value}}</span><span v-if="item.specs.unit">{{item.specs.unit}}</span></div>
-                 <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='enmu'||item.dataType=='bool'"><span >{{item.value}}</span><span>{{item.specs[item.value]}}</span></div>
-                 <div style="font-size:14px;font-weight: bolder;font-family: fantasy" v-if="item.dataType=='struct'">
+                 <div style="font-size:16px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='double'||item.dataType.type=='float'||item.dataType.type=='int'"><span >{{item.value | filterVal}}</span><span v-if="item.dataType.specs.unit">{{item.dataType.specs.unit}}</span></div>
+                 <div style="font-size:16px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='enmu'||item.dataType.type=='bool'"><span >{{item.value | filterVal}}</span><span>{{item.dataType.specs[item.value]}}</span></div>
+                 <div style="font-size:14px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='struct'">
                     <i v-for="(key,index) in item.specs" :key="index" style="display:block;height:30px;font-style:normal">
-                       <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="key.dataType.type=='double'||key.dataType.type=='float'||key.dataType.type=='int'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span v-if="key.dataType.specs.unit">{{key.dataType.specs.unit}}</span></div>
-                        <div style="font-size:16px;font-weight: bolder;font-family: fantasy" v-if="key.dataType.type=='enmu'||key.dataType.type=='bool'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span>{{key.dataType.specs[key.value]}}</span></div>
+                       <div style="font-size:16px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='double'||key.dataType.type=='float'||key.dataType.type=='int'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span v-if="key.dataType.specs.unit">{{key.dataType.specs.unit}}</span></div>
+                        <div style="font-size:16px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='enmu'||key.dataType.type=='bool'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span>{{key.dataType.specs[key.value]}}</span></div>
                    </i>
                   
                   
                  </div>
-                 <div><span>{{$t('equipment.updatetime')+':'}}</span><span v-if="item.time">{{timestampToTime(item.time)}}</span></div>
+                 <div style="text-align:center;"><span class="fontSize">{{$t('equipment.updatetime')+':'}}</span><span v-if="item.time" class="fontSize">{{timestampToTime(item.time)}}</span></div>
+                 <div style="text-align:center;"><el-link type="primary" :underline="false" @click="dataDetail(item)">查看数据</el-link></div>
                 </li>
               </ul>
             </div>
@@ -327,6 +328,66 @@
             </el-dialog>
          </el-tab-pane>
       </el-tabs>
+      <!--data数据dialog-->
+      <el-dialog
+      title="历史数据"
+      :visible.sync="datadialogVisible"
+      width="40%"
+      :before-close="handleClose">
+      <div class="dialogcontent">
+        <!--数据图表-->
+        <el-tabs type="border-card" @tab-click="handleClick">
+          <el-tab-pane>
+            <span slot="label"><i class="el-icon-date"></i> 表格</span>
+            <el-table
+              :data="datafordetail.slice((dataDeviceStart-1)*dataDeviceLength,dataDeviceStart*dataDeviceLength)"
+              stripe
+              height="300"
+              style="width: 100%;text-align:center;">
+              <el-table-column
+                prop="name"
+                label="名称"
+                align="center"
+               >
+              </el-table-column>
+              <el-table-column
+                prop="value"
+                label="数值"
+                align="center"
+                >
+              </el-table-column>
+              <el-table-column
+                label="时间"
+                align="center">
+                <template slot-scope="scope">
+                  <span>{{timestampToTime(scope.row.time)}}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="elpagination" style="margin-top:20px;">
+              <el-pagination
+                @size-change="dataDeviceSizeChange"
+                @current-change="dataDeviceCurrentChange"
+                :page-sizes="[10, 20, 30, 50]"
+                :page-size="dataDeviceLength"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="dataDeviceTotal.length"
+              ></el-pagination>
+              </div>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label"><i class="el-icon-tickets"></i> 图表</span>
+            <div id="echarts" style="height:auto;width:100%;">
+               <line-chart :chart-data="lineChartData"/>
+            </div>
+            </el-tab-pane>
+        </el-tabs>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="datadialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="datadialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
     </div>
   </div>
 </template>
@@ -337,10 +398,28 @@ import { timestampToTime } from "@/api/login";
 import { getDev } from "@/api/systemmanage/system";
 import { clearInterval } from "timers";
 import { prototype } from 'stream';
-
+import LineChart from "../dashboard/admin/components/LineChart";
+import $ from 'jquery'
+var dataobj={}
 export default {
+  components:{
+    LineChart
+  },
+  filters:{
+    filterVal(val){
+      if(val){
+        return val
+      }else{
+        return '--'
+      }
+    }
+  },
   data() {
     return {
+      width:0,
+      lineChartData:'',
+      datafordetail:[],
+      datadialogVisible:false,
       childDialog:false,
       ninthform:{
         product:'',
@@ -375,6 +454,7 @@ export default {
       ],
       thirdData: [],
       isupdate: false,
+      ispushdata:true,
       timer: null,
       properties:[],
       isshowtable:false,
@@ -397,7 +477,19 @@ export default {
       productDevices:[],
       ischange:false,
       ischildren:false,
+      productid:'',
+      dataDeviceTotal:0,
+      dataDeviceLength:10,
+      dataDeviceStart:1,
     };
+  },
+  watch:{
+    properties:{
+      deep:true,
+      handler(val){
+        console.log(val)
+      }
+    }
   },
   mounted() {
     this.getDeviceDetail();
@@ -408,7 +500,8 @@ export default {
         this.$router.push({
          path:'/roles/onlinetest',
          query:{
-           deviceid:this.deviceid
+           deviceid:this.deviceid,
+           productid:this.productid
          }
         })
       }
@@ -480,8 +573,9 @@ export default {
       var Devices = Parse.Object.extend("Devices");
       var devices = new Parse.Query(Devices);
       devices.get(this.deviceid).then(resultes => {
-        var obj = {};
         console.log(resultes)
+        var obj = {};
+         this.productid = resultes.attributes.product.id
         obj.id = resultes.id;
         obj.createdAt = utc2beijing(resultes.createdAt);
         obj.productName = resultes.attributes.product.attributes.name;
@@ -522,8 +616,16 @@ export default {
         }
         
         this.devicedetail = obj;
-        // console.log(this.properties)
-        this.Update()
+        // this.Update()
+        this.properties = JSON.parse(JSON.stringify(resultes.attributes.product.attributes.thing.properties))
+         this.properties.map(items=>{
+                dataobj[items['name']]={
+                  expectedData: [],
+                  actualData: [],
+                  title:items['name'],
+                  data:[]
+                }  
+            })
       });
       
     },
@@ -532,13 +634,29 @@ export default {
       getDev(this.devicedetail.devaddr, this.devicedetail.productid)
         .then(resultes => {
           if (resultes) {
-            console.log(resultes)
             this.thirdData.push({
               time: timestampToTime(Math.ceil(new Date().getTime() / 1000)),
               value: JSON.stringify(resultes)
             });
             this.thirdtotal = this.thirdData.length;
-            this.properties = resultes.data
+            //动态$set,数据更新试图也一样更新，如果只是遍历的话试图回更新过慢
+            this.properties.map((item,index)=>{
+              resultes.data.map((updatedata,updatedindex)=>{
+                if(item.name == updatedata.name){
+                  var obj=resultes.data[updatedindex]
+                  this.$set(this.properties,index,obj)
+                }
+              })
+            })
+            for(var key in dataobj){
+              resultes.data.map(items=>{
+                if(key==items.name){
+                  dataobj[key].expectedData.push(items.value)
+                  dataobj[key].actualData.push(timestampToTime(items.time).substring(11))
+                  dataobj[key].data.unshift(items)
+                }
+              })
+            }
           }
         })
         .catch(error => {
@@ -552,6 +670,8 @@ export default {
     },
     //定时器启动
     updateTrue(event) {
+      // console.log(this.ispushdata)
+      this.ispushdata=false
       if (event == true) {
         this.timer = window.setInterval(() => {
           this.Update();
@@ -560,6 +680,13 @@ export default {
         window.clearInterval(this.timer);
         this.timer = null;
       }
+    },
+    //实时数据的分页
+    dataDeviceSizeChange(val){
+      this.dataDeviceStart=1
+    },
+    dataDeviceCurrentChange(val){
+      this.dataDeviceStart=val
     },
     handleSizeChange1(val) {
       this.thirdstart = 1;
@@ -779,6 +906,35 @@ export default {
           this.devicesTableData[index] = newData;
         });
     },
+    //查看历史数据
+    /**/
+    dataDetail(item){
+      this.datadialogVisible=true
+      
+      var lineChartData={}
+      // setTimeout(()=>{
+        // console.log(dataobj)
+        for(var key in dataobj){
+          if(item.name==key){
+            this.datafordetail = dataobj[key].data
+            lineChartData = dataobj[key]
+            this.dataDeviceTotal = dataobj[key].data
+          }
+        }
+        //  const lineChartData = {
+        //   newVisitis: {
+        //     expectedData: [100, 120, 161, 134, 105, 160, 165],
+        //     actualData: [0,1,2,3,4,5,6],
+        //     title:'help1'
+        //   }
+        // }
+        this.lineChartData =lineChartData
+      // },1000)
+      
+    },
+    handleClick(val){
+
+    }
   },
   //清除定时器
   destroyed(){
@@ -811,7 +967,7 @@ export default {
 }
 .editdevices .updatedtable{
     width: 300px;
-    height: 150px;
+    height: 190px;
     margin: 20px 20px 0 0;
     border: 1px solid #cccccc;
     /* text-align: center; */
@@ -866,6 +1022,15 @@ export default {
 }
 .editdevices .childdialog .el-form-item__content .el-select{
   width:100%;
+}
+.fontSize{
+  font-size:12px;
+  color:#666666;
+}
+.editdevices .svg-icon{
+  width:3rem;
+  height:3rem;
+  margin-top:5px;
 }
 </style>
 

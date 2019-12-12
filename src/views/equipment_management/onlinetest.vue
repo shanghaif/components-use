@@ -4,13 +4,15 @@
          <div >
             <el-form :model="devices" label-width="100px" :inline="true" size="mini">
                 <el-form-item label="请选择设备">
-                    <el-select v-model="devices.device">
-                        <el-option></el-option>
+                    <el-select v-model="devices.productid" @change="selsectProduct">
+                        <el-option v-for="(item,index) in productlist" :key="index" :label="item.attributes.name" :value="item.id">
+
+                        </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-select v-model="devices.device">
-                        <el-option></el-option>
+                    <el-select v-model="devices.deviceid" v-el-select-loadmore="loadmore">
+                        <el-option v-for="(item,index) in devicelist" :key="index" :label="item.attributes.name" :value="item.id"></el-option>
                     </el-select>
                 </el-form-item>
             </el-form>
@@ -37,13 +39,17 @@
                 height="250">
                 <el-table-column
                     prop="date"
-                    label="类型 / 时间"
-                    width="300"
+                    label="数据类型"
                     >
                 </el-table-column>
                 <el-table-column
                     prop="name"
                     label="时间"
+                    >
+                </el-table-column>
+                <el-table-column
+                    prop="name"
+                    label="数据内容"
                     >
                 </el-table-column>
                 </el-table>
@@ -189,6 +195,27 @@ var editor1;
 var editor2;
 export default {
   name: "OnlineTest",
+  directives: {
+    'el-select-loadmore': {
+      bind(el, binding) {
+        // 获取element-ui定义好的scroll盒子
+        const SELECTWRAP_DOM = el.querySelector('.el-select-dropdown .el-select-dropdown__wrap');
+        SELECTWRAP_DOM.addEventListener('scroll', function () {
+          /**
+          * scrollHeight 获取元素内容高度(只读)
+          * scrollTop 获取或者设置元素的偏移值,常用于, 计算滚动条的位置, 当一个元素的容器没有产生垂直方向的滚动条, 那它的scrollTop的值默认为0.
+          * clientHeight 读取元素的可见高度(只读)
+          * 如果元素滚动到底, 下面等式返回true, 没有则返回false:
+          * ele.scrollHeight - ele.scrollTop === ele.clientHeight;
+          */
+          const condition = this.scrollHeight - this.scrollTop <= this.clientHeight;
+          if (condition) {
+            binding.value();
+          }
+        });
+      }
+    }
+  },
   data() {
     return {
      primary:true,
@@ -196,7 +223,8 @@ export default {
      value4:true,
      contentData:[],
      devices:{
-         device:''
+         deviceid:'',
+         productid:'',
      },
      editor1:{
          function:'',
@@ -211,7 +239,13 @@ export default {
      isactive:false,
      primary1form:{
          status:''
-     }
+     },
+     productlist:[],
+     devicelist:[],
+     formData: {
+        pageIndex: 1,
+        pageSize: 20,
+      }
     };
   },
   mounted() {
@@ -223,12 +257,50 @@ export default {
         enableSnippets: true,
         enableLiveAutocompletion: true // 设置自动提示
     });
+    this.getProduct()
   },
   methods: {
     //发送指令
     sendZl() {},
     setJson(){
        
+    },
+    loadmore() {
+      this.formData.pageIndex++;
+      this.selsectProduct(this.productid);
+    },
+    getProduct(){
+      var Product = Parse.Object.extend("Product");
+      var product = new Parse.Query(Product);
+      product.limit(1000)
+      product.find().then(productresultes=>{
+         this.productlist=productresultes
+         this.devices.productid = this.$route.query.productid
+         this.getDevices(this.productid,true)
+        
+      })
+    },
+    //设备
+    getDevices(productid,isfirst){
+      var Devices = Parse.Object.extend("Devices");
+      var devices = new Parse.Query(Devices);
+      devices.equalTo('product',productid)
+      devices.skip((this.formData.pageIndex-1)*this.formData.pageSize)
+      devices.limit(this.formData.pageSize)
+      devices.find().then(deviceresultes=>{
+          this.devicelist = [...this.devicelist, ...deviceresultes]
+          if(isfirst){
+              this.devices.deviceid = this.$route.query.deviceid
+          }
+      })
+    },
+    //选择产品
+    selsectProduct(value){
+        this.formData.pageIndex=1
+        this.devicelist=[]
+        this.devices.productid = value
+        this.devices.deviceid=''
+        this.getDevices(value)
     },
     //清空选择框1
     // clearEditor1(){

@@ -12,7 +12,7 @@
               <el-button type="primary" @click="getChannel(0)">{{$t('developer.search')}}</el-button>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="addchanneltype">{{$t('developer.createchannel')}}</el-button>
+              <el-button type="primary" @click="addchanneltype">{{$t('developer.selectchannel')}}</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -797,7 +797,7 @@
               :rules='[{ required: true, message:"端口不能为空",trigger: "blur" }, { validator: validPort }]'
               class="notlastchildren"
             >
-              <el-input v-model="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
+              <el-input v-model.number="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
             </el-form-item>
 
             <el-form-item
@@ -967,7 +967,7 @@
               :rules='[{ required: true, trigger: "blur" }, { validator: validPort }]'
               class="notlastchildren"
             >
-              <el-input v-model="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
+              <el-input v-model.number="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
             </el-form-item>
             <el-form-item
               :label="$t('developer.username')"
@@ -1268,6 +1268,7 @@ export default {
     addchannelForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
+          var userid = Parse.User.current().id
           this.channelregion.map(item => {
             if (item.name == this.addchannel.region) {
               this.addchannel.channeltype = item.channelvalue;
@@ -1278,6 +1279,9 @@ export default {
           searchchannel.equalTo("config.port", this.addchannel.port);
           searchchannel.find().then(resultes => {
             var channel = new Channel();
+            var acl =new Parse.ACL()
+            acl.setReadAccess(userid,true)
+            acl.setWriteAccess(userid,true)
             if (this.channelId != "") {
               channel.id = this.channelId;
             } else {
@@ -1289,6 +1293,7 @@ export default {
                 });
               }
             }
+            channel.set('ACL',acl)
             channel.set("name", this.addchannel.name);
             channel.set("cType", this.addchannel.region);
             channel.set("type", this.addchannel.channeltype);
@@ -1317,7 +1322,7 @@ export default {
               channel.set("config", {
                 auto_save: this.addchannel.auto_save,
                 max_size: this.addchannel.max_size,
-                max_memory: this.addchannel.max_memory,
+                max_memory: this.addchannel.max_memory, 
                 server: "http://" + this.addchannel.server,
                 username: this.addchannel.username,
                 password: this.addchannel.password

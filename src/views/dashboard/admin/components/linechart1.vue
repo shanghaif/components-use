@@ -6,6 +6,7 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import { debounce } from '@/utils'
+import { format } from 'path';
 
 export default {
   props: {
@@ -19,7 +20,7 @@ export default {
     },
     height: {
       type: String,
-      default: '370px'
+      default: '250px'
     },
     autoResize: {
       type: Boolean,
@@ -31,6 +32,7 @@ export default {
       default:()=>{
             return {
               expectedData: [],
+              expectedData1: [],
               actualData: [],
               title:'1'
           }
@@ -44,23 +46,19 @@ export default {
     }
   },
   // 不需要watch,watch会影响首次（如果在tabs中）渲染
-  watch: {
-    chartData: {
-      deep: true,
-      handler(val) {
-         this.setOptions(val)
-      }
-    },
-  },
+//   watch: {
+//     chartData: {
+//       deep: true,
+//       handler(val) {
+//          this.setOptions(val)
+//       }
+//     },
+//   },
   mounted() {
-   
-    let dom=document.getElementsByClassName("chart")[0]
-    dom.style.width=window.innerWidth*0.4-120+'px'
     this.initChart()
     if (this.autoResize) {
       this.__resizeHandler = debounce(() => {
         if (this.chart) {
-           dom.style.width=window.innerWidth*0.4-120+'px'
           this.chart.resize()
         }
       }, 100)
@@ -99,7 +97,6 @@ export default {
           left: 10,
           right: 10,
           bottom: 20,
-          top: 30,
           containLabel: true
         },
         title: {
@@ -113,41 +110,42 @@ export default {
           axisPointer: {
             type: 'cross'
           },
-          padding: [5, 10]
+          padding: [5, 10],
+          formatter: '{a} <br/>{b} : {c}万台'
         },
         yAxis: {
+        name:'年产量(万台)',
           axisTick: {
             show: false
-          }
+          },
+        axisLabel: {
+            formatter: "{value}"
+            },
+            axisLabel: {
+              textStyle: {
+                color: "#fff" //坐标值得具体的颜色
+              }
+            },
+            nameTextStyle:{
+                color:"#ffffff",
+                padding:10,
+                fontSize:14
+            }
+          
         },
         legend: {
-          data: ['数据']
-        },
-         toolbox: {
-            feature: {
-                dataView: {show: true, readOnly: false},
-                magicType: {show: true, type: ['line', 'bar']},
-                restore: {show: true},
-                saveAsImage: {show: true}
-            }
-        },
-        dataZoom: [{
-            type: 'slider',
-            show: true,
-            start: 0,
-            end: 50,
-            handleSize: 8
+          data: ['年产量'],
+           textStyle:{
+            color:'#ffffff'
           },
-          {
-            type: 'inside',
-            start: 0,
-            end: 50
-          }
-        ],
+        },
         series: [{
-          name: '数据', itemStyle: {
+          name: '年产量', 
+        //    symbol: 'circle',
+           symbolSize: 10,
+          itemStyle: {
             normal: {
-              color: '#FF005A',
+              color: '#e67070',
               lineStyle: {
                 color: '#FF005A',
                 width: 2
@@ -160,10 +158,34 @@ export default {
           smooth: true,
           type: 'line',
           data: expectedData,
+          tooltip: true,
           animationDuration: 2800,
-          animationEasing: 'cubicInOut',
+        //   animationEasing: 'cubicInOut',
           
-        }]
+        },
+        // {
+        //   name: '数据1',
+        //   symbol: 'circle',
+        //   symbolSize: 10,
+        //   itemStyle: {
+        //     normal: {
+        //       color: '#FF005A',
+        //       lineStyle: {
+        //         color: 'red',
+        //         width: 2
+        //       },
+        //       areaStyle: {
+        //         // color: '#FF005A'
+        //       }
+        //     }
+        //   },
+        //   smooth: true,
+        //   type: 'line',
+        //   data: expectedData1,
+        //   animationDuration: 2800,
+        // //   animationEasing: 'cubicInOut'
+        // }
+        ]
       })
     },
     initChart() {

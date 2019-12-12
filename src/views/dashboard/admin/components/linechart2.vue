@@ -19,7 +19,7 @@ export default {
     },
     height: {
       type: String,
-      default: '370px'
+      default: '250px'
     },
     autoResize: {
       type: Boolean,
@@ -31,6 +31,7 @@ export default {
       default:()=>{
             return {
               expectedData: [],
+              expectedData1: [],
               actualData: [],
               title:'1'
           }
@@ -44,23 +45,19 @@ export default {
     }
   },
   // 不需要watch,watch会影响首次（如果在tabs中）渲染
-  watch: {
-    chartData: {
-      deep: true,
-      handler(val) {
-         this.setOptions(val)
-      }
-    },
-  },
+//   watch: {
+//     chartData: {
+//       deep: true,
+//       handler(val) {
+//          this.setOptions(val)
+//       }
+//     },
+//   },
   mounted() {
-   
-    let dom=document.getElementsByClassName("chart")[0]
-    dom.style.width=window.innerWidth*0.4-120+'px'
     this.initChart()
     if (this.autoResize) {
       this.__resizeHandler = debounce(() => {
         if (this.chart) {
-           dom.style.width=window.innerWidth*0.4-120+'px'
           this.chart.resize()
         }
       }, 100)
@@ -86,20 +83,26 @@ export default {
         this.__resizeHandler()
       }
     },
-    setOptions({ expectedData, actualData,title } = {}) {
+    setOptions({expectedData1, actualData,title } = {}) {
       this.chart.setOption({
         xAxis: {
           data: actualData,
           boundaryGap: false,
           axisTick: {
             show: false
-          }
+          },
+        //   axisLine:{
+        //     lineStyle:{
+        //         color:'#fff',
+        //         // width:1,//这里是为了突出显示加上的
+        //     }
+        //   }
         },
         grid: {
           left: 10,
           right: 10,
           bottom: 20,
-          top: 30,
+         
           containLabel: true
         },
         title: {
@@ -116,53 +119,80 @@ export default {
           padding: [5, 10]
         },
         yAxis: {
+         name:'单位(%)',
           axisTick: {
             show: false
-          }
+          },
+        //   axisLine:{
+        //     lineStyle:{
+        //         color:'#fff',
+        //         // width:1,//这里是为了突出显示加上的
+        //     }
+        //   }
+        axisLabel: {
+              textStyle: {
+                color: "#fff" //坐标值得具体的颜色
+              }
+            },
+            nameTextStyle:{
+                color:"#ffffff",
+                padding:10,
+                fontSize:14
+            }
         },
         legend: {
-          data: ['数据']
-        },
-         toolbox: {
-            feature: {
-                dataView: {show: true, readOnly: false},
-                magicType: {show: true, type: ['line', 'bar']},
-                restore: {show: true},
-                saveAsImage: {show: true}
-            }
-        },
-        dataZoom: [{
-            type: 'slider',
-            show: true,
-            start: 0,
-            end: 50,
-            handleSize: 8
-          },
-          {
-            type: 'inside',
-            start: 0,
-            end: 50
+          data: ['企业内销比重'],
+           textStyle:{
+            color:'#ffffff'
           }
-        ],
-        series: [{
-          name: '数据', itemStyle: {
+        },
+        series: [
+        //     {
+        //   name: '新产品产值率', 
+        //   symbol: 'circle',
+        //   symbolSize: 10,
+        //   itemStyle: {
+        //     normal: {
+        //       color: '#dda38f',
+        //       lineStyle: {
+        //         color: '#dda38f',
+        //         width: 2,
+        //         type: 'dashed',
+        //       },
+        //     //   areaStyle: {
+        //     //     color: '#FF005A'
+        //     //   }
+        //     }
+        //   },
+        //   smooth: true,
+        //   type: 'line',
+        //   data: expectedData,
+        //   animationDuration: 2800,
+        // //   animationEasing: 'cubicInOut',
+          
+        // },
+        {
+          name: '企业内销比重',
+          symbol: 'circle',
+          symbolSize: 10,
+          itemStyle: {
             normal: {
-              color: '#FF005A',
+              color: '#fffff',
               lineStyle: {
-                color: '#FF005A',
-                width: 2
+                color: '#33FF00',
+                width: 2,
+                type: 'dashed'
               },
-              areaStyle: {
-                color: '#006666'
-              }
+            //   areaStyle: {
+            //     color: '#FF005A'
+            //   }
             }
           },
-          smooth: true,
+        //   smooth: true,
           type: 'line',
-          data: expectedData,
+          data: expectedData1,
           animationDuration: 2800,
-          animationEasing: 'cubicInOut',
-          
+        //   animationEasing: 'cubicInOut'
         }]
       })
     },

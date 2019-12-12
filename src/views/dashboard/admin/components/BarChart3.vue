@@ -6,6 +6,7 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import { debounce } from '@/utils'
+import { regionData } from 'element-china-area-data';
 
 const animationDuration = 6000
 
@@ -21,13 +22,19 @@ export default {
     },
     height: {
       type: String,
-      default: '250px'
+      default: '420px'
     },
-    barchartdata:{
-      type:Array,
-      default:()=>{
-        data:[]
-      }
+    regionpdata:{
+        type:Object,
+        default:()=>{
+            return {
+            xdata:[],
+            data:[],
+            alldata:[],
+            title1:'',
+            title2:'',
+            }
+        }
     }
   },
   data() {
@@ -36,15 +43,15 @@ export default {
     }
   },
   watch:{
-    barchartdata:{
-      deep:true,
-       handler(val) {
-      this.initChart(val)
+      regionpdata:{
+          deep:true,
+          handler(val){
+              this.initChart(val)
+          }
       }
-    }
   },
   mounted() {
-    this.initChart(this.barchartdata)
+    this.initChart(this.regionpdata)
     this.__resizeHandler = debounce(() => {
       if (this.chart) {
         this.chart.resize()
@@ -61,7 +68,7 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart(barchartdata) {
+    initChart(regionpdata) {
       this.chart = echarts.init(this.$el, 'macarons')
       this.chart.setOption({
         tooltip: {
@@ -69,36 +76,40 @@ export default {
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           },
-           formatter: '{a} <br/>{b} : {c}%'
+           formatter: regionpdata.formatter
         },
         grid: {
-          // top:20,
-          left: '5%',
+        //   top:20,
+          left: '2%',
           right: '2%',
-          bottom: '7%',
+          bottom: '3%',
           containLabel: true
         },
         xAxis: [{
           type: 'category',
-          data: ['2012年', '2013年', '2014年', '2015年', '2016年','2017年'],
+          data: regionpdata.xdata,
           axisTick: {
             alignWithLabel: true,
             show:false,
-          }
+          },
+        //   axisLabel:{
+        //         interval:0,//横轴信息全部显示
+        //         rotate:-30,//-30度角倾斜显示
+        //     },
         }],
          legend: {
-          data: ['销售增长'],
+          data: [regionpdata.title1,regionpdata.title2],
            textStyle:{
             color:'#ffffff'
           }
         },
         yAxis: [{
-          name:'销售增长(%)',
+          name:'员工数量(人)',
           type: 'value',
           axisTick: {
             show: false
           },
-          axisLabel: {
+           axisLabel: {
               textStyle: {
                 color: "#fff" //坐标值得具体的颜色
               }
@@ -109,27 +120,26 @@ export default {
                 fontSize:14
             }
         }],
-        series: [{
-          name: '销售增长',
+        series: [
+             {
+          name: regionpdata.title2,
           type: 'bar',
-          // stack: 'vistors',
+          stack: 'vistors',
           barWidth: '40%',
-          itemStyle: {
-              normal: {
-                color: "#e67070"
-              }
-            },
-          data: barchartdata.data,
+          data: regionpdata.alldata,
+          animationDuration
+        },{
+          name: regionpdata.title1,
+          type: 'bar',
+          stack: 'vistors',
+          barWidth: '40%',
+          barGap: '-100%',//添加此配置项即为重叠效果
+          data: regionpdata.data,
+          lineStyle:{
+              color: '#555',
+          },
           animationDuration
         } 
-        // {
-        //   name: 'pageB',
-        //   type: 'bar',
-        //   // stack: 'vistors',
-        //   // barWidth: '40%',
-        //   data: [80, 52, 200, 334, 390, 330, 220],
-        //   animationDuration
-        // }
         ]
       })
     }

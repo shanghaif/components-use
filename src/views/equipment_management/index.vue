@@ -2,9 +2,13 @@
   <div class="equipment">
     <h3 style="margin:0;">{{$t('equipment.equipmentstatistics')}}</h3>
     <div class="equ_header">
+      
       <ul>
         <li>
           <p>
+             <span class="svg-container">
+                  <svg-icon icon-class="devicelist" />
+                </span>
             {{$t('equipment.totalequipment')}}
             <el-tooltip :content="$t('equipment.totalequipment')" placement="top">
               <i class="el-icon-question"></i>
@@ -14,9 +18,9 @@
         </li>
         <li>
           <p>
-            <span
-              style="height:5px;width:5px;border-radius:5px;background:#409eff;display:inline-block;vertical-align:middle;margin-right:5px;"
-            ></span>{{$t('equipment.activationdevice')}}
+             <span class="svg-container">
+                  <svg-icon icon-class="shuliang" />
+                </span>{{$t('equipment.activationdevice')}}
             <el-tooltip :content="$t('equipment.totalactive')" placement="top">
               <i class="el-icon-question"></i>
             </el-tooltip>
@@ -25,9 +29,9 @@
         </li>
         <li>
           <p>
-            <span
-              style="height:5px;width:5px;border-radius:5px;background:#67c23a;display:inline-block;vertical-align:middle;margin-right:5px;"
-            ></span>{{$t('equipment.onlinedevices')}}
+            <span class="svg-container">
+                  <svg-icon icon-class="onlinelist" />
+                </span>{{$t('equipment.onlinedevices')}}
             <el-tooltip :content="$t('equipment.totalonline')" placement="top">
               <i class="el-icon-question"></i>
             </el-tooltip>
@@ -44,7 +48,7 @@
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane :label="$t('route.设备管理')" name="first">
           <div>
-            <div style="text-align:right">
+            <div>
               <el-button>{{$t('equipment.batchaddition')}}</el-button>
               <el-button type="primary" @click="devicedialogVisible=true">{{$t('equipment.adddevice')}}</el-button>
             </div>
@@ -290,7 +294,7 @@
               <el-input v-model="deviceform.brand"></el-input>
             </el-form-item>
             <el-form-item :label="$t('equipment.installationlocation')">
-              <el-input v-model="deviceform.address"></el-input>
+              <el-input v-model="deviceform.address" @focus="updateLocation"></el-input>
             </el-form-item>
             <el-form-item :label="$t('developer.describe')">
               <el-input
@@ -358,6 +362,25 @@
           </el-table>
         </div>
       </el-dialog>
+      <el-dialog
+        title="设备安装地址"
+        :visible.sync="bmapdialogVisible"
+        width="50%"
+        v-el-drag-dialog
+        :before-close="handleClosebmap">
+        <div>
+        <baidu-map :center="center" :zoom="zoom" :scroll-wheel-zoom="true" style="height:300px " @ready="handler" @click="getClickInfo" >
+      <!-- 必须给容器指高度，不然地图将显示在一个高度为0的容器中，看不到 -->
+        <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+        <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
+        <bm-city-list anchor="BMAP_ANCHOR_TOP_LEFT"></bm-city-list>
+      </baidu-map>
+      </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="bmapdialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="bmapdialogVisible = false">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -365,10 +388,15 @@
 import Parse from "parse";
 import { Promise } from "q";
 import Cookies from 'js-cookie';
+import elDragDialog from '@/directive/el-dragDialog' // base on element-ui
 var language
 export default {
+  components:{
+   elDragDialog
+  },
   data() {
     return {
+      bmapdialogVisible:false,
       onlineall:'',
       activeall:'',
       userId: "",
@@ -433,7 +461,9 @@ export default {
       proTableData: [],
       proTableData1: [],
       activelength:[],
-      onlinelength:[]
+      onlinelength:[],
+      center: { lng: 0, lat: 0 }, //经纬度
+      zoom: 13 //地图展示级别
     };
   },
   watch: {
@@ -455,6 +485,22 @@ export default {
     
   },
   methods: {
+     handler({ BMap, map }) {
+      this.center.lng = 120.20000;
+      this.center.lat = 30.26667;
+      this.zoom = this.zoom;
+    },
+    getClickInfo(e) {
+      this.center.lng = e.point.lng;
+      this.center.lat = e.point.lat;
+      this.deviceform.address = e.point.lng.toFixed(6)+','+e.point.lat.toFixed(6)
+    },
+    updateLocation(){
+      this.bmapdialogVisible = true
+    },
+    handleClosebmap(){
+      this.bmapdialogVisible = false
+    },
     //激活设备
     getActiveDevices(){
       var Devices = Parse.Object.extend("Devices");

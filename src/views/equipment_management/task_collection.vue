@@ -2,18 +2,18 @@
   <div class="task_collection">
     <div class="top">
       <div class="left">
-        <el-button type="primary" @click="dialogVisible = true">配置任务</el-button>
-        <el-button type="primary" style="margin-left:30px" @click="deletetask">删 除</el-button>
+        <el-button type="primary" @click="dialogVisible = true">{{$t('task.Configurationtask')}}</el-button>
+        <el-button type="primary" style="margin-left:30px" @click="deletetask">{{$t('developer.delete')}}</el-button>
       </div>
       <div class="right">
         <el-input
           type="text"
           style="width:200px;margin-left:30px;"
-          placeholder="请输入任务名称"
+          :placeholder="$t('task.pleaseentertaskname')"
           v-model="valueforsearch"
           clearable
         ></el-input>
-        <el-button type="primary" @click="search">搜 索</el-button>
+        <el-button type="primary" @click="search">{{$t('developer.search')}}</el-button>
       </div>
     </div>
     <div class="center">
@@ -26,48 +26,49 @@
         v-loading="loading"
       >
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column label="任务名称">
+        <el-table-column :label="$t('task.Taskname')">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="产品名称">
+        <el-table-column :label="$t('task.productname')">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.product.attributes.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="应用名称">
+        <el-table-column :label="$t('task.Applicationname')">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.app.attributes.title}}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="采集开始时间">
+        <el-table-column :label="$t('task.Starttime')">
           <template slot-scope="scope">
             <span>{{timestampToTime(scope.row.attributes.args.starttime)}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="数据项名称">
+        <el-table-column :label="$t('task.DataID')">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.args.dis.join(',')}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="周期单位">
+        <el-table-column :label="$t('task.Cycleunit')">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.args.freq}}</span>
-            <span v-if="scope.row.attributes.args.unit=='day'">天</span>
-            <span v-else-if="scope.row.attributes.args.unit=='minute'">分</span>
-            <span v-else-if="scope.row.attributes.args.unit=='hour'">时</span>
+            <span v-if="scope.row.attributes.args.unit=='day'">{{$t('task.Day')}}</span>
+            <span v-else-if="scope.row.attributes.args.unit=='minute'">{{$t('task.Minute')}}</span>
+            <span v-else-if="scope.row.attributes.args.unit=='hour'">{{$t('task.Hour')}}</span>
+            <span v-else-if="scope.row.attributes.args.unit=='month'">{{$t('task.month')}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="下发通道">
+        <el-table-column :label="$t('task.Sendchannel')">
           <template slot-scope="scope">
             <span >{{channelMap(scope.row.attributes.args.downchannel)}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column :label="$t('task.Operation')">
           <template slot-scope="scope">
-            <el-button size="small" type="primary" @click="editcrond(scope.row.id)">编 辑</el-button>
+            <el-button size="small" type="primary" @click="editcrond(scope.row.id)">{{$t('task.Edit')}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -85,7 +86,7 @@
     </div>
     <!--弹窗-->
     <el-dialog
-      title="配置采集任务"
+      :title="$t('task.Configuretask')"
       :visible.sync="dialogVisible"
       width="50%"
       :before-close="handleClose"
@@ -93,8 +94,8 @@
     >
       <div class="dialog">
         <el-form ref="taskform" :model="taskform" label-width="120px" :rules="taskformrules">
-          <el-form-item label="应用名称" prop="app">
-            <el-select v-model="taskform.app" placeholder="请选择" @change="appselect">
+          <el-form-item :label="$t('task.Applicationname')" prop="app">
+            <el-select v-model="taskform.app" :placeholder="$t('task.Select')" @change="appselect">
               <el-option
                 v-for="item in applist"
                 :key="item.id"
@@ -103,8 +104,8 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="产品名称" prop="product">
-            <el-select v-model="taskform.product" placeholder="请选择">
+          <el-form-item :label="$t('task.productname')" prop="product">
+            <el-select v-model="taskform.product" :placeholder="$t('task.Select')">
               <el-option
                 v-for="item in productlist"
                 :key="item.id"
@@ -113,11 +114,12 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="任务名称" prop="name">
-            <el-input type="text" v-model="taskform.name" placeholder="请输入任务名称"></el-input>
+          <el-form-item :label="$t('task.Taskname')" prop="name">
+            <el-input type="text" v-model="taskform.name" :placeholder="$t('task.pleaseentertaskname')"></el-input>
           </el-form-item>
-          <el-form-item label="终端类型" prop="ftype">
-            <el-select v-model="taskform.ftype" placeholder="请选择">
+          
+          <el-form-item :label="$t('task.Terminaltype')" prop="ftype">
+            <el-select v-model="taskform.ftype" :placeholder="$t('task.Select')">
               <el-option
                 v-for="item in options"
                 :key="item.value"
@@ -127,11 +129,11 @@
             </el-select>
           </el-form-item>
           <!--采集开始时间-->
-          <el-form-item label="采集开始时间" prop="starttime">
+          <el-form-item :label="$t('task.Starttime')" prop="starttime">
             <el-date-picker
               v-model="taskform.starttime"
               type="datetime"
-              placeholder="选择开始时间"
+              :placeholder="$t('task.Selectstarttime')"
               @change="testdata"
               :picker-options="pickerOptionsStart"
             ></el-date-picker>
@@ -142,29 +144,30 @@
             <p style="color:black;margin:0;position:absolute;top:25px">(all代表全部)(注意:逗号为英文逗号)</p>
           </el-form-item>
           <!--采集结束时间-->
-          <el-form-item label="采集结束时间" prop="endtime">
+          <el-form-item :label="$t('task.Endtime')" prop="endtime">
             <el-date-picker
               v-model="taskform.endtime"
               type="datetime"
-              placeholder="选择结束时间"
+              :placeholder="$t('task.Selectendtime')"
               @change="enddata"
               :picker-options="pickerOptionsEnd"
             ></el-date-picker>
           </el-form-item>
           <!--冻结日期-->
-          <el-form-item label="冻结日期">
+          <el-form-item :label="$t('task.Frozendate')">
             <el-date-picker
               v-model="taskform.frozendate"
               type="date"
-              placeholder="当天"
+              :placeholder="$t('task.Currentday')"
               value-format="timestamp"
             ></el-date-picker>
           </el-form-item>
           <!--采集间隔时间-->
-          <el-form-item label="采集间隔时间" required>
+          
+          <el-form-item :label="$t('task.Collectioninterval')" required>
             <el-col :span="11">
               <el-form-item prop="unit">
-                <el-select v-model="taskform.unit" placeholder="请选择" @change="selectchange">
+                <el-select v-model="taskform.unit" :placeholder="$t('task.Select')" @change="selectchange">
                   <el-option
                     v-for="item in date"
                     :key="item.value"
@@ -177,36 +180,36 @@
             <el-col class="line" :span="2">-</el-col>
             <el-col :span="11">
               <el-form-item prop="freq">
-                <el-select v-model="taskform.freq" placeholder="请选择">
+                <el-select v-model="taskform.freq" :placeholder="$t('task.Select')">
                   <el-option
                     v-for="item in spacing"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
-                  ></el-option>
+                  ></el-option> 
                 </el-select>
               </el-form-item>
             </el-col>
           </el-form-item>
           <!--上报通道-->
-          <el-form-item label="上报通道" prop="upchannel">
-            <el-select v-model="taskform.upchannel" placeholder="上报通道可多选" multiple>
+          <el-form-item :label="$t('task.Reportchannel')" prop="upchannel">
+            <el-select v-model="taskform.upchannel" :placeholder="$t('task.Multiplereportingchannelsareallowed')" multiple>
               <el-option label="主站" :value="1"></el-option>
               <el-option label="postgres" :value="2"></el-option>
               <el-option label="tdengine" :value="3"></el-option>
             </el-select>
           </el-form-item>
           <!--采集策略-->
-          <el-form-item label="采集策略" class="lineone" label-width="100px">
+          <el-form-item :label="$t('task.Collectionpolicy')" class="lineone" label-width="100px">
             <div class="flexg" v-for="(item, index) in taskform.downchannel" :key="index">
               <el-form-item
-                :label="'轮次'+(index+1)"
+                :label="$t('task.Rotation')+(index+1)"
                 class="elformcontent"
                 label-width="60px"
                 :prop="'downchannel.'+index+'.type'"
                 :rules="[{required: true, message: '选择通道类型',trigger: 'change'}]"
               >
-                <el-select v-model="item.type" placeholder="请选择通道类型">
+                <el-select v-model="item.type" :placeholder="$t('task.Selectchannel')">
                   <el-option
                     v-for="item in channel"
                     :key="item.value"
@@ -222,10 +225,10 @@
                 <el-input v-model.number="item.interval" type="number" :min="1" placeholder="本轮时长"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-select v-model="item.unit" placeholder="选择单位">
-                  <el-option label="时" value="hours"></el-option>
-                  <el-option label="分" value="minutes"></el-option>
-                  <el-option label="秒" value="seconds"></el-option>
+                <el-select v-model="item.unit" >
+                  <el-option :label="$t('task.Hour')" value="hours"></el-option>
+                  <el-option :label="$t('task.Minute')" value="minutes"></el-option>
+                  <el-option :label="$t('task.Seconds')" value="seconds"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item>
@@ -234,7 +237,7 @@
                   @click.prevent="removeDomain1(item)"
                   :underline="false"
                   icon="el-icon-minus"
-                >删除</el-link>
+                >{{$t('developer.delete')}}</el-link>
               </el-form-item>
             </div>
           </el-form-item>
@@ -244,20 +247,19 @@
               icon="el-icon-plus"
               type="primary"
               :underline="false"
-            >添加采集策略</el-link>
+            >{{$t('task.Add')}}</el-link>
           </div>
         </el-form>
       </div>
 
       <div class="di" style="width:100%;">
-        <label for>数据项标识：</label>
+        <label for>{{$t('task.DataitemID')}}</label>
         <el-transfer
           v-model="diselect"
           :data="data"
-          :titles="['数据项标识', '数据项标识']"
-          :button-texts="['删除', '添加']"
+          :titles="[$t('task.DataitemID'), $t('task.DataitemID')]"
+          :button-texts="[$t('task.Delete'), $t('developer.add')]"
           filterable
-          filter-placeholder="请输入搜索内容"
         >
           <el-select
             class="transfer-footer"
@@ -277,8 +279,8 @@
       </div>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="handleClose" style="float:left">关 闭</el-button>
-        <el-button @click="convartion('taskform')" style="float:right" type="primary">保 存</el-button>
+        <el-button @click="handleClose" style="float:left">{{$t('developer.cancel')}}</el-button>
+        <el-button @click="convartion('taskform')" style="float:right" type="primary">{{$t('task.Submission')}}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -398,11 +400,11 @@ export default {
       options: [
         {
           value: "vcaddr",
-          label: "集中器"
+          label: "Concentrator"
         },
         {
           value: "meter",
-          label: "电表"
+          label: "Meter"
         }
       ],
       date: [
@@ -1213,6 +1215,9 @@ export default {
   .el-input--small
   .el-input__inner {
   border-radius: 16px;
+}
+.task_collection .el-col-2{
+  text-align: center;
 }
 </style>
 
