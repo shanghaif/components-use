@@ -72,7 +72,8 @@ export function addApp(body) {
       category:body.category,
       productIdentifier: body.productIdentifier,
       logo:body.img,
-      desc: body.desc
+      desc: body.desc,
+      background:body.background
     },
   })
 }
@@ -94,7 +95,8 @@ export function updateApp(id,body) {
       category:body.category,
       productIdentifier: body.productIdentifier,
       logo:body.img,
-      desc: body.desc
+      desc: body.desc,
+      background:body.background
     }
   })
 }
@@ -123,4 +125,23 @@ export function handleZero(value){
       }
       return value
   }
+}
+export function uploadLicense(appid,appsecret) {
+  return request({
+    url: `/lictool`,
+    method: 'get',
+    params:{
+      appid:appid,
+      appsecret:appsecret
+    }
+  })
+}
+export function uploadServer(license) {
+  return request({
+    url: `/licsetup`,
+    method: 'get',
+    params:{
+      license:license
+    }
+  })
 }

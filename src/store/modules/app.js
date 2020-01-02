@@ -33,13 +33,13 @@ const app = {
     }
   },
   actions: {
-    toggleSideBar: ({ commit }) => {
+    ToggleSideBar: ({ commit }) => {
       commit('TOGGLE_SIDEBAR')
     },
-    closeSideBar({ commit }, { withoutAnimation }) {
+    CloseSideBar({ commit }, { withoutAnimation }) {
       commit('CLOSE_SIDEBAR', withoutAnimation)
     },
-    toggleDevice({ commit }, device) {
+    ToggleDevice({ commit }, device) {
       commit('TOGGLE_DEVICE', device)
     },
     setLanguage({ commit }, language) {

@@ -8,7 +8,7 @@
       <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
         <el-form-item :label="$t('zetadevices.terminaltype')">
           <el-select v-model="formInline.zetagtype" :placeholder="$t('zetadevices.terminaltype')">
-            <el-option label="ZETAG标签" value="ZETAG"></el-option>
+            <el-option label="ZETAGLabel" value="ZETAG"></el-option>
           </el-select>
           <el-form-item :label="$t('zetadevices.terminalmodel')">
             <el-select v-model="formInline.zetag">
@@ -42,7 +42,7 @@
         </div>
         <div class="zetagright">
           <p>
-            {{'ZETAG'+$t('zetadevices.abel')}}
+            {{'ZETAG'+$t('zetadevices.label')}}
             <span style="color:green">{{'('+items.zetagid+')'}}</span>
             <span
               style="float:right;"
@@ -51,7 +51,7 @@
           </p>
           <p>
             <span>{{$t('zetadevices.model')+':C2'}}</span>
-            <span style="float:right;">{{$t('zetadevicves.sendingtimes')+':'+items.times}}</span>
+            <span style="float:right;">{{$t('zetadevices.sendingtimes')+':'+items.times}}</span>
           </p>
           <p>
            {{$t('zetadevices.lastreportingtime')}}
@@ -147,6 +147,7 @@
 import "echarts/extension/bmap/bmap";
 import { ZetaEtag, ZetaEtagHistroy, ZetaEtagTopn } from "@/api/zeta";
 import { generateTitle } from '@/utils/i18n'
+import Cookies from 'js-cookie';
 export default {
   // components:{
   //   ResourceZeta
@@ -343,10 +344,11 @@ export default {
     //当前位置涟漪图
     getEffectScatterSeries(data) {
       let series = [];
+      const lange = Cookies.get('language')
       const points = [data[0].stations[data[0].stations.length - 1]];
       const lengdata = points.map(train => {
-        const formatter = `{p3|\n${generateTitle('当前位置')}:}
-                           {p4|\n经度：${train.value[0].toFixed(6)}},纬度:${train.value[1].toFixed(6)}`
+      const formatter = `{p3|\n ${lange=='zh'?'当前位置':'Latest location'}}
+                           {p4|\n${lange=='zh'?'经度':'longitude'} ${train.value[0].toFixed(6)}},${lange=='zh'?'纬度':'latitude'}${train.value[1].toFixed(6)}`
         return {
           name: train.zetagid,
           itemStyle: {
@@ -401,7 +403,7 @@ export default {
             shadowBlur: 6,
             shadowOffsetX: 0,
             shadowOffsetY: 3,
-            width: 200,
+            width: 250,
             rich: {
               // 富文本标签样式
               // p2: {
@@ -506,7 +508,7 @@ export default {
           this.total = response.count;
         })
         .catch(error => {
-          this.$message.error(error.msg);
+          this.$message.error(error.error);
         });
     },
     //查询tag标签
@@ -635,13 +637,15 @@ export default {
   .zetacontent {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-around;
     .zetag {
       height: 140px;
-      width: 350px;
+      width: auto;
       border: 1px solid #000;
       display: flex;
       margin-right: 20px;
       margin-bottom: 20px;
+      padding:0 10px;
       .zetagleft {
         img {
           height: 138px;

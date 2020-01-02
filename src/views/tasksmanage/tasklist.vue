@@ -167,9 +167,11 @@
       <!--上报通道-->
       <el-form-item label="上报通道" prop="upchannel">
           <el-select v-model="taskform.upchannel" placeholder="上报通道可多选" multiple>
-            <el-option label="主站" :value="1"></el-option>
-            <el-option label="postgres" :value="2"></el-option>
-            <el-option label="tdengine" :value="3"></el-option>
+            <el-option label="计量主站(南网)" :value="1"></el-option>
+            <el-option label="配置库" :value="2"></el-option>
+            <el-option label="时序库" :value="3"></el-option>
+            <el-option label="计量主站(广东)" :value="4"></el-option>
+            <el-option label="用采主站(国网)" :value="5"></el-option>
           </el-select>
       </el-form-item>
       <!--采集策略-->
@@ -468,7 +470,7 @@ export default {
           value: 8
         },
         {
-          label: "Zeta通道",
+          label: "ZETA通道",
           value: 9
         },
         {
@@ -480,7 +482,7 @@ export default {
           value: 11
         },
         {
-          label: "网络连接",
+          label: "网线连接",
           value: 12
         },
         {
@@ -501,6 +503,15 @@ export default {
         },{
           label: "Bluetooth通道",
           value: 17
+        },{
+          label: "集中器(国网1367.1)",
+          value: 18
+        },{
+          label: "集中器(南网上行公约)",
+          value: 19
+        },{
+           label: "集中器(南网1003公约)",
+           value: 20
         }
       ],
       today: "today",
@@ -677,10 +688,11 @@ export default {
         this.dialogVisible = true;
         this.taskform.name = response.attributes.name;
         this.taskform.unit = response.attributes.args.unit;
+       
         if (typeof response.attributes.args.pns == "string") {
-          this.type = response.attributes.args.pns;
+          this.taskform.meteraddress = response.attributes.args.pns;
         } else {
-          this.type = response.attributes.args.pns.join(",");
+          this.taskform.meteraddress = response.attributes.args.pns.join(",");
         }
         this.taskform.freq = response.attributes.args.freq;
         this.taskform.starttime = response.attributes.args.starttime * 1000;
@@ -777,6 +789,7 @@ export default {
         }
       });
     },
+    //编辑和新增
     convartion(formName) {
       this.$refs[formName].validate((valid) => {
           if (valid) {

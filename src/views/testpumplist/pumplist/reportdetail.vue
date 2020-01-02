@@ -10,7 +10,8 @@
             stripe
             style="width: 100%"
             accordion
-            @expand-change="rowExpand($event,scope.$index)"
+            ref="refTable"
+            @expand-change="rowExpand"
           >
             <el-table-column type="expand" label="取证" width="200">
               <template slot-scope="props">
@@ -20,8 +21,8 @@
                   class="demo-table-expand"
                   style="margin-bottom:10px;"
                 >
-                <!-- <div> -->
-                  <!-- <div id="Getdata" style="width:100%;height:300px;"></div>
+                  <!-- <div>
+                  <div id="Getdata" style="width:100%;height:300px;"></div>
                     <el-table class="tableforfile" :data="Datafile" style="width:100%;text-align:center">
                       <el-table-column label="数据来源" align="center">
                         <template slot-scope="scope">
@@ -40,7 +41,7 @@
                         </template>
                       </el-table-column>
                     </el-table>
-                </div> -->
+                  </div>-->
                   <el-button @click="flatEvidence(props.row.id)">平板取证</el-button>
                   <el-button @click="consoleEvidenvce(props.row.id,reportid)">控制台取证</el-button>
                   <el-button @click="controllerEvidence(props.row.id,reportid)">控制器取证</el-button>
@@ -72,7 +73,7 @@
                       <span v-else style="color:green">在线</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" align="center">
+                  <el-table-column label="操作" align="center" width="200">
                     <template slot-scope="scope">
                       <el-button
                         size="mini"
@@ -111,7 +112,7 @@
               layout="total, sizes, prev, pager, next, jumper"
               :total="total1"
             ></el-pagination>
-          </div> -->
+          </div>-->
         </el-col>
         <el-col
           :xs="24"
@@ -135,8 +136,8 @@
             </el-table-column>
             <el-table-column align="center" label="内容">
               <template slot-scope="scope">
-                <el-button type="success" @click="detail(scope.row.attributes.data.data)">查 看</el-button>
-                <el-button type="danger" @click="deleteimg(scope.row.id)">删 除</el-button>
+                <el-button type="success" @click="detail(scope.row.attributes.data.data)" size="mini">查 看</el-button>
+                <el-button type="danger" @click="deleteimg(scope.row.id)" size="mini">删 除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -179,6 +180,13 @@ import Parse from "parse";
 import $ from "jquery";
 import { Filedata, updateFile } from "@/api/pumpdata/pumpdata";
 import { Pumpcontrol, CloundFile } from "@/api/devicescontrol/index";
+var arr1 =[]
+var arr2=[]
+var arr3=[]
+var arr4=[]
+var arr5=[]
+var arr6=[]
+var arr7=[]
 export default {
   inject: ["reload"],
   data() {
@@ -196,18 +204,24 @@ export default {
       Datafile: [],
       tasknameid: "",
       row: 0,
-      start1:1,
-      pagesize1:10,
-      total1:0,
+      start1: 1,
+      pagesize1: 10,
+      total1: 0,
       // extends:[],
       // getRowKeys(row) {
       //       return row.id;
       //   },
+      expands: [],
+      isreload: 0,
+      taskdetailid: "",
+      taskid: "",
+      isexpeand: false,
+      expandedRows:'',
     };
   },
   mounted() {
     this.getReportdetail();
-    // this.Getchart();
+    this.Getchart();
     this.init();
   },
   methods: {
@@ -256,11 +270,11 @@ export default {
       this.reportid = this.$route.query.id;
       this.testbedid = this.$route.query.testbedid;
       this.Datafile = [];
-      var Report = Parse.Object.extend("Report");
-      var report = new Parse.Query(Report);
+      var PumpClient = Parse.Object.extend("PumpClient");
+      var report = new Parse.Query(PumpClient);
       report.get(this.reportid).then(
         resultes => {
-          var reporttask = resultes.attributes.datas;
+          var reporttask = resultes.attributes.datats;
           var tabledata = reporttask.inspecting;
           this.datafortable = [];
           tabledata.map(item => {
@@ -270,7 +284,7 @@ export default {
               this.datafortable.push(child);
             });
             //分页总条数
-            this.total1 = this.datafortable.length
+            this.total1 = this.datafortable.length;
           });
         },
         error => {
@@ -434,63 +448,174 @@ export default {
 
     startPump(devaddr) {
       var self = this;
-      Pumpcontrol(devaddr, "start", this.reportid).then(resultes => {
-        this.$message({
-          type: "success",
-          message: "成功启动"
+      Pumpcontrol(devaddr, "start", this.reportid)
+        .then(resultes => {
+          this.$message({
+            type: "success",
+            message: "成功启动"
+          });
+          if (this.isreload == 1) {
+            this.consoleEvidenvce(this.taskdetailid, this.taskid);
+          } else if (this.isreload == 2) {
+            this.controllerEvidence(this.taskdetailid, this.taskid);
+          } else if (this.isreload == 3) {
+            this.liveEvidence(this.taskdetailid, this.taskid);
+          }
+        })
+        .catch(error => {
+          // this.$message.error(error.error);
         });
-        self.reload();
-      });
     },
     stopPump(devaddr) {
       var self = this;
-      Pumpcontrol(devaddr, "stop", this.reportid).then(resultes => {
-        this.$message({
-          type: "success",
-          message: "成功停止"
+      Pumpcontrol(devaddr, "stop", this.reportid)
+        .then(resultes => {
+          this.$message({
+            type: "success",
+            message: "成功停止"
+          });
+          if (this.isreload == 1) {
+            this.consoleEvidenvce(this.taskdetailid, this.taskid);
+          } else if (this.isreload == 2) {
+            this.controllerEvidence(this.taskdetailid, this.taskid);
+          } else if (this.isreload == 3) {
+            this.liveEvidence(this.taskdetailid, this.taskid);
+          }
+        })
+        .catch(error => {
+          // this.$message.error(error.error);
         });
-        self.reload();
-      });
     },
-    rowExpand(row) {
-      setTimeout(()=>{
-        this.Getchart()
-      },1000)
-      // this.row = row;
-      // this.tasknameid = row.id;
-      // this.Datafile = [];
-      // var PumpData = Parse.Object.extend("PumpData");
-      // var pumpdata = new Parse.Query(PumpData);
-      // pumpdata.equalTo("itemId", this.tasknameid.toString());
-      // pumpdata.equalTo("reportId", this.reportid);
-      // pumpdata.find().then(result => {
-      //   result.map(item => {
-      //     if (item.attributes.data.type == "file") {
-      //       this.Datafile.push(item);
-      //     }
-      //   });
-      // },error => {
-      //     if (error.code == "209") {
-      //       this.$message({
-      //         type: "warning",
-      //         message: "登陆权限过期，请重新登录"
-      //       });
-      //       this.$router.push({
-      //         path: "/login"
-      //       });
-      //     } else if (error.code == 119) {
-      //       this.$message({
-      //         type: "error",
-      //         message: "没有操作权限"
-      //       });
-      //     } else {
-      //       this.$message.error(error.message);
-      //     }
-      //   });
+    rowExpand(row, expandedRows) {
+       this.row = row;
+        this.expandedRows = expandedRows
+      var that = this;
+      if (expandedRows.length > 1) {
+        that.expands = [];
+        if (row) {
+          that.expands.push(row);
+        }
+        this.$refs.refTable.toggleRowExpansion(expandedRows[0]);
+      } else {
+        that.expands = [];
+      }
+      // if (this.isexpeand == false) {
+  
+        this.tasknameid = row.id;
+        this.Datafile = [];
+        var PumpData = Parse.Object.extend("PumpData");
+        var pumpdata = new Parse.Query(PumpData);
+        pumpdata.equalTo("itemId", this.tasknameid.toString());
+        pumpdata.equalTo("reportId", this.reportid);
+        pumpdata.find().then(
+          result => {
+            result.map(item => {
+              if (item.attributes.data.type == "file") {
+                this.Datafile.push(item);
+              }else{
+                for (var i = 0; i < item.attributes.data.data.length; i++) {
+                    arr1 = []
+                    arr2 = []
+                    arr3 = []
+                    arr1.push(item.attributes.data.data[i].flow, item.attributes.data.data[i].head)
+                    arr5.push(arr1)
+                    arr2.push(item.attributes.data.data[i].flow, item.attributes.data.data[i].power)
+                    arr6.push(arr2)
+                    arr3.push(item.attributes.data.data[i].flow, item.attributes.data.data[i].effect)
+                    arr7.push(arr3)
+                }
+                arr5.sort(function (a, b) {
+                    if (a[0] < b[0]) {
+                        return -1
+                    }
+                    if (a[0] > b[0]) {
+                        return 1
+                    }
+                })
+                arr6.sort(function (a, b) {
+                    if (a[0] < b[0]) {
+                        return -1
+                    }
+                    if (a[0] > b[0]) {
+                        return 1
+                    }
+                })
+                arr7.sort(function (a, b) {
+                    if (a[0] < b[0]) {
+                        return -1
+                    }
+                    if (a[0] > b[0]) {
+                        return 1
+                    }
+                })
+                setTimeout(()=>{
+                   this.Getchart(arr5, arr6, arr7)
+                },500)
+            }
+            });
+          },
+          error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            } else {
+              this.$message.error(error.message);
+            }
+          }
+        );
+        // this.isexpeand = true
+      // }else{
+      //   this.isexpeand=false
+      // }
+      setTimeout(() => {
+        this.Getchart();
+      });
+      //   rowExpand(row) {
+      //   this.row = row;
+      //   this.tasknameid = row.id;
+      //   this.Datafile = [];
+      //   var PumpData = Parse.Object.extend("PumpData");
+      //   var pumpdata = new Parse.Query(PumpData);
+      //   pumpdata.equalTo("itemId", this.tasknameid.toString());
+      //   pumpdata.equalTo("reportId", this.reportid);
+      //   pumpdata.find().then(result => {
+      //     result.map(item => {
+      //       if (item.attributes.data.type == "file") {
+      //         this.Datafile.push(item);
+      //       }
+      //     });
+      //   },error => {
+      //       if (error.code == "209") {
+      //         this.$message({
+      //           type: "warning",
+      //           message: "登陆权限过期，请重新登录"
+      //         });
+      //         this.$router.push({
+      //           path: "/login"
+      //         });
+      //       } else if (error.code == 119) {
+      //         this.$message({
+      //           type: "error",
+      //           message: "没有操作权限"
+      //         });
+      //       } else {
+      //         this.$message.error(error.message);
+      //       }
+      //     });
+      // },
     },
     //查看文件
     detail(data) {
-      console.log(data);
       CloundFile(data).then(resultes => {
         window.open(resultes.url);
       });
@@ -506,9 +631,51 @@ export default {
               type: "success",
               message: "删除成功"
             });
-            this.rowExpand(this.row);
+            this.rowExpand(this.row,this.expandedRows);
           },
           error => {
+            if (error.code == "209") {
+              this.$message({
+                type: "warning",
+                message: "登陆权限过期，请重新登录"
+              });
+              this.$router.push({
+                path: "/login"
+              });
+            } else if (error.code == 119) {
+              this.$message({
+                type: "error",
+                message: "没有操作权限"
+              });
+            } else {
+              this.$message.error(error.message);
+            }
+          }
+        );
+      });
+    },
+    flatEvidence(id) {
+      this.dialogVisible = true;
+      this.tasknameid = id;
+    },
+    consoleEvidenvce(taskdetailid, taskid) {
+      this.isreload = 1;
+      this.taskdetailid = taskdetailid;
+      this.taskid = taskid;
+      var Testbed = Parse.Object.extend("Testbed");
+      var testbed = new Parse.Query(Testbed);
+      testbed.equalTo('name',this.testbedid)
+      testbed.find().then(
+        resultes => {
+          var relation = resultes[0].relation("relation");
+          var query = relation.query();
+          query.ascending('-updatedAt')
+          query.equalTo("basedata.type", "PC");
+          query.find().then(res => {
+            this.tableData1 = res;
+          });
+        },
+        error => {
           if (error.code == "209") {
             this.$message({
               type: "warning",
@@ -526,41 +693,7 @@ export default {
             this.$message.error(error.message);
           }
         }
-        );
-      });
-    },
-    flatEvidence(id) {
-      this.dialogVisible = true;
-      this.tasknameid = id;
-    },
-    consoleEvidenvce(taskdetailid, taskid) {
-      var Testbed = Parse.Object.extend("Testbed");
-      var testbed = new Parse.Query(Testbed);
-      testbed.get(this.testbedid).then(resultes => {
-        var relation = resultes.relation("relation");
-        var query = relation.query();
-        query.equalTo("basedata.type", "PC");
-        query.find().then(res => {
-          this.tableData1 = res;
-        });
-      },error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          } else if (error.code == 119) {
-            this.$message({
-              type: "error",
-              message: "没有操作权限"
-            });
-          } else {
-            this.$message.error(error.message);
-          }
-        });
+      );
     },
     handleRemove(file, fileList) {
       console.log(file, fileList);
@@ -576,9 +709,9 @@ export default {
       this.dialogVisible = false;
     },
     submitUpload() {
-      var local = "http://" + location.hostname + ":8081";
+      // var local = "http://prod.iotn2n.com:8081";
       // this.$http
-      //   .get("http://prod.iotn2n.com:8081")
+        // .get("http://prod.iotn2n.com:8081")
       updateFile()
         .then(
           response => {
@@ -629,9 +762,10 @@ export default {
             source: "web"
           });
           pumpdata.set("type", "web");
-          var Report = Parse.Object.extend("Report");
-          var report = new Report();
-          report.set("objectId", this.reportid);
+          var PumpClient = Parse.Object.extend("PumpClient");
+          var report = new PumpClient();
+          // report.set("objectId", this.reportid);
+          report.id = this.reportid
           pumpdata.set("reportId", report);
           pumpdata.set("itemId", this.tasknameid.toString());
           pumpdata.save().then(
@@ -641,25 +775,26 @@ export default {
                 message: "上传成功!"
               });
               this.dialogVisible = false;
+              this.rowExpand(this.row,this.expandedRows)
             },
             error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          } else if (error.code == 119) {
-            this.$message({
-              type: "error",
-              message: "没有操作权限"
-            });
-          } else {
-            this.$message.error(error.message);
-          }
-        }
+              if (error.code == "209") {
+                this.$message({
+                  type: "warning",
+                  message: "登陆权限过期，请重新登录"
+                });
+                this.$router.push({
+                  path: "/login"
+                });
+              } else if (error.code == 119) {
+                this.$message({
+                  type: "error",
+                  message: "没有操作权限"
+                });
+              } else {
+                this.$message.error(error.message);
+              }
+            }
           );
         },
         error => {
@@ -684,16 +819,23 @@ export default {
     },
     //dtu取证
     controllerEvidence(taskdetailid, taskid) {
+      this.isreload = 2;
+      this.taskdetailid = taskdetailid;
+      this.taskid = taskid;
       var Testbed = Parse.Object.extend("Testbed");
       var testbed = new Parse.Query(Testbed);
-      testbed.get(this.testbedid).then(resultes => {
-        var relation = resultes.relation("relation");
-        var query = relation.query();
-        query.equalTo("basedata.type", "DTU");
-        query.find().then(res => {
-          this.tableData1 = res;
-        });
-      },error => {
+      testbed.equalTo('name',this.testbedid)
+      testbed.find().then(
+        resultes => {
+          var relation = resultes[0].relation("relation");
+          var query = relation.query();
+          query.ascending('-updatedAt')
+          query.equalTo("basedata.type", "DTU");
+          query.find().then(res => {
+            this.tableData1 = res;
+          });
+        },
+        error => {
           if (error.code == "209") {
             this.$message({
               type: "warning",
@@ -710,20 +852,28 @@ export default {
           } else {
             this.$message.error(error.message);
           }
-        });
+        }
+      );
     },
     //视频取证
     liveEvidence(taskdetailid, taskid) {
+      this.isreload = 3;
+      this.taskdetailid = taskdetailid;
+      this.taskid = taskid;
       var Testbed = Parse.Object.extend("Testbed");
       var testbed = new Parse.Query(Testbed);
-      testbed.get(this.testbedid).then(resultes => {
-        var relation = resultes.relation("relation");
-        var query = relation.query();
-        query.equalTo("basedata.type", "CAMERA");
-        query.find().then(res => {
-          this.tableData1 = res;
-        });
-      },error => {
+       testbed.equalTo('name',this.testbedid)
+      testbed.find().then(
+        resultes => {
+          var relation = resultes[0].relation("relation");
+          var query = relation.query();
+          query.ascending('-updatedAt')
+          query.equalTo("basedata.type", "CAMERA");
+          query.find().then(res => {
+            this.tableData1 = res;
+          });
+        },
+        error => {
           if (error.code == "209") {
             this.$message({
               type: "warning",
@@ -740,7 +890,8 @@ export default {
           } else {
             this.$message.error(error.message);
           }
-        });
+        }
+      );
     },
     Gotodetail(type, taskid) {
       if (type == "PC") {

@@ -39,7 +39,16 @@
           <span>{{onlineall}}</span>
         </li>
         <li>
-          <!-- <el-button type="info">刷新</el-button> -->
+         
+            <div class="block">
+            <el-image :src="productimg" style="width:250px;height:200px;position:relative;top:-55px;text-align: center;
+    line-height: 200px;">
+               <div slot="error" class="image-slot">
+                <i class="el-icon-picture-outline"></i>
+              </div>
+            </el-image>
+          </div>
+        
         </li>
       </ul>
     </div>
@@ -54,7 +63,7 @@
             </div>
           </div>
           <div style="margin-top:20px;" class="equdevices">
-            <el-select v-model="equvalue"  class="selectdetail">
+            <el-select v-model="equvalue"  class="selectdetail" @change="selectProductid">
               <el-option
                 v-for="(item,index) in proTableData"
                 :label="item.name"
@@ -108,12 +117,6 @@
               </el-tooltip>
                 </template>
               </el-table-column>
-              <!-- <el-table-column label="设备名称" width="180" show-overflow-tooltip align="center">
-                <template slot-scope="scope">
-                  <span>{{scope.row.name}}</span>
-                 <span v-else>{{scope.row.desc}}</span> 
-                </template>
-              </el-table-column>-->
               <el-table-column :label="$t('equipment.product')" align="center">
                 <template slot-scope="scope">
                   <span type="success">{{scope.row.productName}}</span>
@@ -188,6 +191,12 @@
                     v-if="scope.row.nodeType==1"
                     @click="deviceToChildren(scope.row)"
                   >{{$t('equipment.subdevice')}}</el-link>
+                  <el-link
+                    type="primary"
+                    :underline="false"
+                    icon="el-icon-edit"
+                    @click="editorDevice(scope.row)"
+                  >编辑</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -281,9 +290,6 @@
                 ></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item label="父级设备" prop="fathername">
-              <el-input v-model="deviceform.fathername"></el-input>
-            </el-form-item>-->
             <el-form-item :label="$t('equipment.assetnumber')">
               <el-input v-model="deviceform.assetNum"></el-input>
             </el-form-item>
@@ -369,16 +375,40 @@
         v-el-drag-dialog
         :before-close="handleClosebmap">
         <div>
-        <baidu-map :center="center" :zoom="zoom" :scroll-wheel-zoom="true" style="height:300px " @ready="handler" @click="getClickInfo" >
+          <el-form :model="bmapform" size="small" :inline="true">
+            <!-- <el-form-item label="地址">
+              <el-input v-model="bmapform.location" placeholder="请输入市或者县名称"></el-input>
+            </el-form-item> -->
+            <el-form-item label="地址名称">
+              <el-input v-model="bmapform.keyword"></el-input>
+            </el-form-item>
+             <el-form-item label="选中地址">
+              <el-input v-model="bmapform.address" readonly></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="addressSure">确定</el-button>
+            </el-form-item>
+          </el-form>
+          <!-- <label>地址：<input v-model="bmapfrom.keyword"></label> -->
+        <baidu-map :center="center" :zoom="zoom" :scroll-wheel-zoom="true" style="height:300px " @ready="handler" :mapClick="false" @click="mapClick" >
       <!-- 必须给容器指高度，不然地图将显示在一个高度为0的容器中，看不到 -->
-        <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
-        <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
-        <bm-city-list anchor="BMAP_ANCHOR_TOP_LEFT"></bm-city-list>
-      </baidu-map>
+          <!-- <bml-marker-clusterer :averageCenter="true">
+            <bm-marker :position="{lng: center.lng, lat: center.lat}"></bm-marker>
+          </bml-marker-clusterer> -->
+          <bm-local-search :keyword="bmapform.keyword" :auto-viewport="true" :location="bmapform.location" zoom="12.8" style="display: none"></bm-local-search>
+            <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
+            <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
+            <bm-city-list anchor="BMAP_ANCHOR_TOP_LEFT"></bm-city-list>
+            <!-- <bm-marker :position="center" style="display:none">
+              <bm-info-window  @close="infoWindowClose" @open="infoWindowOpen" style="font-size: 14px">
+              <p>11111</p>
+              </bm-info-window>
+            </bm-marker> -->
+          </baidu-map>
       </div>
         <span slot="footer" class="dialog-footer">
           <el-button @click="bmapdialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="bmapdialogVisible = false">确 定</el-button>
+          <el-button type="primary" @click="bmapdialogVisible = false">保 存</el-button>
         </span>
       </el-dialog>
     </div>
@@ -389,13 +419,16 @@ import Parse from "parse";
 import { Promise } from "q";
 import Cookies from 'js-cookie';
 import elDragDialog from '@/directive/el-dragDialog' // base on element-ui
+import {BmlMarkerClusterer} from 'vue-baidu-map'
 var language
+var pcdata
 export default {
   components:{
    elDragDialog
   },
   data() {
     return {
+      productimg:'',
       bmapdialogVisible:false,
       onlineall:'',
       activeall:'',
@@ -426,7 +459,9 @@ export default {
         assetNum: "",
         devModel: "",
         address: "",
-        productName: ""
+        productName: "",
+        status:'',
+        isEnable:''
       },
       rules: {
         name: [{ required: true, message: "请输入设备名称", trigger: "blur" }],
@@ -463,7 +498,14 @@ export default {
       activelength:[],
       onlinelength:[],
       center: { lng: 0, lat: 0 }, //经纬度
-      zoom: 13 //地图展示级别
+      zoom: 13,//地图展示级别
+      bmapform:{
+        keyword:'',
+        location:'',
+        address:''
+      },
+      deviceid:'',
+      map:null
     };
   },
   watch: {
@@ -478,23 +520,66 @@ export default {
   },
   mounted() {
     this.userId = Parse.User.current().id;
-    console.log(this.userId);
     this.getRole();
     this.searchProduct();
+    this.addDeviceBatch(0)
     language = Cookies.get('language')
-    
+    this.$store.dispatch('getUserId','111')
+    if(this.$route.query.productid){
+      this.selectProductid(this.$route.query.productid)
+    }
+   
   },
   methods: {
+     selectProductid(val){
+      var Product = Parse.Object.extend("Product");
+      var product = new Parse.Query(Product);
+      product.get(val).then(response=>{
+        this.productimg = response.attributes.icon
+      })
+     },
+     addressSure(){
+        var localSearch = new BMap.LocalSearch(this.map);
+             localSearch.enableAutoViewport(); //允许自动调节窗体大小
+             var _this = this
+            localSearch.setSearchCompleteCallback(function (searchResult) {
+      　　　　var poi = searchResult.getPoi(0);
+      　　　　console.log(poi.point.lng + "," + poi.point.lat) //获取经度和纬度，将结果显示在文本框中
+      　　　　_this.map.centerAndZoom(poi.point, 13);
+      　　});
+      　　localSearch.search(this.bmapform.keyword);
+     },
      handler({ BMap, map }) {
       this.center.lng = 120.20000;
       this.center.lat = 30.26667;
       this.zoom = this.zoom;
+      this.map = map
+      console.log(BMap,map)
     },
-    getClickInfo(e) {
+    mapClick(e) {
       this.center.lng = e.point.lng;
       this.center.lat = e.point.lat;
       this.deviceform.address = e.point.lng.toFixed(6)+','+e.point.lat.toFixed(6)
+       let geocoder= new BMap.Geocoder();  //创建地址解析器的实例
+      //  let Marker = new BMap.Marker()
+      geocoder.getLocation(e.point,rs=>{
+        // this.add.site = rs.address;
+      //  Marker.closeInfoWindow()
+      //   console.log(rs)
+        this.bmapform.address = rs.address
+      //地址描述(string)=
+      // console.log(rs.address);    //这里打印可以看到里面的详细地址信息，可以根据需求选择想要的
+      // console.log(rs.addressComponents);//结构化的地址描述(object)
+      // console.log(rs.addressComponents.province); //省
+      // console.log(rs.addressComponents.city); //城市
+      // console.log(rs.addressComponents.district); //区县
+      // console.log(rs.addressComponents.street); //街道
+      // console.log(rs.addressComponents.streetNumber); //门牌号
+      // console.log(rs.surroundingPois); //附近的POI点(array)
+      // console.log(rs.business); //商圈字段，代表此点所属的商圈(string)
+    });
     },
+    //地图更新
     updateLocation(){
       this.bmapdialogVisible = true
     },
@@ -604,6 +689,7 @@ export default {
       devices.count().then(count => {
         this.devicetotal = count;
         devices.find().then(resultes => {
+          // console.log(resultes)
           if (resultes) {
             resultes.map(items => {
               var obj = {};
@@ -617,6 +703,26 @@ export default {
               obj.productName = items.attributes.product.attributes.name;
               obj.devaddr = items.attributes.devaddr;
               obj.isEnable = items.attributes.isEnable;
+              obj.productid = items.attributes.product.id
+              obj.devModel = items.attributes.devModel
+              obj.brand = items.attributes.brand
+              obj.address = items.attributes.address
+              obj.assetNum = items.attributes.assetNum
+              if(items.attributes.location){
+              obj.latitude = items.attributes.location._latitude
+              obj.longitude = items.attributes.location._longitude
+              }else{
+                 obj.latitude = ''
+                 obj.longitude = ''
+              }
+
+              if(items.attributes.batchId){
+                   obj.batchid = items.attributes.batchId.id
+                 
+              }else{
+                obj.batchid=''
+              }
+              obj.address = items.attributes.address
               this.tableData.push(obj);
             });
             this.getActiveDevices()
@@ -867,8 +973,12 @@ export default {
       });
     },
     //增加批次
-    addDeviceBatch() {
-      this.pcdialogVisible = true;
+    addDeviceBatch(isdialog) {
+      if(isdialog==0){
+        this.pcdialogVisible=false
+      }else{
+         this.pcdialogVisible = true;
+      }
       var Datas = Parse.Object.extend("Datas");
       var datas = new Parse.Query(Datas);
       datas.equalTo("type", "batch_number");
@@ -877,6 +987,7 @@ export default {
         resultes => {
           if (resultes) {
             this.pctableData = resultes;
+            pcdata=resultes
           }
         },
         error => {
@@ -888,6 +999,44 @@ export default {
       );
     },
     /*device添加表单提交*/
+    editorDevice(row){
+      this.deviceid = row.id
+      this.devicedialogVisible = true
+      this.deviceform.devaddr = row.devaddr
+      this.deviceform.name = row.name
+      this.deviceform.assetNum = row.assetNum
+      this.deviceform.devModel = row.devModel
+      this.deviceform.desc = row.desc
+      this.deviceform.productid = row.productid
+      this.deviceform.brand = row.brand
+      this.deviceform.productName = row.productid
+      this.deviceform.batchId = row.batchid
+      this.deviceform.status = row.status
+      this.deviceform.isEnable = row.isEnable
+      this.bmapform.address = row.address
+      this.batchid = row.batchid
+      this.center.lat=row.latitude
+      this.center.lng =row.longitude
+       this.deviceform.address = row.latitude+','+row.longitude
+     this.getBatch().then((results)=>{
+       this.pctableData.map(item=>{
+         if(item.id = row.batchid){
+           this.deviceform.batchId = item.attributes.data.batch_name
+         }
+       })
+     }).catch(error=>{
+       console.log(error)
+     })
+    },
+    getBatch(){
+     return new Promise((resolve, reject) => {
+          if(pcdata.length>0){
+             resolve(pcdata)
+          }else{
+            reject(false)
+          }
+        })
+    },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
@@ -898,6 +1047,18 @@ export default {
           var Datas = Parse.Object.extend("Datas");
           var datas = new Datas();
           var acl = new Parse.ACL();
+          if(this.deviceid!=''){
+            devices.id = this.deviceid
+              devices.set("status", this.deviceform.status);
+              devices.set('isEnable',this.deviceform.isEnable)
+          }else{
+              devices.set("status", "OFFLINE");
+              devices.set('isEnable',false)
+          }
+          var location = new Parse.GeoPoint(
+             {latitude: this.center.lat,
+             longitude:this.center.lng}
+             )
           datas.id = this.batchid;
           product.id = this.deviceform.productName;
           devices.set("product", product);
@@ -912,25 +1073,26 @@ export default {
           devices.set("assetNum", this.deviceform.assetNum);
           devices.set("devModel", this.deviceform.devModel);
           devices.set("brand", this.deviceform.brand);
-          devices.set("address", this.deviceform.address);
+          devices.set('location',location)
+          devices.set('address',this.bmapform.address)
           devices.set("desc", this.deviceform.desc);
-          devices.set("status", "OFFLINE");
-          devices.set('isEnable',false)
           devices.save().then(resultes => {
             if (resultes) {
               this.$message({
                 type: "success",
-                message: "设备添加成功"
+                message: `${this.deviceid!='' ? '编辑成功':'添加成功'}`
               });
               this.devicedialogVisible = false;
               this.batchid = "";
               this.getDevices();
+              this.deviceid=''
               this.$refs["deviceform"].resetFields();
               this.deviceform.assetNum = "";
               this.deviceform.devModel = "";
               this.deviceform.address = "";
               this.deviceform.desc = "";
               this.deviceform.brand = ""
+            
             }
           });
         } else {
@@ -1116,7 +1278,7 @@ export default {
         // }
         &:last-child {
           border: 0;
-          float: right;
+          flex-grow:2;
           text-align: right;
         }
         &:nth-child(4) {

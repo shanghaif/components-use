@@ -263,14 +263,8 @@ export default {
           });          
         });
      },
+     //显示，隐藏
      xianshi(id){
-      //   this.appdata.map(item=>{
-      //      if(item.id==id){
-      //         item.isshow=true 
-      //      }
-      //       this.$set(this.appdata)
-      //   })
-      console.log(this.appdata)
       var obj
       for(var i=0;i<this.appdata.length;i++){
          if(this.appdata[i].id==id){
@@ -279,9 +273,6 @@ export default {
             this.$set(this.appdata,i,obj)
          }
       }
-      
-      
-     
      }
   }
 };

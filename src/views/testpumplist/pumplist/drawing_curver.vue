@@ -193,7 +193,6 @@ export default {
           calculable: true,
           tooltip: {
             trigger: "axis",
-
             axisPointer: {
               show: true,
               type: "cross",

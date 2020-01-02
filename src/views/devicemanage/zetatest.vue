@@ -282,7 +282,7 @@ export default {
     return {
       statusBar:'ready',
       timeinterval:null,
-      loadingimg:require('../../imgages/loading.gif'),
+      // loadingimg:require('../../imgages/loading.gif'),
       active: 0,
       testform1: {
         ip: "",

@@ -267,6 +267,7 @@
 import { searchSuketype, addSkzl, editorSkzl,querydevinfo,queryzlinfo } from "@/api/sukeserver"
 import Parse from 'parse'
 import {returnLogin} from '@/utils/return'
+var arr=[]
 export default {
   data() {
     var validName = (rule, value, callback) => {
@@ -343,8 +344,42 @@ export default {
   mounted() {
     this.getSukedevtype();
     this.searchzl1()
+    // this.getSukedev()
   },
   methods: {
+    // getSukedev(){
+    //   var SukeDev = Parse.Object.extend('SukeDev')
+    //   var sukedev = new Parse.Query(SukeDev)
+    //   sukedev.limit(10000)
+    //   sukedev.find().then(resultes=>{
+    //     resultes.map(items=>{
+    //       if(!items.attributes.yysId||!items.attributes.yysName){
+    //           arr.push(
+    //             　new Promise((resolve,reject)=>{
+    //                  var SukeDev = Parse.Object.extend('SukeDev')
+    //                   var sukedev = new SukeDev()
+    //                   sukedev.id = items.id
+    //                    sukedev.set('yysName','电表')
+    //                    sukedev.set('yysId','09')
+    //                   sukedev.save().then(result => {
+    //             　　　　　　　resolve(result)
+    //                   },error=>{
+    //           　　　　　　reject(error)
+    //                     });
+    //            })　　　
+    //           )
+    //       }
+    //     })
+    //     this.promiseall(arr)
+    //   })
+    // },
+    // promiseall(arr){
+    //    Promise.all(arr).then(data=>{
+    //         //成功
+    //     }).catch(error=>{
+    //     　　//失败
+    //     })
+    // },
     timestampToTime(timestamp) {
       var date = new Date(timestamp * 1000) 
       var Y = date.getFullYear() + '-';

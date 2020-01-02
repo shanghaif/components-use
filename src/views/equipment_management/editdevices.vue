@@ -114,16 +114,19 @@
         <el-tab-pane :label="$t('equipment.runningstate')" name="third">
           <div style="background:#ffffff;padding:10px;box-sizing:border-box;">
             <div style="text-align:right">
-              <span>{{$t('equipment.realtimerefresh')}}</span>
+              <div style="float:left">
+                <span>{{$t('equipment.realtimerefresh')}}</span>
               <el-switch
                 v-model="isupdate"
                 active-color="#13ce66"
                 inactive-color="#cccccc"
                 @change="updateTrue($event)"
               ></el-switch>
+              </div>
+              
               <el-button-group>
-                <el-button type="primary" @click="isshowtable=false" plain :class="!isshowtable ? 'buttonactive':''">{{$t('equipment.chart')}}</el-button>
-                <el-button type="primary" @click="isshowtable=true" plain :class="isshowtable ? 'buttonactive':''">{{$t('equipment.table')}}</el-button>
+                <el-button type="primary" @click="isshowtable=false" plain :class="!isshowtable ? 'buttonactive':''" size="small">{{$t('equipment.chart')}}</el-button>
+                <el-button type="primary" @click="isshowtable=true" plain :class="isshowtable ? 'buttonactive':''" size="small">{{$t('equipment.table')}}</el-button>
               </el-button-group>
             </div>
             <div class="thirdtb" v-if="!isshowtable">
@@ -132,12 +135,12 @@
                 <li v-for="(item,index) in properties" :key="index" class="updatedtable">
                   <div style="font-family: cursive;height:70px;"><span style="font-size:16px;">{{item.name}}</span><span style="float:right;margin-right:10px;"><svg-icon :icon-class="item.name"></svg-icon></span></div>
                   <!-- <div><span>ID：</span><span>{{item.identifier}}</span></div> -->
-                 <div style="font-size:16px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='double'||item.dataType.type=='float'||item.dataType.type=='int'"><span >{{item.value | filterVal}}</span><span v-if="item.dataType.specs.unit">{{item.dataType.specs.unit}}</span></div>
-                 <div style="font-size:16px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='enmu'||item.dataType.type=='bool'"><span >{{item.value | filterVal}}</span><span>{{item.dataType.specs[item.value]}}</span></div>
-                 <div style="font-size:14px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='struct'">
+                 <div style="font-size:25px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='double'||item.dataType.type=='float'||item.dataType.type=='int'"><span >{{item.value | filterVal}}</span><span v-if="item.dataType.specs.unit">{{item.dataType.specs.unit}}</span></div>
+                 <div style="font-size:25px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='enmu'||item.dataType.type=='bool'"><span >{{item.value | filterVal}}</span><span>{{item.dataType.specs[item.value]}}</span></div>
+                 <div style="font-size:25px;color:#666666;font-family: fantasy;text-align:center" v-if="item.dataType.type=='struct'">
                     <i v-for="(key,index) in item.specs" :key="index" style="display:block;height:30px;font-style:normal">
-                       <div style="font-size:16px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='double'||key.dataType.type=='float'||key.dataType.type=='int'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span v-if="key.dataType.specs.unit">{{key.dataType.specs.unit}}</span></div>
-                        <div style="font-size:16px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='enmu'||key.dataType.type=='bool'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span>{{key.dataType.specs[key.value]}}</span></div>
+                       <div style="font-size:25px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='double'||key.dataType.type=='float'||key.dataType.type=='int'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span v-if="key.dataType.specs.unit">{{key.dataType.specs.unit}}</span></div>
+                        <div style="font-size:25px;color:#666666;text-align:center;font-family: fantasy" v-if="key.dataType.type=='enmu'||key.dataType.type=='bool'"><span >{{key.name+':'}}</span><span >{{key.value}}</span><span>{{key.dataType.specs[key.value]}}</span></div>
                    </i>
                   
                   
@@ -481,18 +484,19 @@ export default {
       dataDeviceTotal:0,
       dataDeviceLength:10,
       dataDeviceStart:1,
+      devicedevaddr:''
     };
   },
   watch:{
     properties:{
       deep:true,
       handler(val){
-        console.log(val)
       }
     }
   },
   mounted() {
     this.getDeviceDetail();
+  
   },
   methods: {
     tabHandleClick(tab){
@@ -500,22 +504,22 @@ export default {
         this.$router.push({
          path:'/roles/onlinetest',
          query:{
-           deviceid:this.deviceid,
+           deviceid:this.devicedevaddr,
            productid:this.productid
          }
         })
       }
     },
     timestampToTime(timestamp) {
-  var date = new Date(timestamp * 1000) 
-	var Y = date.getFullYear() + '-';
-	var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-	var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
-	var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
-	var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
-	var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
-	return Y+M+D+h+m+s;
-},
+    var date = new Date(timestamp * 1000) 
+    var Y = date.getFullYear() + '-';
+    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
+    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
+    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
+    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+    return Y+M+D+h+m+s;
+  },
     getDevices(start) {
       if(start==0){
         this.childrenDeviceStart=0
@@ -556,26 +560,27 @@ export default {
     getDeviceDetail() {
       this.deviceid = this.$route.query.deviceid;
       this.ischildren=this.$route.query.ischildren
+       var Product = Parse.Object.extend('Product')
+       var product = new Parse.Query(Product)
       if(this.$route.query.nodeType==1&&this.ischildren==true){
           this.activeName = 'children'
           this.isshowchild = true
           this.getDevices()
-          var Product = Parse.Object.extend('Product')
-          var product = new Parse.Query(Product)
+         
           product.find().then(resultes=>{
             this.allProudct = resultes
           })
-      }else if(this.$route.query.nodeType==1&&this.ischildren==false){
-        this.isshowchild = true
-      }else{
-        this.isshowchild = false
-      }
+          }else if(this.$route.query.nodeType==1&&this.ischildren==false){
+            this.isshowchild = true
+          }else{
+            this.isshowchild = false
+          }
       var Devices = Parse.Object.extend("Devices");
       var devices = new Parse.Query(Devices);
       devices.get(this.deviceid).then(resultes => {
-        console.log(resultes)
         var obj = {};
          this.productid = resultes.attributes.product.id
+         this.devicedevaddr = resultes.attributes.devaddr
         obj.id = resultes.id;
         obj.createdAt = utc2beijing(resultes.createdAt);
         obj.productName = resultes.attributes.product.attributes.name;
@@ -603,9 +608,31 @@ export default {
         obj.devType = resultes.attributes.product.attributes.devType;
         obj.productSecret = resultes.attributes.product.attributes.productSecret;
         if(resultes.attributes.product.attributes.thing){
-          this.productProperties = resultes.attributes.product.attributes.thing.properties
+           this.properties = JSON.parse(JSON.stringify(resultes.attributes.product.attributes.thing.properties))
+           this.properties.map(items=>{
+                dataobj[items['identifier']]={
+                  expectedData: [],
+                  actualData: [],
+                  title:items['name']+'('+items['dataType']['specs']['unit']+')',
+                  data:[],
+                  max:0
+                }  
+            })
         }else{
-          this.productProperties = []
+          product.get(this.productid).then(resultes=>{
+             this.properties = JSON.parse(JSON.stringify(resultes.attributes.thing.properties))
+             this.properties.map(items=>{
+                dataobj[items['identifier']]={
+                  expectedData: [],
+                  actualData: [],
+                  title:items['name']+'('+items['dataType']['specs']['unit']+')',
+                  data:[],
+                  max:0
+                }  
+            })
+          },error=>{
+            this.$message.error(error.message)
+          })
         }
         if(resultes.attributes.product.attributes.topics){
           this.topicData = resultes.attributes.product.attributes.topics.concat(
@@ -616,33 +643,29 @@ export default {
         }
         
         this.devicedetail = obj;
-        // this.Update()
-        this.properties = JSON.parse(JSON.stringify(resultes.attributes.product.attributes.thing.properties))
-         this.properties.map(items=>{
-                dataobj[items['name']]={
-                  expectedData: [],
-                  actualData: [],
-                  title:items['name'],
-                  data:[]
-                }  
-            })
+        //初始化物模型数据
+        this.isupdate = true
+        this.updateTrue(true)
       });
-      
     },
     //实时刷新
     Update() {
       getDev(this.devicedetail.devaddr, this.devicedetail.productid)
         .then(resultes => {
           if (resultes) {
-            this.thirdData.push({
-              time: timestampToTime(Math.ceil(new Date().getTime() / 1000)),
-              value: JSON.stringify(resultes)
-            });
+            if(resultes.data.length!=0){
+               this.thirdData.push({
+                time: timestampToTime(Math.ceil(new Date().getTime() / 1000)),
+                value: JSON.stringify(resultes)
+              });
+            }
+           
             this.thirdtotal = this.thirdData.length;
+            // console.log(resultes)
             //动态$set,数据更新试图也一样更新，如果只是遍历的话试图回更新过慢
             this.properties.map((item,index)=>{
               resultes.data.map((updatedata,updatedindex)=>{
-                if(item.name == updatedata.name){
+                if(item.identifier == updatedata.identifier){
                   var obj=resultes.data[updatedindex]
                   this.$set(this.properties,index,obj)
                 }
@@ -650,10 +673,11 @@ export default {
             })
             for(var key in dataobj){
               resultes.data.map(items=>{
-                if(key==items.name){
+                if(key==items.identifier){
                   dataobj[key].expectedData.push(items.value)
                   dataobj[key].actualData.push(timestampToTime(items.time).substring(11))
                   dataobj[key].data.unshift(items)
+                  dataobj[key].max = items.dataType.specs.max
                 }
               })
             }
@@ -668,9 +692,22 @@ export default {
           this.isupdate = false;
         });
     },
+     dataDetail(item){
+      this.datadialogVisible=true
+      var lineChartData={}
+        for(var key in dataobj){
+          if(item.identifier==key){
+            this.datafordetail = dataobj[key].data
+            lineChartData = dataobj[key]
+            this.dataDeviceTotal = dataobj[key].data
+          }
+        }
+        console.log(lineChartData)
+        this.lineChartData =lineChartData
+      
+    },
     //定时器启动
     updateTrue(event) {
-      // console.log(this.ispushdata)
       this.ispushdata=false
       if (event == true) {
         this.timer = window.setInterval(() => {
@@ -774,8 +811,6 @@ export default {
             type: "error"
           });
           }
-         
-    
       }).catch(error=>{
         console.log(error)
       });
@@ -882,7 +917,6 @@ export default {
             newData2[key] = row[key];
           }
           newData2.isEnable = newData2.isEnable == true ? true : false;
-          //   this.tableData[index] = newData2
           var Devices = Parse.Object.extend("Devices");
           var devices = new Parse.Query(Devices);
           devices.get(row.id).then(object => {
@@ -908,30 +942,7 @@ export default {
     },
     //查看历史数据
     /**/
-    dataDetail(item){
-      this.datadialogVisible=true
-      
-      var lineChartData={}
-      // setTimeout(()=>{
-        // console.log(dataobj)
-        for(var key in dataobj){
-          if(item.name==key){
-            this.datafordetail = dataobj[key].data
-            lineChartData = dataobj[key]
-            this.dataDeviceTotal = dataobj[key].data
-          }
-        }
-        //  const lineChartData = {
-        //   newVisitis: {
-        //     expectedData: [100, 120, 161, 134, 105, 160, 165],
-        //     actualData: [0,1,2,3,4,5,6],
-        //     title:'help1'
-        //   }
-        // }
-        this.lineChartData =lineChartData
-      // },1000)
-      
-    },
+   
     handleClick(val){
 
     }

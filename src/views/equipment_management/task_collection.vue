@@ -298,6 +298,7 @@ import $ from "jquery";
 import Parse from "parse";
 var taskid = "";
 export default {
+  name:'TaskCollection',
   data() {
     return {
       selectdata: "",
@@ -543,19 +544,14 @@ export default {
       app.limit(1000);
       app.find().then(resultes => {
         this.applist = resultes;
-      });
-    },
-    appselect(val) {
-      this.applist.map(items => {
-        if (val == items.id) {
-          var Product = Parse.Object.extend("Product");
+         var Product = Parse.Object.extend("Product");
           var product = new Parse.Query(Product);
-          product.equalTo("devType", items.attributes.productIdentifier);
           product.find().then(response => {
             this.productlist = response;
           });
-        }
-      });
+      })
+    },
+    appselect(val) {
     },
     getMain() {
       this.options1 = [];
@@ -671,8 +667,8 @@ export default {
     //搜索和初始化
     search() {
       this.loading = true;
-      var Crond1 = Parse.Object.extend("Crond1");
-      var querycround = new Parse.Query(Crond1);
+      var Crond = Parse.Object.extend("Crond");
+      var querycround = new Parse.Query(Crond);
       if (this.valueforsearch != "") {
         querycround.matches("name", this.valueforsearch,'i');
       }
@@ -711,8 +707,8 @@ export default {
     },
     //编辑操作
     editcrond(id) {
-      var Crond1 = Parse.Object.extend("Crond1");
-      var querycround = new Parse.Query(Crond1);
+      var Crond = Parse.Object.extend("Crond");
+      var querycround = new Parse.Query(Crond);
       querycround.get(id).then(response => {
         this.dialogVisible = true;
         this.taskform.name = response.attributes.name;
@@ -865,9 +861,9 @@ export default {
             this.taskform.downchannel.map(items => {
               arr.push([items.type, items.interval]);
             });
-            var Crond1 = Parse.Object.extend("Crond1");
-            var crond = new Crond1();
-            var querycround = new Parse.Query(Crond1);
+            var Crond = Parse.Object.extend("Crond");
+            var crond = new Crond();
+            var querycround = new Parse.Query(Crond);
             var App = Parse.Object.extend("App");
             var app = new App();
             var Product = Parse.Object.extend("Product");
@@ -1045,8 +1041,8 @@ export default {
         this.multipleSelection.map(items => {
           arr.push(
             new Promise((resolve, reject) => {
-              var Crond1 = Parse.Object.extend("Crond1");
-              var crond = new Crond1();
+              var Crond = Parse.Object.extend("Crond");
+              var crond = new Crond();
               crond.id = items.id;
               return crond.destroy().then(
                 resultes => {

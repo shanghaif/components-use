@@ -4,7 +4,7 @@
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane :label="$t('product.myproduct')+'('+total+')'" name="first">
         <div class="prosecond">
-          <el-form :inline="true" :model="formInline" class="demo-form-inline">
+          <el-form :inline="true" :model="formInline" class="demo-form-inline" size="small">
             <el-form-item>
               <el-input
                 v-model="formInline.productname"
@@ -84,6 +84,12 @@
                     @click="GoTodevices(scope.row)"
                     type="primary"
                   >{{$t('product.equipment')}}</el-link>
+                  <el-link
+                    :underline="false"
+                    icon="el-icon-edit"
+                    type="success"
+                    @click="editorProudct(scope.row)"
+                  >编 辑</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -166,12 +172,25 @@
             <el-form :model="form" :rules="rules" ref="ruleForm">
               <el-form-item :label="$t('product.networking')" prop="netType">
                 <el-select v-model="form.netType" :placeholder="$t('product.selectgateway')">
-                  <el-option label="WiFi" value="WIFI"></el-option>
-                  <el-option :label="$t('product.honeycomb')+'(2G/3G/4G)'" value="CELLULAR"></el-option>
+                  <el-option v-for="(item,index) in channel" :key="index" :label="item.label" :value="item.value"></el-option>
+                  <!-- <el-option :label="$t('product.honeycomb')+'(2G/3G/4G)'" value="CELLULAR"></el-option>
                   <el-option :label="$t('product.ethernet')" value="ETHERNET"></el-option>
                   <el-option label="LoRaWAN" value="LORA"></el-option>
-                  <el-option :label="$t('product.other')" value="OTHER"></el-option>
+                  <el-option :label="$t('product.other')" value="OTHER"></el-option> -->
                 </el-select>
+              </el-form-item>
+              <el-form-item label="产品模型">
+                <el-upload
+                  class="avatar-uploader"
+                  action="/iotapi/upload"
+                  :show-file-list="false"
+                  :on-success="handleAvatarSuccess"
+                  :before-upload="beforeAvatarUpload">
+                   <i class="el-icon-close" @click="deleteImgsrc"></i>
+                  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+                 
+                  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
               </el-form-item>
               <el-form-item :label="$t('developer.describe')" prop="desc">
                 <el-input type="textarea" v-model="form.desc"></el-input>
@@ -213,7 +232,8 @@ export default {
         nodeType: 0,
         desc: "",
         netType: "",
-        devType: ""
+        devType: "",
+        productSecret:''
       },
       rules: {
         name: [{ required: true, message: "请输入产品", trigger: "blur" }],
@@ -238,82 +258,87 @@ export default {
       ruleoptions: [],
       channel: [
         {
+          label:'WiFi',
+          value:'WiFi'
+        },
+        {
+          label:'蜂窝(2G/3G/4G)',
+          value:'CELLULAR'
+        },
+        {
+          label:'以太网',
+          value:'ETHERNET'
+        },
+        {
+          label:'LoRaWAN',
+          value:'LoRa'
+        },
+        {
           label: "LTE通道",
-          value: 1
+          value: "LTE"
         },
         {
           label: "GPRS/CMDA通道",
-          value: 2
-        },
-        {
-          label: "LoRa通道",
-          value: 3
+          value: "GPRS/CMDA"
         },
         {
           label: "微功率通道",
-          value: 4
+          value: "微功率"
         },
         {
           label: "RS232/RS485通道",
-          value: 5
+          value: "RS232/RS485"
         },
         {
           label: "红外通道",
-          value: 6
+          value: "红外"
         },
         {
           label: "NB-IOT通道",
-          value: 7
+          value: "NB-IOT"
         },
         {
           label: "载波通道",
-          value: 8
+          value: "载波"
         },
         {
           label: "ZETA通道",
-          value: 9
+          value: "ZETA"
         },
         {
           label: "ZigBee通道",
-          value: 10
+          value: "ZigBee"
         },
         {
           label: "光纤通道",
-          value: 11
+          value: "光纤"
         },
         {
           label: "网线连接",
-          value: 12
+          value: "网线连接"
         },
         {
           label: "5G通道",
-          value: 13
+          value: "5G"
         },
         {
           label: "WIFI通道",
-          value: 14
+          value: "WIFI"
         },
         {
           label: "RS422通道",
-          value: 15
+          value: "RS422"
         },
         {
           label: "NFC通道",
-          value: 16
+          value: "NFC"
         },{
           label: "Bluetooth通道",
-          value: 17
-        },{
-          label: "集中器(国网1367.1)",
-          value: 18
-        },{
-          label: "集中器(南网上行公约)",
-          value: 19
-        },{
-           label: "集中器(南网1003公约)",
-           value: 20
+          value: "Bluetooth"
         }
       ],
+      imageUrl:'',
+      productid:''
     };
   },
   computed: {
@@ -327,12 +352,27 @@ export default {
     }
   },
   mounted() {
-    // this.Industry();
+    this.Industry();
     //    this.getRole()
     this.searchProduct(0)
   },
 
   methods: {
+    deleteImgsrc(){
+      event.stopPropagation()
+      this.imageUrl = ''
+    },
+    handleAvatarSuccess(res, file) {
+        this.imageUrl = res.path;
+        this.$message.success('上传成功')
+      },
+      beforeAvatarUpload(file) {
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isLt2M;
+      },
     utc2beijing(utc_datetime) {
       // 转为正常的时间格式 年-月-日 时:分:秒
       var date = new Date(+new Date(utc_datetime) + 8 * 3600 * 1000)
@@ -413,7 +453,42 @@ export default {
     //添加产品弹窗
     addproduct(){
         this.dialogFormVisible =true
-        this.Industry()
+        // this.Industry()
+    },
+    getParent(id,origin,returnarr){
+      origin.map(item=>{
+        if(id==item.id){
+           returnarr.unshift(item.value)
+           this.getParent(item.parentid,origin,returnarr)
+        }else if(item.parentid==0 && item.id==id){
+          returnarr.unshift(item.value)
+        }
+      })
+      this.form.category = returnarr
+      return returnarr
+    },
+    //查找Industry父级
+    getIndustryParent(type,originarr){
+      originarr.map(item=>{
+        if(item.value==type){
+          this.getParent(item.id,originarr,[])
+        }
+      })
+    },
+      editorProudct(row){
+      this.dialogFormVisible = true
+      this.productid = row.id
+      this.getIndustryParent(row.attributes.category,this.option)
+      this.form.desc = row.attributes.desc
+      this.form.name = row.attributes.name
+      this.form.nodeType = row.attributes.nodeType
+      this.form.netType = row.attributes.netType
+      this.form.devType = row.attributes.devType
+      this.form.productSecret = row.attributes.productSecret
+      if(row.attributes.icon){
+        this.imageUrl = row.attributes.icon
+      }
+      
     },
     //查询样品
     Industry() {
@@ -450,9 +525,9 @@ export default {
     //     })
 
     // },
+  
     submitForm(formName) {
       var objectId = Parse.User.current().id;
-      console.log(objectId);
       this.$refs[formName].validate(valid => {
         if (valid) {
           var ranNum = Math.ceil(Math.random() * 25);
@@ -464,10 +539,12 @@ export default {
           var Product = Parse.Object.extend("Product");
           var product = new Product();
           var acl = new Parse.ACL();
-          // this.ruleoptions.map(items => {
-          // acl.setRoleReadAccess(items.name, true);
-          // acl.setRoleWriteAccess(items.name, true);
-          // });
+          if(this.productid==''){
+             product.set("productSecret", productSecret);
+          }else{
+            product.id = this.productid
+            product.set("productSecret", this.form.productSecret);
+          }
           acl.setReadAccess(objectId, true);
           acl.setWriteAccess(objectId, true);
           product.set("ACL", acl);
@@ -478,20 +555,21 @@ export default {
             "category",
             this.form.category[this.form.category.length - 1]
           ),
-            product.set("name", this.form.name);
+          product.set('icon',this.imageUrl)
+          product.set("name", this.form.name);
           product.set("devType", this.form.devType);
           product.set("desc", this.form.desc);
           product.set("topics", []);
-          product.set("productSecret", productSecret);
           product.save().then(res => {
             if (res) {
               this.$message({
                 type: "success",
-                message: "创建成功"
+                message: `${this.productid=='' ? '创建成功':'编辑成功'}`
               });
               this.dialogFormVisible = false;
               this.$refs["ruleForm"].resetFields();
               this.searchProduct();
+              this.productid=''
             }
           });
         } else {
@@ -608,5 +686,32 @@ export default {
   margin-left: 10px;
   clear: both;
 }
+.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    text-align: center;
+  }
+  .avatar {
+    width: 150px;
+    height: 150px;
+    display: block;
+  }
+  .devproduct .el-icon-close{
+    position:absolute;
+    right:0;
+  }
 </style>
 

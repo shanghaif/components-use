@@ -322,7 +322,7 @@ export default {
     this.$nextTick(function() {
       setInterval(this.nowtime, 1000);
     });
-    this.search()
+    // this.search()
   },
   methods: {
     getChannelEnable(row) {
@@ -332,24 +332,24 @@ export default {
         return "red_active";
       }
     },
-    search() {
+    // search() {
       //发送ajax请求
-      $.ajax({
-        type: "get",
-        url: "http://wthrcdn.etouch.cn/weather_mini",
-        data: {
-          // msg在vue实例对象中 所以要用this点出来
-          city: '杭州'
-        },
-        //因为返回的是json格式的字符串 可以通过dataType转js对象
-        dataType: "json",
-        success: backData => {
-          console.log(backData);
-          //通过打印的结果 可以通过数组渲染到页面上
-          this.list = backData.data;
-        }
-      });
-    },
+    //   $.ajax({
+    //     type: "get",
+    //     url: "http://wthrcdn.etouch.cn/weather_mini",
+    //     data: {
+    //       // msg在vue实例对象中 所以要用this点出来
+    //       city: '杭州'
+    //     },
+    //     //因为返回的是json格式的字符串 可以通过dataType转js对象
+    //     dataType: "json",
+    //     success: backData => {
+    //       console.log(backData);
+    //       //通过打印的结果 可以通过数组渲染到页面上
+    //       this.list = backData.data;
+    //     }
+    //   });
+    // },
     nowtime() {
       var timestamp3 = Date.parse(new Date());
       var date = new Date(timestamp3);

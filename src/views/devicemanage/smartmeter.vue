@@ -334,7 +334,10 @@ export default {
 .smartmeter .el-table .NewDiv p span {
   color: #1b88e7;
 }
-/* .smartmeter .number:last-child{
-    display:none;
-} */
+.smartmeter .number:last-child{
+  display: none;
+}
+.smartmeter .el-pagination__jump {
+  display: none;
+}
 </style>

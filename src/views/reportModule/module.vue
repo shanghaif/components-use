@@ -12,7 +12,8 @@ let schema = {
   properties: {
     sample: {
       type: "string",
-      description: "产品名称"
+      description: "产品名称",
+      minLength:10,
     },
     category: {
       type: "string",
@@ -30,7 +31,7 @@ let schema = {
         properties: {
           inspecting_item: {
             type: "string",
-            description: "检验项目"
+            description: "检验项目",
           },
           guarantee_value: {
             type: "array",
@@ -73,6 +74,12 @@ let schema = {
 import { Parse } from "parse";
 import Cookies from "js-cookie";
 import { addReport } from "@/api/reportmodule/reportmodule";
+import Vue from "vue";
+import $ from 'jquery'
+var editor
+JSONEditor.defaults.options.theme = "foundation4";
+// JSONEditor.defaults.options.iconlib = 'foundation2';
+
 export default {
   data() {
     return {
@@ -84,15 +91,22 @@ export default {
   methods: {
     getSchema() {
       this.reportId = this.$route.query.id;
+      JSONEditor.defaults.options.show_errors= 'change'
       if (this.reportId) {
         var report = Parse.Object.extend("Datas");
         var query = new Parse.Query(report);
         query.get(this.reportId).then(resultes => {
           schema.default = resultes.attributes.data;
-          this.editor = new JSONEditor(
+          schema.default.inspecting.map(children => {
+            children.guarantee_value.map(deleteid => {
+              delete deleteid.id;
+            });
+          });
+         editor = new JSONEditor(
             document.getElementById("editor_holder"),
             {
-              schema
+              schema,
+              theme:'foundation4'
             }
           );
         }),
@@ -101,30 +115,36 @@ export default {
           };
       } else {
         schema.default = {};
-        this.editor = new JSONEditor(document.getElementById("editor_holder"), {
-          schema
+        editor = new JSONEditor(document.getElementById("editor_holder"), {
+          schema: schema
         });
       }
     },
     addmodule() {
-      addReport(this.editor.getValue(), this.reportId)
-        .then(resultes => {
-          if (resultes) {
-            this.$message({
-              type: "success",
-              message: "添加成功!"
-            });
-            this.$router.push({
-              path: "/reportmodule/index"
-            });
-          }
-        })
-        .catch(error => {
-          this.$message({
-            type: "error",
-            message: error.error
-          });
+      var errors = editor.validate({
         });
+        console.log(errors)
+      if (errors.length) {
+      } else {
+        addReport(editor.getValue(), this.reportId)
+          .then(resultes => {
+            if (resultes) {
+              this.$message({
+                type: "success",
+                message: "添加成功!"
+              });
+              this.$router.push({
+                path: "/reportmodule/index"
+              });
+            }
+          })
+          .catch(error => {
+            this.$message({
+              type: "error",
+              message: error.error
+            });
+          });
+      }
     }
   },
   mounted() {
@@ -143,7 +163,7 @@ export default {
 }
 </style>
 <style>
-.form-control {
+/* .form-control {
   margin: 10px 0;
 }
 .module button {
@@ -222,5 +242,11 @@ select {
 }
 .module .je-indented-panel button{
   margin-top:10px;
+} */
+.module p {
+  margin-top: 0 !important;
+}
+.module td .button-group {
+  margin-top: -25px !important;
 }
 </style>

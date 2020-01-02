@@ -97,8 +97,8 @@
           <el-form-item label="上报通道" prop="upchannel">
             <el-select v-model="form.upchannel" placeholder="上报通道" multiple>
               <el-option label="主站" :value="1"></el-option>
-              <el-option label="postgres" :value="2"></el-option>
-              <el-option label="tdengine" :value="3"></el-option>
+              <el-option label="存储库" :value="2"></el-option>
+              <el-option label="时序库" :value="3"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="采集策略" class="lineone" label-width="100px">
@@ -362,9 +362,9 @@ export default {
                    if(upchannel==1){
                        string='主站'
                    }else if(upchannel==2){
-                       string='postgres'
+                       string='存储库'
                    }else{
-                       string = 'tdengine'
+                       string = '时序库'
                    }
                    arr.push(string)
                })

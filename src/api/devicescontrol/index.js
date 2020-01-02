@@ -6,10 +6,10 @@ export function Pumpcontrol(addr,action,reportId) {
     method: 'post',
     params: {
         action:action,
-        reportId:reportId
+       
     },
     data:{
-        
+      reportId:reportId
     }
   })
 }

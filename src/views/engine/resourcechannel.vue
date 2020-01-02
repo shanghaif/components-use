@@ -1,74 +1,91 @@
 <template>
   <div class="resourcechannel">
-    <h3>资源通道管理</h3>
+    <h3>{{$t('resource.resource')}}</h3>
     <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane :label="'资源通道'+'('+total+')'" name="first">
+      <el-tab-pane :label="$t('resource.resource')+'('+total+')'" name="first">
         <div class="firsttable">
           <el-form :inline="true" :model="channelformsearch" class="demo-form-inline" size="small">
             <el-form-item>
-              <el-input v-model="channelformsearch.name" placeholder="请输入资源名称搜索"></el-input>
+              <el-input v-model="channelformsearch.name" :placeholder="$t('resource.name')"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="Get_Re_Channel(0)">搜 索</el-button>
+              <el-button type="primary" @click="Get_Re_Channel(0)">{{$t('developer.search')}}</el-button>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="addchanneltype">创建通道</el-button>
+              <el-button type="primary" @click="addchanneltype">{{$t('developer.selectchannel')}}</el-button>
             </el-form-item>
           </el-form>
           <!----------------------------------------------------资源通道表格------------------>
           <el-table :data="tableData" style="width: 100%;" :row-class-name="getChannelEnable">
-            <el-table-column label="通道编号">
-              <template slot-scope="scope">
-                <span>{{scope.row.id}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="通道名称">
-              <template slot-scope="scope">
-                <span>{{scope.row.attributes.name}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="启用状态">
-              <template slot-scope="scope">
-                <span v-if="scope.row.attributes.isEnable==true" style="color:green">已启用</span>
-                <span v-else>已禁用</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="连接状态" width="200">
-              <template slot-scope="scope">
-                <span v-if="scope.row.attributes.status=='off'" style="color:red">未连接</span>
-                <span v-else style="color:green">已连接</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="通道地址" width="200">
-              <template slot-scope="scope">
-                <span>{{scope.row.attributes.config.host}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="描述">
-              <template slot-scope="scope">
-                <span>{{scope.row.attributes.desc}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="200">
+            <el-table-column :label="$t('developer.channelnumber')">
+            <template slot-scope="scope">
+              <span>{{scope.row.id}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channelname')">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.name}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channeltype')">
+            <template slot-scope="scope">
+              <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+              <span v-else>{{$t('developer.resourcechannel')}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.servicetype')">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.cType}}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column :label="$t('developer.channelstatus')">
+            <template slot-scope="scope">
+              <span v-if="scope.row.attributes.status=='ONLINE'" style="color:green">在线</span>
+              <span v-else style="color:red">离线</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channeladdr')" width="200">
+            <!-- <template slot="header" slot-scope="scope">
+              <span>
+                <el-tooltip content="${productId}为对应的产品Id,${addr}为对应的设备地址" placement="top">
+                  <span>
+                    通道路径
+                    <i class="el-icon-question"></i>
+                  </span>
+                </el-tooltip>
+              </span>
+            </template>-->
+            <template slot-scope="scope">
+              <span>{{'channel/'+scope.row.id}}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column :label="$t('developer.describe')">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.desc}}</span>
+            </template>
+          </el-table-column>
+            <el-table-column :label="$t('developer.operation')" width="200">
               <template slot-scope="scope">
                 <el-button
                   type="success"
                   v-if="scope.row.attributes.isEnable==false"
                   size="mini"
-                  @click="qyChannel(scope.row)"
-                >启用</el-button>
-                <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row)">禁用</el-button>
-                <el-button type="primary" size="mini" @click="updateChannel(scope.row)">编辑</el-button>
+                  @click="qyChannel(scope.row,'enable')"
+                >{{$t('developer.enable')}}</el-button>
+                <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row,'disable')">{{$t('developer.prohibit')}}</el-button>
+                <el-button type="primary" size="mini" @click="updateChannel(scope.row)">{{$t('developer.edit')}}</el-button>
                 <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                   <p>确定删除这个{{scope.row.attributes.name}}通道吗？</p>
                   <div style="text-align: right; margin: 0">
                     <el-button
                       size="mini"
                       @click="scope._self.$refs[`popover-${scope.$index}`].doClose()"
-                    >取消</el-button>
-                    <el-button type="primary" size="mini" @click="deleteChannel(scope)">确定</el-button>
+                    >{{$t('developer.cancel')}}</el-button>
+                    <el-button type="primary" size="mini" @click="deleteChannel(scope)">{{$t('developer.determine')}}</el-button>
                   </div>
-                  <el-button type="danger" size="mini" slot="reference">删除</el-button>
+                  <el-button type="danger" size="mini" slot="reference">{{$t('developer.delete')}}</el-button>
                 </el-popover>
               </template>
             </el-table-column>
@@ -87,19 +104,19 @@
       </el-tab-pane>
       <!--弹窗--->
       <el-dialog
-        :title="channelupdated+'资源通道'"
+        :title="channelupdated+$t('resource.resource')"
         :visible.sync="channelForm"
         width="40%"
         top="0"
         :before-close="handleClose"
       >
         <el-form :model="addchannel" label-width="100px" ref="addchannel" :rules="addrules">
-          <el-form-item label="服务类型" prop="region" class="lastchildren">
+          <el-form-item :label="$t('resource.Servicetype')" prop="region" class="lastchildren">
             <el-select
               v-model="addchannel.region"
-              placeholder="请选择服务类型"
+              :placeholder="$t('resource.Servicetype')"
               :disabled="channelId!=''"
-              @change="removeauto('addchannel')"
+              @change="removeauto"
             >
               <el-option
                 v-for="(item,index) in channelregion"
@@ -109,64 +126,67 @@
               ></el-option>
             </el-select>
           </el-form-item>
+            <el-form-item :label="$t('developer.channelname')" prop="name" class="lastchildren">
+              <el-input v-model="addchannel.name" autocomplete="off" :placeholder="$t('developer.channelname')"></el-input>
+            </el-form-item>
 
-          <!--kafka---------------------------------------------------------------------------------->
-          <div class="notlastchildren notline" v-if="addchannel.region=='kafka'">
+          <!--KAFKA---------------------------------------------------------------------------------->
+          <div class="notlastchildren notline" v-if="addchannel.region=='KAFKA'">
              <el-form-item
-            label="kafka服务器"
+            label="KAFKA服务器"
             label-width="200px"
-            prop="kafkahost"
+            prop="KAFKAhost"
             :rules='[
               {required:true,message:"kafa服务器不能为空",trigger: "blur"}
               ]'
           >
             <template>
               <span slot="label">
-                <span>kafka服务器</span>
-                <el-popover placement="top-start" width="200" trigger="hover" content="kafka服务器">
+                <span>{{'KAFKA'+$t('resource.server')}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" :content="'KAFKA'+$t('resource.server')">
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
               </span>
             </template>
-            <el-input type="text" placeholder="kafka服务器" v-model="addchannel.kafkahost"></el-input>
+            <el-input type="text" :placeholder="'KAFKA'+$t('resource.server')" v-model="addchannel.KAFKAhost"></el-input>
           </el-form-item>
           </div>
-         <div class="notlastchildren notline" v-if="addchannel.region=='kafka'">
+         <div class="notlastchildren notline" v-if="addchannel.region=='KAFKA'">
             <el-form-item
-            label="kafka端口"
+            :label="'KAFKA'+$t('developer.port')"
             label-width="200px"
-            prop="kafkaport"
+            prop="KAFKAport"
             :rules='[
-              {required:true,message:"kafka端口不能为空",trigger: "blur"},
+              {required:true,message:"KAFKA端口不能为空",trigger: "blur"},
               { validator: validPort }
               ]'
           >
-            <el-input type="text" placeholder="kafka端口" v-model="addchannel.kafkaport"></el-input>
+            <el-input type="text" :placeholder="'KAFKA'+$t('developer.port')" v-model="addchannel.KAFKAport"></el-input>
           </el-form-item>
          </div>
-         <div v-if="addchannel.region=='kafka'"
+         <div v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
             <el-form-item
-            label="kafka资源名"
+            :label="'KAFKA'+$t('resource.resource')"
             label-width="200px"
           >
-            <el-input type="text" placeholder="kafka资源名" v-model="addchannel.kafkaname"></el-input>
+            <el-input type="text" :placeholder="'KAFKA'+$t('resource.resource')" v-model="addchannel.KAFKAname"></el-input>
           </el-form-item>
          </div>
-         <div  v-if="addchannel.region=='kafka'"
+         <div  v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
           <el-form-item
-            label="kafka"
+            label="KAFKA"
             label-width="200px"
           >
             <template>
               <span slot="label">
-                <span>Metadata更新间隔</span>
+                <span>{{'Metadata'+$t('resource.updateinterval')}}</span>
                 <el-popover
                   placement="top-start"
                   width="200"
                   trigger="hover"
-                  content="Metadata更新间隔"
+                  :content="'Metadata'+$t('resource.updateinterval')"
                 >
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
@@ -174,92 +194,92 @@
             </template>
             <el-input
               type="text"
-              placeholder="Metadata更新间隔"
-              v-model.number="addchannel.kafkametadata"
+              :placeholder="'Metadata'+$t('resource.updateinterval')"
+              v-model.number="addchannel.KAFKAmetadata"
             ></el-input>
           </el-form-item>
          </div>
-          <div  v-if="addchannel.region=='kafka'"
+          <div  v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
               <el-form-item
-            label="kafka"
+            label="KAFKA"
            
             label-width="200px"
           >
             <template>
               <span slot="label">
-                <span>同步调用间隔时间</span>
-                <el-popover placement="top-start" width="200" trigger="hover" content="同步调用间隔时间">
+                <span>{{$t('resource.Synchronizationcallinterval')}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" :content="$t('resource.Synchronizationcallinterval')">
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
               </span>
             </template>
 
-            <el-input type="text" placeholder="同步调用间隔时间" v-model.number="addchannel.kafkaduring"></el-input>
+            <el-input type="text" :placeholder="$t('resource.Synchronizationcallinterval')" v-model.number="addchannel.KAFKAduring"></el-input>
           </el-form-item>
           </div>
-          <div v-if="addchannel.region=='kafka'"
+          <div v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
             <el-form-item
-            label="kafka"
+            label="KAFKA"
             label-width="200px"
           >
             <template>
               <span slot="label">
-                <span>最大批处理字节数</span>
-                <el-popover placement="top-start" width="200" trigger="hover" content="最大批处理字节数">
+                <span>{{$t('resource.Maximumbatchbytes')}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" :content="$t('resource.Maximumbatchbytes')">
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
               </span>
             </template>
-            <el-input type="text" placeholder="最大批处理字节数" v-model.number="addchannel.kafkabatch"></el-input>
+            <el-input type="text" :placeholder="$t('resource.Maximumbatchbytes')" v-model.number="addchannel.KAFKAbatch"></el-input>
           </el-form-item>
           </div>
-          <div  v-if="addchannel.region=='kafka'"
+          <div  v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
               <el-form-item
             label="acks"
             label-width="200px"
           >
-            <el-select v-model="addchannel.kafkaacks">
+            <el-select v-model="addchannel.KAFKAacks">
               <el-option label="all" value="all"></el-option>
               <el-option label="0" value="0"></el-option>
               <el-option label="1" value="1"></el-option>
             </el-select>
           </el-form-item>
           </div>
-          <div v-if="addchannel.region=='kafka'"
+          <div v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
                <el-form-item
-            label="kafka"
+            label="KAFKA"
             label-width="200px"
           >
             <template>
               <span slot="label">
-                <span>压缩</span>
-                <el-popover placement="top-start" width="200" trigger="hover" content="压缩">
+                <span>{{$t('resource.compress')}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" :content="$t('resource.compress')">
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
               </span>
             </template>
-            <el-input type="text" placeholder="压缩" v-model="addchannel.kafkays"></el-input>
+            <el-input type="text" :placeholder="$t('resource.compress')" v-model="addchannel.KAFKAys"></el-input>
           </el-form-item>
           </div>
-         <div  v-if="addchannel.region=='kafka'"
+         <div  v-if="addchannel.region=='KAFKA'"
             class="notlastchildren notline">
              <el-form-item
-            label="kafka"
+            label="KAFKA"
             label-width="200px"
           >
             <template slot="label">
               <span>
-                <span>发送消息的缓冲区大小</span>
-                <el-popover placement="top-start" width="200" trigger="hover" content="发送消息的缓冲区大小">
+                <span>{{$t('resource.Buffersizeforsendingmessages')}}</span>
+                <el-popover placement="top-start" width="200" trigger="hover" :content="$t('resource.Buffersizeforsendingmessages')">
                   <i class="el-icon-question" slot="reference" style="color:#71737d;"></i>
                 </el-popover>
               </span>
             </template>
-            <el-input type="text" placeholder="发送消息的缓冲区大小" v-model.number="addchannel.kafkabuffer"></el-input>
+            <el-input type="text" :placeholder="$t('resource.Buffersizeforsendingmessages')" v-model.number="addchannel.KAFKAbuffer"></el-input>
           </el-form-item>
          </div>
          
@@ -267,12 +287,12 @@
           <div v-if="addchannel.region=='postgresql'||addchannel.region=='mongodb'||addchannel.region=='mysql'||addchannel.region=='influxdb'" class="notlastchildren notline">
             <div>
                <el-form-item
-            :label="addchannel.region+'服务器'"
+            :label="addchannel.region+$t('resource.server')"
             label-width="200px"
             prop="postgresqlhost"
             :rules='[{required:true,message:"服务器不能为空",trigger: "blur"}]'
           >
-            <el-input type="text" placeholder="服务器" v-model="addchannel.postgresqlhost"></el-input>
+            <el-input type="text" :placeholder="'addchannel.region'+$t('resource.server')" v-model="addchannel.postgresqlhost"></el-input>
           </el-form-item>
             </div>
             
@@ -281,12 +301,12 @@
             class="notlastchildren notline">
             <div>
                <el-form-item
-                label="端口"
+                :label="$t('developer.port')"
                 label-width="200px"
                 prop="postgresqlport"
                 :rules='[{required:true,message:"服务器端口不能为空",trigger: "blur"},{ validator: validPort }]'
               >
-                <el-input type="text" placeholder="端口" v-model.number="addchannel.postgresqlport"></el-input>
+                <el-input type="text" :placeholder="$t('developer.port')" v-model.number="addchannel.postgresqlport"></el-input>
               </el-form-item>
             </div>
            
@@ -295,7 +315,7 @@
             class="notlastchildren notline">
             <div>
                 <el-form-item
-                  :label="addchannel.region+'用户名'"
+                  :label="addchannel.region+$t('developer.username')"
                   label-width="200px"
                   prop="postgresqlusername"
                   :rules='[
@@ -304,7 +324,7 @@
                 >
                 <el-input
                   type="text"
-                  placeholder="用户名"
+                  :placeholder="$t('developer.username')"
                   v-model="addchannel.postgresqlusername"
                   class="notauto"
                   readonly
@@ -317,7 +337,7 @@
             class="notlastchildren notline">
             <div>
               <el-form-item
-            :label="addchannel.region+'密码'"
+            :label="addchannel.region+$t('developer.password')"
             label-width="200px"
             prop="postgresqlpassword"
             :rules='[
@@ -326,7 +346,7 @@
           >
             <el-input
               :type="pwdType"
-              placeholder="密码"
+              :placeholder="$t('developer.passowrd')"
               v-model="addchannel.postgresqlpassword"
               class="notauto readonly"
               readonly
@@ -367,13 +387,13 @@
             class="notlastchildren notline">
             <div>
                <el-form-item
-            label="批量写入大小"
+            :label="$t('resource.Bulkwritesize')"
            
             label-width="200px"
           >
             <el-input
               type="text"
-              placeholder="批量写入大小"
+              :placeholder="$t('resource.Bulkwritesize')"
               v-model.number="addchannel.postgresqllength"
               class="notauto"
               readonly
@@ -387,10 +407,10 @@
             class="notlastchildren notline" >
             <div>
                 <el-form-item
-            :label="addchannel.region+'资源名'"
+            :label="addchannel.region+$t('resource.resource')"
              label-width="200px"
           >
-            <el-input type="text" placeholder="资源名" v-model="addchannel.postgresqlname"></el-input>
+            <el-input type="text" :placeholder="$t('resource.resource')" v-model="addchannel.postgresqlname"></el-input>
           </el-form-item>
             </div>
              
@@ -399,11 +419,11 @@
             class="notlastchildren notline">
             <div>
               <el-form-item
-            :label="addchannel.region+'连接数'"
+            :label="addchannel.region+$t('resource.Connectionnumber')"
             label-width="200px"
           >
             <el-input
-              placeholder="连接数"
+              :placeholder="$t('resource.Connectionnumber')"
               v-model.number="addchannel.postgresqlconnect"
               class="notauto"
               readonly
@@ -418,7 +438,7 @@
             class="notlastchildren notline">
             <div>
                <el-form-item
-                label="开始SSL"
+                label="OpenSSL"
                 label-width="200px"
               >
                 <el-select v-model="addchannel.postgresqlssl">
@@ -429,31 +449,84 @@
                 </el-select>
               </el-form-item>
             </div>
-              
           </div>
+          <!-- HTTP配置
          <div v-if=" addchannel.region=='HTTP'">
             <el-form-item
-            label="端口"
+            :label="$t('developer.port')"
             
             prop="port"
             :rules='[{ required: true, message:"端口不能为空",trigger: "blur" }]'
             class="notlastchildren"
           >
-            <el-input v-model="addchannel.port" autocomplete="off" placeholder="请输入通道端口"></el-input>
+            <el-input v-model="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
           </el-form-item>
          </div>
           <div  v-if="addchannel.region=='HTTP'">
               <el-form-item
-            label="路径"
+            :label="$t('developer.path')"
            
             prop="path"
             :rules='[
           { required: true, message: "需要输入正确的url", trigger: "blur" }]'
             class="notlastchildren"
           >
-            <el-input v-model="addchannel.path" autocomplete="off" placeholder="请输入通道路径"></el-input>
+            <el-input v-model="addchannel.path" autocomplete="off" :placeholder="$t('developer.path')"></el-input>
           </el-form-item>
+          </div> -->
+          <div  v-if="addchannel.region=='HTTP'||addchannel.region=='TD'"  class="notlastchildren">
+             <el-form-item
+              :label="$t('developer.port')"
+              
+              prop="port"
+              :rules='[{ required: true, message:"端口不能为空",trigger: "blur" }, { validator: validPort }]'
+              
+            >
+              <el-input v-model.number="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
+            </el-form-item>
           </div>
+         <div  v-if="addchannel.region=='TD'" class="notlastchildren">
+            <el-form-item
+              label="IP"
+              
+              prop="ip"
+              :rules='[
+              { required: true, message:"地址不能为空"},
+              { validator: validUrl, trigger: "blur" }
+              ]'
+            >
+              <el-input v-model="addchannel.ip" autocomplete="off"></el-input>
+            </el-form-item>
+         </div>
+           <!-- <div   v-if="addchannel.region=='TCP'">
+              <el-form-item
+              :label="$t('developer.cacheconstraint')"
+             
+              prop="buff_size"
+              :rules='[
+          { required: true, message: "最大存储不能为空", trigger: "blur" },
+          { type: "number", message: "最大存储必须为数字值" }
+        ]'
+              class="notlastchildren"
+            >
+              <el-input v-model.number="addchannel.buff_size" autocomplete="off" :min="1">
+                <template slot="append">KB</template>
+              </el-input>
+            </el-form-item>
+           </div> -->
+           <div v-if="addchannel.region=='HTTP'" class="notlastchildren">
+             <el-form-item
+              :label="$t('developer.path')"
+              
+              prop="path"
+              :rules='[
+           { required: true, message: "需要输入正确的url", trigger: "blur" }]'
+              
+            >
+              <el-input v-model="addchannel.path" autocomplete="off" :placeholder="$t('developer.path')"></el-input>
+            </el-form-item>
+           </div>
+            
           <!--dynamodb----------------->
           <div  v-if="addchannel.region=='dynamodb'"
             class="notlastchildren notline">
@@ -553,7 +626,89 @@
             </div>
               
           </div>
-          
+          <!--Parse 配置-->
+          <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+             <el-form-item
+            label="parse服务器"
+            label-width="200px"
+            prop="parsehost"
+            :rules='[
+              {required:true,message:"Parse服务器不能为空",trigger: "blur"}
+              ]'
+          >
+            <el-input type="text" :placeholder="'parse'+$t('resource.server')" v-model="addchannel.parsehost"></el-input>
+          </el-form-item>
+          </div>
+         <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+            <el-form-item
+            :label="'parse'+$t('developer.port')"
+            label-width="200px"
+            prop="parseport"
+            :rules='[
+              {required:true,message:"端口不能为空",trigger: "blur"},
+              { validator: validPort }
+              ]'
+          >
+            <el-input type="text" :placeholder="'PARSE'+$t('developer.port')" v-model="addchannel.parseport"></el-input>
+          </el-form-item>
+         </div>
+          <div v-if="addchannel.region=='PARSE'"
+              class="notlastchildren notline">
+              <el-form-item
+              :label="'parse'+$t('resource.resource')"
+              label-width="200px"
+            >
+              <el-input type="text" :placeholder="'parse'+$t('resource.resource')" v-model="addchannel.parseresource"></el-input>
+            </el-form-item>
+          </div>
+          <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+            <el-form-item
+            label="appid"
+            label-width="200px"
+            prop="parseappid"
+            :rules='[
+              {required:true,message:"appid不能为空",trigger: "blur"}
+              ]'
+          >
+            <el-input type="text"  v-model="addchannel.parseappid"></el-input>
+          </el-form-item>
+         </div>
+         <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+            <el-form-item
+            label="js_key"
+            label-width="200px"
+            prop="parsejs_key"
+            :rules='[
+              {required:true,message:"js_key不能为空",trigger: "blur"}
+              ]'
+          >
+            <el-input type="text"  v-model="addchannel.parsejs_key"></el-input>
+          </el-form-item>
+         </div>
+         <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+            <el-form-item
+            label="master_key"
+            label-width="200px"
+            prop="parsemaster_key"
+            :rules='[
+              {required:true,message:"master_key不能为空",trigger: "blur"}
+              ]'
+          >
+            <el-input type="text"  v-model="addchannel.parsemaster_key"></el-input>
+          </el-form-item>
+         </div>
+         <div class="notlastchildren notline" v-if="addchannel.region=='PARSE'">
+            <el-form-item
+            label="rest_key"
+            label-width="200px"
+            prop="parserest_key"
+            :rules='[
+              {required:true,message:"rest_key不能为空",trigger: "blur"},
+              ]'
+          >
+            <el-input type="text"  v-model="addchannel.parserest_key"></el-input>
+          </el-form-item>
+         </div>
           <!--------------------------------RabbitMq----------------------------------------------------------------------------------->
           <div v-if="addchannel.region=='rabbitmq'"
             class="notlastchildren notline">
@@ -709,24 +864,137 @@
             </div>
             
          </div>
-         
+          <!--TD配置-->
+          <div   class="notlastchildren" v-if="addchannel.region=='TD'">
+               <el-form-item
+              :label="$t('developer.servicelink')"
+              prop="server"
+              :rules='[
+              { required: true, message: "需要输入路径", trigger: "blur" },
+              
+            ]'
+            >
+              <el-input v-model="addchannel.server" autocomplete="off" :placeholder="$t('developer.servicelink')">
+                <!-- <template slot="prepend">http://</template> -->
+              </el-input>
+            </el-form-item>
+          </div>
+          <div class="notlastchildren" v-if="addchannel.region=='TD'">
+            <el-form-item
+              :label="$t('developer.libraryname')"
+              prop="username"
+              :rules='[
+                { required: true, message: "请输入用户名", trigger: "blur" }
+              ]'
+            >
+              <el-input
+                v-model="addchannel.username"
+                autocomplete="off"
+                :placeholder="$t('developer.libraryname')"
+                type="text"
+                class="notauto"
+                readonly
+              ></el-input>
+            </el-form-item>
+          </div>
+            <div  class="notlastchildren" v-if="addchannel.region=='TD'">
+                <el-form-item
+              :label="$t('developer.librarypassword')"
+              prop="password"
+              :rules='[{ required: true, message: "请输入密码", trigger: "blur" }]'
+            >
+              <el-input
+                v-model="addchannel.password"
+                autocomplete="off"
+                :placeholder="$t('developer.librarypassword')"
+                :type="pwdType"
+                class="notauto"
+                readonly
+              >
+                <template slot="append">
+                  <span class="show-pwd" @click="showPwd" style="cursor:pointer">
+                    <svg-icon :icon-class="pwdType=='password' ? 'eye':'zheneys'" />
+                  </span>
+                </template>
+              </el-input>
+            </el-form-item>
+            </div>
+            
+            <!--同步间隔提示---------------------------------------------------------------------------------->
+            <div class="notlastchildren" v-if="addchannel.region=='TD'">
+                <el-form-item
+              :label="$t('developer.synchronousinterval')"
+              prop="auto_save"
+              :rules='[
+              { required: true, message: "同步间隔不能为空", trigger: "blur" },
+              { type: "number", message: "同步间隔必须为数字值" }
+            ]'
+            >
+              <el-input
+                v-model.number="addchannel.auto_save"
+                autocomplete="off"
+                :min="1"
+                :placeholder="$t('developer.synchronousinterval')"
+              >
+                <template slot="append">秒</template>
+              </el-input>
+            </el-form-item>
+            </div>
+            <div class="notlastchildren"  v-if="addchannel.region=='TD'">
+              <el-form-item
+              :label="$t('developer.amountdata')"
+             
+              prop="max_size"
+              :rules='[
+              { required: true, message: "最大条数不能为空", trigger: "blur" },
+              { type: "number", message: "最大条数必须为数字值" }
+            ]'
+              
+            >
+              <el-input
+                v-model.number="addchannel.max_size"
+                autocomplete="off"
+                :min="1"
+                :placeholder="$t('developer.amountdata')"
+              >
+                <template slot="append">条</template>
+              </el-input>
+            </el-form-item>
+            </div>
+            <div class="notlastchildren" v-if="addchannel.region=='TD'">
+                 <el-form-item
+              :label="$t('developer.cacheconstraint')"
+              
+              prop="max_memory"
+              :rules='[
+          { required: true, message: "最大存储不能为空", trigger: "blur" },
+          { type: "number", message: "最大存储必须为数字值" }]'
+              
+            >
+              <el-input v-model.number="addchannel.max_memory" autocomplete="off" :min="1">
+                <template slot="append">KB</template>
+              </el-input>
+            </el-form-item>
+            </div>
+           <!---Parse配置--->
+          
           <!---------------------统一的配置描述---------------------------->
-          <el-form-item label="通道描述" class="lastchildren">
+          <el-form-item :label="$t('developer.describe')" class="lastchildren">
             <el-input
               v-model="addchannel.desc"
               autocomplete="off"
               type="textarea"
               :rows="3"
-              placeholder="请输入通道描述"
+              :placeholder="$t('developer.describe')"
             ></el-input>
           </el-form-item>
-          <el-form-item class="lastchildren">
-            <el-button type="success" size="medium" @click="testConnect('addchannel')">测试连接</el-button>
-          </el-form-item>
+          <!-- <el-form-item class="lastchildren">
+            <el-button type="success" size="medium" @click="testConnect('addchannel')">{{$t('resource.Testconnection')}}</el-button>
+          </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="handleClose">取 消</el-button>
-          <el-button type="primary" @click="addchannelForm('addchannel')">确 定</el-button>
+          <el-button @click="handleClose">{{$t('developer.cancel')}}</el-button>
+          <el-button type="primary" @click="addchannelForm('addchannel')">{{$t('developer.determine')}}</el-button>
         </div>
       </el-dialog>
     </el-tabs>
@@ -740,7 +1008,7 @@ import {
   updateConnect,
   deleteConnect
 } from "@/api/testchannel";
-
+import { subupadte } from "@/api/systemmanage/system";
 
 export default {
   data() {
@@ -756,9 +1024,14 @@ export default {
         name: ""
       },
       channelregion: [
+         {
+          name: "HTTP",
+          value: "HTTP",
+          channeltype: "资源通道",
+        },
         {
           name: "Kafka",
-          value: "kafka",
+          value: "KAFKA",
           channeltype: "资源通道",
           channelvalue: "2"
         },
@@ -773,7 +1046,7 @@ export default {
           channeltype: "资源通道"
         },
         {
-          name: "postgresql",
+          name: "Postgresql",
           value: "postgresql",
           channeltype: "资源通道"
         },
@@ -783,7 +1056,7 @@ export default {
           channeltype: "资源通道"
         },
         {
-          name: "InfluxDB",
+          name: "Influxdb",
           value: "influxdb",
           channeltype: "资源通道"
         },
@@ -791,23 +1064,44 @@ export default {
           name: "DynamoDB",
           value: "dynamodb",
           channeltype: "资源通道"
-        }
+        },
+        {
+          name: "Parse",
+          value: "PARSE",
+          channeltype: "资源通道",
+          channelvalue: "2"
+        },
+        {
+          name: "TD",
+          value: "TD",
+          channeltype: "资源通道",
+          channelvalue: "2"
+        },
       ],
       addchannel: {
-        region: "kafka",
+        region: "PARSE",
         port: "",
-        path: "",
+        path: "0.0.0.0",
         desc: "",
-        //kafka配置
-        kafkahost: "127.0.0.1",
-        kafkaport: 9092,
-        kafkaname: "",
-        kafkametadata: "3s",
-        kafkaduring: "3s",
-        kafkabuffer: 33554433,
-        kafkaacks: "all",
-        kafkays: "",
-        kafkabatch: 16384,
+        name:'',
+        username:'',
+        password:'',
+        ip:'',
+        //td配置
+        auto_save: 30,
+        max_size: 10000,
+        max_memory: 1024000,
+        server: "",
+        //KAFKA配置
+        KAFKAhost: "127.0.0.1",
+        KAFKAport: 9092,
+        KAFKAname: "",
+        KAFKAmetadata: "3s",
+        KAFKAduring: "3s",
+        KAFKAbuffer: 33554433,
+        KAFKAacks: "all",
+        KAFKAys: "",
+        KAFKAbatch: 16384,
         //其他数据库配置，已pg名称命名
         postgresqlconnect: "",
         postgresqlhost: "",
@@ -818,18 +1112,26 @@ export default {
         postgresqlssl: "disable",
         postgresqllength: "",
         postgresqlname: "",
-        isEnable: true,
+        isEnable: false,
         //dynamedb
         dynamodbhost: "",
         //rabbitmq
         rabbitmqhost: "",
         rabbitmqusername: "",
         rabbitmqname: "",
-        rabbitconnect: "",
-        rabbitpassword: "",
-        rabbittimeout: "",
-        rabbitinvented: "", //虚拟主机
-        rabbitmqautoconnect: "" //自动重连间隔
+        rabbitmqconnect: "",
+        rabbitmqpassword: "",
+        rabbitmqtimeout: "",
+        rabbitmqinvented: "", //虚拟主机
+        rabbitmqautoconnect: "", //自动重连间隔
+        //parse配置
+        parsehost: "127.0.0.1",
+        parseport: 9092,
+        parseresource:'',
+        parseappid:'',
+        parsejs_key:'',
+        parsemaster_key:'',
+        parserest_key:''
       },
       addrules: {
         name: [{ required: true, message: "请输入通道名称", trigger: "blur" }],
@@ -884,17 +1186,18 @@ export default {
       if (start == 0) {
         this.start = 0;
       }
-      var Resource = Parse.Object.extend("Resource");
-      var resource = new Parse.Query(Resource);
-      resource.skip(this.start);
-      resource.limit(this.length);
-      resource.ascending("updatedAt");
+      var Channel = Parse.Object.extend("Channel");
+      var channel = new Parse.Query(Channel);
+      channel.skip(this.start);
+      channel.limit(this.length);
+      channel.ascending("-updatedAt");
+      channel.equalTo('type','2')
       if (this.channelformsearch.name != "") {
-        resource.contains("name", this.channelformsearch.name);
+        channel.contains("name", this.channelformsearch.name);
       }
-      resource.count().then(count => {
+      channel.count().then(count => {
         this.total = count;
-        resource.find().then(
+        channel.find().then(
           resultes => {
             if (resultes) {
               this.tableData = resultes;
@@ -920,25 +1223,17 @@ export default {
       });
     },
     //更新状态
-    qyChannel(row) {
-      updateConnect(
-        row.id,
-        row.attributes.config.host,
-        row.attributes.config.port,
-        row.attributes.config.username,
-        row.attributes.config.password,
-        row.attributes.config.database,
-        row.attributes.name,
-        row.attributes.config.sql_length,
-        row.attributes.config.connect,
-        row.attributes.config.ssl,
-        !row.attributes.isEnable
-      )
-        .then(response => {
-          if (response) {
-            this.$message.success("状态更新成功");
-            this.Get_Re_Channel(0);
+    qyChannel(row,action) {
+       subupadte(row.id, action)
+        .then(resultes => {
+          if (resultes) {
+            this.$message({
+              type:'success',
+              message:`${action=='enable' ? '启用成功':'禁用成功'}`
+            });
+
           }
+          this.Get_Re_Channel(0)
         })
         .catch(error => {
           this.$message.error(error.error);
@@ -948,150 +1243,198 @@ export default {
     updateChannel(row) {
       this.channelForm = true;
       this.channelupdated = "编辑";
-      var Resource = Parse.Object.extend("Resource");
-      var resource = new Parse.Query(Resource);
-      this.resourceid = row.id;
-      resource.get(row.id).then(
-        resultes => {
-          if (
-            resultes.attributes.resource_type == "mongodb" ||
-            resultes.attributes.resource_type == "mysql" ||
-            resultes.attributes.resource_type == "postgresql" ||
-            resultes.attributes.resource_type == "influxdb"
-          ) {
-            this.addchannel.region = resultes.attributes.resource_type;
-            (this.addchannel.postgresqlconnect =
-              resultes.attributes.config.connect),
-              (this.addchannel.postgresqlhost =
-                resultes.attributes.config.host),
-              (this.addchannel.postgresqlusername =
-                resultes.attributes.config.username),
-              (this.addchannel.postgresqlpassword =
-                resultes.attributes.config.password),
-              (this.addchannel.postgresqlport =
-                resultes.attributes.config.port),
-              (this.addchannel.postgresqldatabase =
-                resultes.attributes.config.database),
-              (this.addchannel.postgresqlssl = "disable"),
-              (this.addchannel.postgresqllength =
-                resultes.attributes.config.sql_length),
-              (this.addchannel.postgresqlname = resultes.attributes.name);
-            this.addchannel.isEnable = resultes.attributes.isEnable;
-          }
-        },
-        error => {
-          if (error.code == "209") {
-            this.$message({
-              type: "warning",
-              message: "登陆权限过期，请重新登录"
-            });
-            this.$router.push({
-              path: "/login"
-            });
-          } else if (error.code == 119) {
-            this.$message({
-              type: "error",
-              message: "没有操作权限"
-            });
-          }
-        }
-      );
     },
     addchannelForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
+          var Channel = Parse.Object.extend('Channel')
+          var channel = new Channel()
+           var userid = Parse.User.current().id
+            var acl =new Parse.ACL()
+            acl.setReadAccess(userid,true)
+            acl.setWriteAccess(userid,true)
           if (this.resourceid != "") {
-            updateConnect(
-              this.resourceid,
-              this.addchannel.postgresqlhost,
-              this.addchannel.postgresqlport,
-              this.addchannel.postgresqlusername,
-              this.addchannel.postgresqlpassword,
-              this.addchannel.postgresqldatabase,
-              this.addchannel.postgresqlname,
-              this.addchannel.postgresqllength,
-              this.addchannel.postgresqlconnect,
-              this.addchannel.postgresqlssl,
-              this.addchannel.isEnable
-            )
-              .then(response => {
-                if (response) {
-                  this.$message.success("编辑成功");
-                  this.channelForm = false;
-                  this.Get_Re_Channel(0);
+            channel.id = this.resourceid
+           }
+            if(this.addchannel.region=='postgresql'||this.addchannel.region=='mongodb'||this.addchannel.region=='mysql'||this.addchannel.region=='influxdb'){
+              channel.set('config',{
+                "host":   this.addchannel.postgresqlhost,
+                "port": this.addchannel.postgresqlport,
+                "username": this.addchannel.postgresqlusername,
+                "password":  this.addchannel.postgresqlpassword,
+                "database": this.addchannel.postgresqldatabase,
+                "name": this.addchannel.postgresqlname,
+                "sql_length": this.addchannel.postgresqllength,
+                "connect": this.addchannel.postgresqlconnect,
+                "ssl": this.addchannel.postgresqlssl,
+              })   
+            }else if (this.addchannel.region == "TD") {
+              channel.set("config", {
+                auto_save: this.addchannel.auto_save,
+                max_size: this.addchannel.max_size,
+                max_memory: this.addchannel.max_memory, 
+                ip:this.addchannel.ip,
+                port:this.addchannel.port,
+                path:this.addchannel.server,
+                username: this.addchannel.username,
+                password: this.addchannel.password
+              });
+            } else if (this.addchannel.region == "HTTP") {
+              channel.set("config", {
+                path: "http://" + this.addchannel.path,
+                port: this.addchannel.port
+              });
+            }else if(this.addchannel.region=='KAFKA'){
+                channel.set("config", {
+                host: this.addchannel.KAFKAhost,
+                port: this.addchannel.KAFKAport,
+                name:this.addchannel.KAFKAname,
+                during:this.addchannel.KAFKAduring,
+                buffer:this.addchannel.KAFKAbuffer,
+                acks:this.addchannel.KAFKAacks,
+                metadata:this.addchannel.KAFKAmetadata,
+                batch:this.addchannel.KAFKAbatch
+              });
+            }else if(this.addchannel.region=='rabbitmq'){
+                channel.set('config',{
+                  host:this.addchannel.rabbitmqhost,
+                  username:this.addchannel.rabbitmqusername,
+                  name:this.addchannel.rabbitmqname,
+                  connect:this.addchannel.rabbitmqconnect,
+                  password:this.addchannel.rabbitmqpassword,
+                  timeout:this.addchannel.rabbitmqtimeout,
+                  invented:this.addchannel.rabbitmqinvented,//虚拟主机
+                  autoconnect:this.addchannel.rabbitmqautoconnect //重连机制
+                })
+            }
+            else if(this.addchannel.region=='PARSE'){
+                channel.set('config',{
+                 host:this.addchannel.parsehost,
+                 port:this.addchannel.parseport,
+                 path:this.addchannel.parseresource,
+                 appid:this.addchannel.parseappid,
+                 master_key:this.addchannel.parsemaster_key,
+                 rest_key:this.addchannel.parserest_key,
+                 js_key:this.addchannel.parsejs_key
+                })
+            }
+              channel.set('ACL',acl)
+              channel.set('type','2')
+              channel.set('name',this.addchannel.name)
+              channel.set('cType',this.addchannel.region)
+              channel.set('desc',this.addchannel.desc)
+              channel.set('isEnable',this.addchannel.isEnable)
+              channel.save().then(resultes=>{
+                if(resultes){
+                  this.$message.success('创建成功')
+                  this.$refs['addchannel'].resetFields();
+                  this.channelForm=false
+                  this.Get_Re_Channel(0)
                 }
               })
-              .catch(error => {
-                this.$message.error(error);
-              });
-          }
-        }
+           }
       });
+    },
+    //删除通道
+     deleteChannel(scope) {
+      var Channel = Parse.Object.extend("Channel");
+      var channel = new Channel();
+      channel.id = scope.row.id;
+      channel.destroy().then(
+        resultes => {
+          this.$message({
+            type: "success",
+            message: "删除成功"
+          });
+          scope._self.$refs[`popover-${scope.$index}`].doClose();
+          this.Get_Re_Channel(0);
+        },
+        error => {
+          this.$message({
+            type: "error",
+            message: error.message
+          });
+        }
+      );
     },
     addchanneltype() {
       this.channelForm = true;
       this.channelupdated = "新增";
     },
-    testConnect(formName) {
-      this.$refs[formName].validate(valid => {
-        if (valid) {
-          console.log(this.$refs[formName])
-          if (
-            this.addchannel.region == "mongodb" ||
-            this.addchannel.region == "mysql" ||
-            this.addchannel.region == "postgresql" ||
-            this.addchanneltype.region == "influxdb"
-          ) {
-            channelConnect(
-              this.addchannel.region.toLowerCase(),
-              this.addchannel.postgresqlhost,
-              this.addchannel.postgresqlport,
-              this.addchannel.postgresqlusername,
-              this.addchannel.postgresqlpassword,
-              this.addchannel.postgresqldatabase,
-              this.addchannel.postgresqlname,
-              this.addchannel.postgresqllength,
-              this.addchannel.postgresqlconnect,
-              this.addchannel.postgresqlssl
-            )
-              .then(resultes => {
-                if (resultes) {
-                  this.$notify({
-                    title: "成功",
-                    message: "连接可用,通道已创建",
-                    type: "success",
-                    duration: 2000
-                  });
-                }
-              })
-              .catch(error => {
-                this.$notify({
-                  title: "连接不可用",
-                  message: error.reason,
-                  type: "error",
-                  duration: 2000
-                });
-              });
-          }
-        } else {
-          this.$message.error("有必填项未填写");
-          return false;
-        }
-      });
-    },
+    // testConnect(formName) {
+    //   this.$refs[formName].validate(valid => {
+    //     if (valid) {
+    //       console.log(this.$refs[formName])
+    //       if (
+    //         this.addchannel.region == "mongodb" ||
+    //         this.addchannel.region == "mysql" ||
+    //         this.addchannel.region == "postgresql" ||
+    //         this.addchanneltype.region == "influxdb"
+    //       ) {
+    //         channelConnect(
+    //           this.addchannel.region.toLowerCase(),
+    //           this.addchannel.postgresqlhost,
+    //           this.addchannel.postgresqlport,
+    //           this.addchannel.postgresqlusername,
+    //           this.addchannel.postgresqlpassword,
+    //           this.addchannel.postgresqldatabase,
+    //           this.addchannel.postgresqlname,
+    //           this.addchannel.postgresqllength,
+    //           this.addchannel.postgresqlconnect,
+    //           this.addchannel.postgresqlssl
+    //         )
+    //           .then(resultes => {
+    //             if (resultes) {
+    //               this.$notify({
+    //                 title: "成功",
+    //                 message: "连接可用,通道已创建",
+    //                 type: "success",
+    //                 duration: 2000
+    //               });
+    //             }
+    //           })
+    //           .catch(error => {
+    //             this.$notify({
+    //               title: "连接不可用",
+    //               message: error.reason,
+    //               type: "error",
+    //               duration: 2000
+    //             });
+    //           });
+    //       }
+    //     } else {
+    //       this.$message.error("有必填项未填写");
+    //       return false;
+    //     }
+    //   });
+    // },
     //关闭弹窗
     handleClose() {
       this.addchannel = {
-        region: "HTTP",
+        region: "PARSE",
         port: "",
-        path: "",
+        path: "0.0.0.0",
         desc: "",
-        kafkaclient: "127.0.0.1:9092",
-        kafkametadata: "3s",
-        kafkaduring: "3s",
-        kafkakb: "1024KB",
-        kafkays: "",
-        kafkahc: "1024KB",
+        name:'',
+        username:'',
+        password:'',
+        ip:'',
+        //td配置
+        auto_save: 30,
+        max_size: 10000,
+        max_memory: 1024000,
+        server: "",
+        //KAFKA配置
+        KAFKAhost: "127.0.0.1",
+        KAFKAport: 9092,
+        KAFKAname: "",
+        KAFKAmetadata: "3s",
+        KAFKAduring: "3s",
+        KAFKAbuffer: 33554433,
+        KAFKAacks: "all",
+        KAFKAys: "",
+        KAFKAbatch: 16384,
+        //其他数据库配置，已pg名称命名
         postgresqlconnect: "",
         postgresqlhost: "",
         postgresqlusername: "",
@@ -1101,7 +1444,26 @@ export default {
         postgresqlssl: "disable",
         postgresqllength: "",
         postgresqlname: "",
-        isEnable: true
+        isEnable: false,
+        //dynamedb
+        dynamodbhost: "",
+        //rabbitmq
+        rabbitmqhost: "",
+        rabbitmqusername: "",
+        rabbitmqname: "",
+        rabbitmqconnect: "",
+        rabbitmqpassword: "",
+        rabbitmqtimeout: "",
+        rabbitmqinvented: "", //虚拟主机
+        rabbitmqautoconnect: "", //自动重连间隔
+        //parse配置
+        parsehost: "127.0.0.1",
+        parseport: 9092,
+        parseresource:'',
+        parseappid:'',
+        parsejs_key:'',
+        parsemaster_key:'',
+        parserest_key:''
       };
       this.channelForm = false;
       // this.$refs["addchannel"].resetFields();
@@ -1121,9 +1483,10 @@ export default {
     channelCurrentChange(val) {
       this.start = (val - 1) * this.length;
     },
-    removeauto(formName) {
+    removeauto(val) {
       //去掉自动补全
-      //   this.$refs[formName].resetFields();
+        this.$refs['addchannel'].resetFields();
+        this.addchannel.region=val
       setTimeout(() => {
         var notautolength = document.getElementsByClassName("notauto");
         for (var i = 0; i < notautolength.length; i++) {
@@ -1132,19 +1495,19 @@ export default {
       }, 100);
     },
     //删除设备
-    deleteChannel(scope) {
-      deleteConnect(scope.row.id)
-        .then(resultes => {
-          if (resultes) {
-            this.$message.error("删除成功");
-            scope._self.$refs[`popover-${scope.$index}`].doClose();
-            this.Get_Re_Channel(0);
-          }
-        })
-        .catch(error => {
-          this.$message.error(error);
-        });
-    }
+    // deleteChannel(scope) {
+    //   deleteConnect(scope.row.id)
+    //     .then(resultes => {
+    //       if (resultes) {
+    //         this.$message.error("删除成功");
+    //         scope._self.$refs[`popover-${scope.$index}`].doClose();
+    //         this.Get_Re_Channel(0);
+    //       }
+    //     })
+    //     .catch(error => {
+    //       this.$message.error(error);
+    //     });
+    // }
   }
 };
 </script>

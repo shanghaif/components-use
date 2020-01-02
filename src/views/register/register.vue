@@ -38,7 +38,7 @@
         <!-- <el-form-item label="姓名" prop="username">
           <el-input v-model="ruleForm2.username" placeholder="2-5个文字" :maxlength="5"></el-input>
         </el-form-item>-->
-        <el-form-item prop="password">
+        <el-form-item prop="password" required>
           <span class="svg-container">
             <svg-icon icon-class="password"/>
           </span>
@@ -55,7 +55,7 @@
           </span>
         </el-form-item>
 
-        <el-form-item prop="checkPass">
+        <el-form-item prop="checkPass" required>
           <span class="svg-container">
             <svg-icon icon-class="password"/>
           </span>
@@ -107,6 +107,7 @@
 </template>
 <script>
 import Parse from "parse";
+import Cookies from 'js-cookie';
 let Base64 = require('js-base64').Base64;
 export default {
   data() {
@@ -129,7 +130,6 @@ export default {
         callback();
       }
     };
-
     return {
       time: 60, // 发送验证码倒计时
       sendMsgDisabled: false,
@@ -207,18 +207,25 @@ export default {
       });
     },
     submitForm(formName) {
+      var MobileRegex = /^1[3-9]\d{9}$/;
       this.$refs[formName].validate(valid => {
         if (valid) {
           var user = new Parse.User();
           user.set("username", this.ruleForm2.phone.toString());
           user.set("password", this.ruleForm2.password);
-          user.set("phone", this.ruleForm2.phone.toString());
-          // user.set("role", this.ruleForm2.roles);
+          if(MobileRegex.test(this.ruleForm2.phone)){
+             user.set("phone", this.ruleForm2.phone.toString());
+          }else{
+             user.set("phone", '');
+          }
+         
           user.set('productId',this.protype)
           let acl = new Parse.ACL();
           user
             .save()
             .then(resultes => {
+              console.log(resultes.attributes.sessionToken)
+              Cookies.set('sessionToken',resultes.attributes.sessionToken)
               this.$router.push({
                 path: "/phonelogin",
                 query:{
@@ -235,7 +242,7 @@ export default {
               });
               }else{
                 this.$message({
-                message: error,
+                message: error.message,
                 type: "error"
               });
               }
@@ -303,7 +310,7 @@ $light_gray: rgba(0, 0, 0, 0.247058823529412);
       border-radius: 5px;
       color: #454545;
     }
-    /deep/ .logo {
+    .logo {
     display: flex;
     justify-content: center;
     margin-bottom: 10px;
@@ -328,7 +335,7 @@ $light_gray: #eee;
   background-color: $bg;
   .login-form {
     position: absolute;
-    height: 600px;
+    height: 550px;
     right: 5%;
     width: 520px;
     max-width: 100%;

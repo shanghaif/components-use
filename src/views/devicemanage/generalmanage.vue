@@ -67,7 +67,11 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="设备编号">
-                <el-input v-model="formInline.hardware_number" placeholder="设备编号" style="width:200px"></el-input>
+                <el-input
+                  v-model="formInline.hardware_number"
+                  placeholder="设备编号"
+                  style="width:200px"
+                ></el-input>
               </el-form-item>
             </el-form>
           </div>
@@ -85,23 +89,23 @@
               @selection-change="handleSelectionChange"
             >
               <el-table-column type="selection" width="55" align="center"></el-table-column>
-              <el-table-column  label="客户名称" align="center">
+              <el-table-column label="客户名称" align="center">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.customer}}</span>
                 </template>
               </el-table-column>
-              <el-table-column  label="设备类型" align="center">
+              <el-table-column label="设备类型" align="center">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.hardwareType}}</span>
                 </template>
               </el-table-column>
-              <el-table-column  label="设备编号" align="center" width="250">
+              <el-table-column label="设备编号" align="center" width="250">
                 <template slot-scope="scope">
-                 <span>{{scope.row.attributes.hardware_number}}</span>
+                  <span>{{scope.row.attributes.hardware_number}}</span>
                 </template>
               </el-table-column>
               <!-- <el-table-column prop="address" label="注册服务器" align="center"></el-table-column> -->
-              <el-table-column  label="服务商名称" align="center">
+              <el-table-column label="服务商名称" align="center">
                 <template slot-scope="scope">
                   <span>{{scope.row.attributes.yysName}}</span>
                 </template>
@@ -136,8 +140,8 @@
               </el-table-column>
               <el-table-column label="注册时间" align="center">
                 <template slot-scope="scope">
-                  <span>{{utc2beijing(scope.row.attributes.createdAt).substring(0,10)}}</span> 
-                  <br/>
+                  <span>{{utc2beijing(scope.row.attributes.createdAt).substring(0,10)}}</span>
+                  <br />
                   <span>{{utc2beijing(scope.row.attributes.createdAt).substring(10)}}</span>
                 </template>
               </el-table-column>
@@ -193,7 +197,7 @@
               <el-table-column label="序号" align="center" type="index" width="50">
                 <!-- <template slot-scope="scope">
                   <span>{{scope.row.id}}</span>
-                </template> -->
+                </template>-->
               </el-table-column>
               <el-table-column label="客户名称" align="center">
                 <template slot-scope="scope">
@@ -254,13 +258,13 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
-                <el-form-item label="授权码" :label-width="formLabelWidth">
-                <el-input v-model="userform.cardid"  autocomplete="off" class="readonly" readonly>
+              <el-form-item label="授权码" :label-width="formLabelWidth">
+                <el-input v-model="userform.cardid" autocomplete="off" class="readonly" readonly>
                   <template slot="append">
-                  <span class="show-pwd" @click="showPwd">
-                    <svg-icon :icon-class="isopen" />
-                  </span>
-                 </template>
+                    <span class="show-pwd" @click="showPwd">
+                      <svg-icon :icon-class="isopen" />
+                    </span>
+                  </template>
                 </el-input>
               </el-form-item>
             </el-form>
@@ -371,7 +375,7 @@
 import Resource from "@/components/resource";
 import Parse from "parse";
 import { addCustomer } from "@/api/customernode";
-import {returnLogin} from '@/utils/return'
+import { returnLogin } from "@/utils/return";
 import {
   addSukeyys,
   searchSuketype,
@@ -384,6 +388,7 @@ import {
 } from "@/api/sukeserver";
 import { utc2beijing } from "@/utils/index";
 import ScrollPane from "@/components/ScrollPane";
+import { resolve } from "url";
 export default {
   components: {
     Resource
@@ -431,8 +436,8 @@ export default {
       }
     };
     return {
-      isopen:'suo',
-      pwdType:'password',
+      isopen: "suo",
+      pwdType: "password",
       Devicerule: {
         name: [
           {
@@ -465,7 +470,7 @@ export default {
         region: "",
         addr: "",
         hardwareType: "",
-        cardid:''
+        cardid: ""
       },
       DevicePageSize: 10,
       Devicestart: 0,
@@ -530,28 +535,39 @@ export default {
   },
   methods: {
     utc2beijing(utc_datetime) {
-	// 转为正常的时间格式 年-月-日 时:分:秒
-    var date = new Date(utc_datetime);  
-    var Y = date.getFullYear() + '-';
-    var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-    var D = (date.getDate()+1 <= 10 ? '0'+(date.getDate()) : date.getDate()) + ' ';
-    var h = (date.getHours()+1 <= 10 ? '0'+(date.getHours()) : date.getHours())  + ':';
-    var m = (date.getMinutes()+1 <= 10 ? '0'+(date.getMinutes()) : date.getMinutes())  + ':';
-    var s = (date.getSeconds()+1 <= 10 ? '0'+(date.getSeconds()) : date.getSeconds());
-    return Y+M+D+h+m+s; 
-  },
+      // 转为正常的时间格式 年-月-日 时:分:秒
+      var date = new Date(utc_datetime);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 < 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D =
+        (date.getDate() + 1 <= 10 ? "0" + date.getDate() : date.getDate()) +
+        " ";
+      var h =
+        (date.getHours() + 1 <= 10 ? "0" + date.getHours() : date.getHours()) +
+        ":";
+      var m =
+        (date.getMinutes() + 1 <= 10
+          ? "0" + date.getMinutes()
+          : date.getMinutes()) + ":";
+      var s =
+        date.getSeconds() + 1 <= 10
+          ? "0" + date.getSeconds()
+          : date.getSeconds();
+      return Y + M + D + h + m + s;
+    },
     showPwd() {
-       var readonly = document.getElementsByClassName('readonly')[0]
-      if(this.isopen=='suo'){
-         readonly.children[0].removeAttribute('readonly')
-         this.isopen = 'opensuo'
-      }else{
-        readonly.children[0].setAttribute('readonly','readonly')
-         this.isopen = 'suo'
+      var readonly = document.getElementsByClassName("readonly")[0];
+      if (this.isopen == "suo") {
+        readonly.children[0].removeAttribute("readonly");
+        this.isopen = "opensuo";
+      } else {
+        readonly.children[0].setAttribute("readonly", "readonly");
+        this.isopen = "suo";
       }
-       
-        
-      },
+    },
     reset() {
       this.formInline = {
         ol_status: 9,
@@ -570,37 +586,40 @@ export default {
       var Department = Parse.Object.extend("Department");
       var department = new Parse.Query(Department);
       department.equalTo("name", val);
-      department.find().then(resultes => {
-        if (resultes) {
-          var Department1 = Parse.Object.extend("Department");
-          var department1 = new Parse.Query(Department1);
-          resultes.map(items => {
-            var obj = {};
-            items.createtime = utc2beijing(items.attributes.createdAt);
-            (obj.name = items.attributes.name),
-              (obj.ParentId = items.attributes.ParentId);
-            obj.objectId = items.id;
-            obj.createtime = items.createtime;
-            obj.is_show = false;
-            this.data.push(obj);
-            department1.equalTo("ParentId", items.id);
-            department1.find().then(response => {
-              response.map(items => {
-                var obj = {};
-                items.createtime = utc2beijing(items.attributes.createdAt);
-                (obj.name = items.attributes.name),
-                  (obj.ParentId = items.attributes.ParentId);
-                obj.objectId = items.id;
-                obj.createtime = items.createtime;
-                obj.is_show = false;
-                this.data.push(obj);
+      department.find().then(
+        resultes => {
+          if (resultes) {
+            var Department1 = Parse.Object.extend("Department");
+            var department1 = new Parse.Query(Department1);
+            resultes.map(items => {
+              var obj = {};
+              items.createtime = utc2beijing(items.attributes.createdAt);
+              (obj.name = items.attributes.name),
+                (obj.ParentId = items.attributes.ParentId);
+              obj.objectId = items.id;
+              obj.createtime = items.createtime;
+              obj.is_show = false;
+              this.data.push(obj);
+              department1.equalTo("ParentId", items.id);
+              department1.find().then(response => {
+                response.map(items => {
+                  var obj = {};
+                  items.createtime = utc2beijing(items.attributes.createdAt);
+                  (obj.name = items.attributes.name),
+                    (obj.ParentId = items.attributes.ParentId);
+                  obj.objectId = items.id;
+                  obj.createtime = items.createtime;
+                  obj.is_show = false;
+                  this.data.push(obj);
+                });
               });
             });
-          });
+          }
+        },
+        error => {
+          returnLogin(error);
         }
-      },error=>{
-        returnLogin(error)
-      });
+      );
     },
     selsectserver(val) {
       this.ispData.map(item => {
@@ -627,35 +646,38 @@ export default {
           this.DeviceTotal = response.count;
         });
       } else {
-     
-        var SukeDev =Parse.Object.extend('SukeDev')
-        var sukedev = new Parse.Query(SukeDev)
-        if(this.formInline.status!=9){
-           sukedev.equalTo('status',this.formInline.status)
+        var SukeDev = Parse.Object.extend("SukeDev");
+        var sukedev = new Parse.Query(SukeDev);
+        if (this.formInline.status != 9) {
+          sukedev.equalTo("status", this.formInline.status);
         }
-       if(this.formInline.ol_status!=9){
-          sukedev.equalTo('ol_status',this.formInline.ol_status)
-       }
-       if(this.formInline.auth!=9){
-         sukedev.equalTo('auth',this.formInline.auth)
-       }
-        
-        if(this.formInline.hardware_number!=''){
-          sukedev.matches('hardware_number',this.formInline.hardware_number,"i")
+        if (this.formInline.ol_status != 9) {
+          sukedev.equalTo("ol_status", this.formInline.ol_status);
         }
-        if(this.formInline.customer!=''){
-          sukedev.equalTo('customerId',this.formInline.customer)
+        if (this.formInline.auth != 9) {
+          sukedev.equalTo("auth", this.formInline.auth);
         }
-        if(this.formInline.hardwareType!=''){
-          sukedev.equalTo('hardwareType',this.formInline.hardwareType)
+
+        if (this.formInline.hardware_number != "") {
+          sukedev.matches(
+            "hardware_number",
+            this.formInline.hardware_number,
+            "i"
+          );
         }
-        sukedev.skip(this.Userstart)
-        sukedev.limit(this.UserPageSize)
-        sukedev.ascending('createdAt')
-        sukedev.count().then(count=>{
-          this.UserTotal = count
-          sukedev.find().then(resultes=>{
-            this.tableData = resultes
+        if (this.formInline.customer != "") {
+          sukedev.equalTo("customerId", this.formInline.customer);
+        }
+        if (this.formInline.hardwareType != "") {
+          sukedev.equalTo("hardwareType", this.formInline.hardwareType);
+        }
+        sukedev.skip(this.Userstart);
+        sukedev.limit(this.UserPageSize);
+        sukedev.ascending("createdAt");
+        sukedev.count().then(count => {
+          this.UserTotal = count;
+          sukedev.find().then(resultes => {
+            this.tableData = resultes;
             // resultes.map(items=>{
             //   var obj={}
             //   obj.objectId = items.id
@@ -666,8 +688,8 @@ export default {
             //   }
             //     this.tableData.push(obj)
             // })
-          })
-        })
+          });
+        });
       }
     },
     getsukesercver() {
@@ -691,17 +713,18 @@ export default {
         }
       });
       if (this.isaddusername) {
-        if(this.customerForm.username!=''){
-           var Department = Parse.Object.extend("Department");
-            var department = new Department();
-            var acl = new Parse.ACL();
-            department.set("name", this.customerForm.username);
-            department.set("org_type", "suke");
-            department.set("ParentId", "0");
-            acl.setRoleReadAccess("suke", true);
-            acl.setRoleWriteAccess("suke", true);
-            department.set("ACL", acl);
-            department.save().then(object => {
+        if (this.customerForm.username != "") {
+          var Department = Parse.Object.extend("Department");
+          var department = new Department();
+          var acl = new Parse.ACL();
+          department.set("name", this.customerForm.username);
+          department.set("org_type", "suke");
+          department.set("ParentId", "0");
+          acl.setRoleReadAccess("suke", true);
+          acl.setRoleWriteAccess("suke", true);
+          department.set("ACL", acl);
+          department.save().then(
+            object => {
               this.$message({
                 message: "新增成功",
                 type: "success"
@@ -709,13 +732,14 @@ export default {
               this.isadduser = false;
               this.getTree();
               this.getMainstation();
-            },error=>{
-              returnLogin(error)
-            });
-        }else{
-          this.$message.error('请填写客户姓名')
+            },
+            error => {
+              returnLogin(error);
+            }
+          );
+        } else {
+          this.$message.error("请填写客户姓名");
         }
-       
       }
     },
     //删除用户
@@ -736,51 +760,97 @@ export default {
           }
         },
         error => {
-          returnLogin(error)
+          returnLogin(error);
         }
       );
     },
-    addDevTypeForUser() {
-      if(this.customerForm.customer!=''){
-        if(this.selectdevnumber.length!=0){
-          var Department = Parse.Object.extend("Department");
-            var department = new Parse.Query(Department);
-            var department1= new Department()
+    //异步操作添加用户
+    userPrimise(selectdevnumber) {
+      var arr = [];
+      selectdevnumber.map(items => {
+        arr.push(
+          new Promise((resolve, reject) => {
+            var Department = Parse.Object.extend("Department");
+            var department1 = new Department();
             var SukeDev = Parse.Object.extend("SukeDev");
-            var sukdev = new SukeDev()
-            this.selectdevnumber.map(items => {
-              setTimeout(() => {
-                sukdev.id = items.objectId
-                  sukdev.set("customer", this.dataforuser);
-                  sukdev.set("customerId", this.customerForm.customer);
-                  sukdev.save().then(resultes => {
-                    department1.id = items.departmentId
-                      department1.set("ParentId", this.customerForm.customer);
-                      department1.save().then(response => {
-                        this.$message({
-                          message: "更新成功",
-                          type: "success"
-                        });
-                        this.dialogFormVisible = false;  
-                      });
-                  },error=>{
-                    returnLogin(error)
-                  });
-              },500);
-               setTimeout(()=>{
-                      this.getTree();
-                      this.handleClick({ name: "first" });
-                    },1000)
-            });
-            
-            }else{
-              this.$message.error('请挑选设备')
-            }
-        
-      }else{
-        this.$message.error('请挑选用户')
+            var sukdev = new SukeDev();
+            sukdev.id = items.id;
+            sukdev.set("customer", this.dataforuser);
+            sukdev.set("customerId", this.customerForm.customer);
+            return sukdev.save().then(
+              resultes => {
+                department1.id = items.attributes.departmentId;
+                department1.set("ParentId", this.customerForm.customer);
+                department1.save().then(response => {
+                  resolve(response);
+                });
+              },
+              error => {
+                returnLogin(error);
+                reject(error.error);
+              }
+            );
+          })
+        );
+      });
+      Promise.all(arr)
+        .then(data => {
+          this.$message({
+            message: "更新成功",
+            type: "success"
+          });
+          if (data.length == this.selectdevnumber.length) {
+            this.dialogFormVisible = false;
+            this.getTree();
+            this.handleClick({ name: "first" });
+          }
+        })
+        .catch(error => {
+          this.$message({
+            message: error,
+            type: "error"
+          });
+        });
+    },
+    addDevTypeForUser() {
+      if (this.customerForm.customer != "") {
+        if (this.selectdevnumber.length != 0) {
+          this.userPrimise(this.selectdevnumber);
+          // var Department = Parse.Object.extend("Department");
+          // var department = new Parse.Query(Department);
+          // var department1= new Department()
+          // var SukeDev = Parse.Object.extend("SukeDev");
+          // var sukdev = new SukeDev()
+          // this.selectdevnumber.map(items => {
+          //   setTimeout(() => {
+          //     sukdev.id = items.objectId
+          //       sukdev.set("customer", this.dataforuser);
+          //       sukdev.set("customerId", this.customerForm.customer);
+          //       sukdev.save().then(resultes => {
+          //         department1.id = items.departmentId
+          //           department1.set("ParentId", this.customerForm.customer);
+          //           department1.save().then(response => {
+          //             this.$message({
+          //               message: "更新成功",
+          //               type: "success"
+          //             });
+          //             this.dialogFormVisible = false;
+          //           });
+          //       },error=>{
+          //         returnLogin(error)
+          //       });
+          //   },500);
+          //    setTimeout(()=>{
+          //           this.getTree();
+          //           this.handleClick({ name: "first" });
+          //         },1000)
+          // });
+        } else {
+          this.$message.error("请挑选设备");
+        }
+      } else {
+        this.$message.error("请挑选用户");
       }
-      
     },
     editordevtype(row) {
       this.userFormVisible = true;
@@ -788,10 +858,10 @@ export default {
       this.userform.region = row.attributes.auth;
       this.userdevid = row.id;
       this.userform.addr = row.attributes.address;
-      this.userform.cardid = row.attributes.cardId
-      this.userform.hardwareType = row.attributes.yysId
-      if(row.attributes.yysName!=''){
-        this.datafordev = row.attributes.yysName
+      this.userform.cardid = row.attributes.cardId;
+      this.userform.hardwareType = row.attributes.yysId;
+      if (row.attributes.yysName != "") {
+        this.datafordev = row.attributes.yysName;
       }
     },
     updateusertype() {
@@ -802,7 +872,7 @@ export default {
         object.set("auth", this.userform.region);
         object.set("address", this.userform.addr);
         object.set("yysId", this.userform.hardwareType);
-        object.set('cardId',this.userform.cardid)
+        object.set("cardId", this.userform.cardid);
         object.set("yysName", this.datafordev);
         object.save().then(
           resultes => {
@@ -815,7 +885,7 @@ export default {
             this.handleClick({ name: "first" });
           },
           error => {
-           returnLogin(error)
+            returnLogin(error);
           }
         );
       });
@@ -825,7 +895,7 @@ export default {
       var department = new Parse.Query(Department);
       department.limit(10000);
       department.equalTo("org_type", "suke");
-      department.exists('ParentId')
+      department.exists("ParentId");
       department.find().then(
         resultes => {
           this.data = [];
@@ -841,7 +911,7 @@ export default {
           });
         },
         error => {
-         returnLogin(error)
+          returnLogin(error);
         }
       );
     },
@@ -857,7 +927,7 @@ export default {
           this.handleClick({ name: "third" });
         },
         error => {
-         returnLogin(error)
+          returnLogin(error);
         }
       );
     },
@@ -866,11 +936,11 @@ export default {
     },
     //查询用户
     searchskUser(start) {
-      if(start==0){
-        this.Userstart=0
+      if (start == 0) {
+        this.Userstart = 0;
       }
-      
-      this.handleClick({name:'first'})
+
+      this.handleClick({ name: "first" });
     },
     getDetailforUser(data) {
       var SukeDev = Parse.Object.extend("SukeDev");
@@ -906,8 +976,8 @@ export default {
     },
     //设备类型查询
     querydevtype(start) {
-      if(start==0){
-        this.Devicestart=0
+      if (start == 0) {
+        this.Devicestart = 0;
       }
       querydevinfo(this.formthree, this.Devicestart, this.DevicePageSize).then(
         response => {
@@ -1103,11 +1173,11 @@ export default {
   margin-top: 20px;
 }
 @media screen and (max-width: 1024px) {
-      .resource {
-       display: none;
-    }
-    .el-dialog{
-      width:100%;
-    }
+  .resource {
+    display: none;
   }
+  .el-dialog {
+    width: 100%;
+  }
+}
 </style>
