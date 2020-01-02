@@ -2,8 +2,8 @@
   <div class="rolescontrol">
     <div class="search">
       <el-input placeholder="请输入内容" v-model="search" style="width:200px" clearable></el-input>
-      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;" >搜 索</el-button>
-      <el-button type="primary" icon="el-icon-plus" @click="addcontrol">新 增</el-button>
+      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;" >{{$t('developer.search')}}</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="addcontrol">{{$t('developer.add')}}</el-button>
     </div>
     <tree-table
       :key="key"
@@ -17,20 +17,20 @@
         <el-tag>{{scope.row.createtime}}</el-tag>
       </template>
       <template slot="operation" slot-scope="{scope}">
-        <el-button size="mini" type="success" icon="el-icon-edit" @click="handleEdit(scope.row)">编 辑</el-button>
-        <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)" disabled>删 除</el-button>
+        <el-button size="mini" type="success" icon="el-icon-edit" @click="handleEdit(scope.row)">{{$t('developer.edit')}}</el-button>
+        <el-button size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)" disabled>{{$t('developer.delete')}}</el-button>
       </template>
     </tree-table>
      <!--编辑权限弹窗-->
-    <el-dialog title="编辑权限" :visible.sync="roleEdit">
+    <el-dialog :title="$t('developer.edit')" :visible.sync="roleEdit">
       <el-form :model="form">
-        <el-form-item label="权限名称" :label-width="formLabelWidth">
+        <el-form-item :label="$t('user.name')" :label-width="formLabelWidth">
           <el-input v-model="form.name" autocomplete="off" style="width:300px;" disabled></el-input>
         </el-form-item>
-        <el-form-item label="权限备注" :label-width="formLabelWidth">
+        <el-form-item :label="$t('user.Reamrks')" :label-width="formLabelWidth">
           <el-input v-model="form.alias" autocomplete="off" style="width:300px;"></el-input>
         </el-form-item>
-        <el-form-item label="权限描述" :label-width="formLabelWidth">
+        <el-form-item :label="$t('developer.describe')" :label-width="formLabelWidth">
           <el-input
             v-model="form.description"
             autocomplete="off"
@@ -41,8 +41,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="roleEdit = false">取 消</el-button>
-        <el-button type="primary" @click="updaterole">确 定</el-button>
+        <el-button @click="roleEdit = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="updaterole">{{$t('developer.determine')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -69,23 +69,23 @@ export default {
       permissionid:'',
       columns: [
         {
-          label: "名称",
+          label: "Name",
           key: "alias",
           expand: true,
           align:'left',
         },
         {
-          label: "别名",
+          label: "Alias",
           key: "name",
           width: 200,
           align: "center"
         },
         {
-          label: "创建日期",
+          label: "Created time",
           key: "scope"
         },
         {
-          label: "操作",
+          label: "Operation",
           key: "operation"
         }
       ],

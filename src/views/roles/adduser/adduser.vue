@@ -161,7 +161,6 @@ export default {
   },
   mounted() {
     this.getDepartment();
-    console.log();
     this.nowuserid = Parse.User.current().id;
   },
   methods: {
@@ -208,7 +207,7 @@ export default {
             error => {
               this.$message({
                 type: "error",
-                message: error.error
+                message: error.message
               });
             }
           );

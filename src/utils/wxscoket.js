@@ -67,6 +67,7 @@ var Websocket = {
     cleanSession: false
   },
   sendInfo: '{}',
+  hooks:[],
   tablelist: [],
   subInfo:info,
   originrecivedata: [],
@@ -83,14 +84,7 @@ var Websocket = {
     } catch (e) {
     }
     // eslint-disable-next-line no-undef
-    console.log(111)
   },
-    // timer:function(){
-    //   var _this=this
-    //   setTimeout(() => {
-    //     _this.connect()
-    //   }, 5000)
-    // },
   newClient: function () {
     var _this = this
     // eslint-disable-next-line no-undef
@@ -108,6 +102,20 @@ var Websocket = {
   recive: function (msg) {
     console.log(msg)
   },
+
+  add_hook:function(Re, Callback){
+     this.hooks.push({re:Re,callback:Callback});
+  },
+
+  dispatch:function(message){
+      var topic = message.destinationName
+      this.hooks.map(item=>{
+        if(item.re.test(topic)){
+          item.callback(message.payloadString)
+        }
+      })
+  },
+
   connect: function () {
     var _this = this
     // eslint-disable-next-line no-undef
@@ -121,7 +129,7 @@ var Websocket = {
         console.log('onConnectionLost: ' + responseObject.errorMessage)
         setTimeout(function(){
           _this.connect()
-        },5000)
+        },1000)
        
       }else{
         window.clearTimeout()
@@ -134,7 +142,7 @@ var Websocket = {
       } catch (e) {
         message.msgString = 'Binary message(' + message.payloadBytes.length + ')'
       }
-      _this.recive(message.payloadString)
+      _this.dispatch(message)
     }
  
     var options = {
@@ -149,7 +157,7 @@ var Websocket = {
         _this.connState = true
         _this.subscribe(_this.subInfo,function(res) {
           if (res.result) {
-           console.log(_this.subInfo)
+            console.log(_this.subInfo)
             console.log("订阅成功"); 
           } 
         })

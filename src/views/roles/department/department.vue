@@ -1,19 +1,19 @@
 <template>
   <div class="department">
     <div class="search">
-      <el-input placeholder="请输入内容" v-model="search" clearable style="wdith:200px"></el-input>
-      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">搜 索</el-button>
-      <el-button type="primary" icon="el-icon-plus" @click="add()">新 增</el-button>
+      <el-input :placeholder="$t('user.name')" v-model="search" clearable style="wdith:200px"></el-input>
+      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">{{$t('developer.search')}}</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="add()">{{$t('developer.add')}}</el-button>
     </div>
-    <el-dialog title="新增" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+    <el-dialog :title="$t('developer.add')" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
       <el-form ref="form" :model="form" label-width="80px">
-        <el-form-item label="名称">
+        <el-form-item :label="$t('user.name')">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="上级">
+        <el-form-item :label="$t('department.Superior')">
           <el-cascader
             style="width:100%"
-            placeholder="如果不选择则为顶级"
+            :placeholder="$t('department.text')"
             v-model="form.departmentid"
             :props="treeprops"
             :options="treeData"
@@ -25,18 +25,18 @@
         <el-form-item label="Level">
           <el-input v-model="form.level"></el-input>
         </el-form-item>
-          <el-form-item label="类别">
-            <el-select v-model="form.type" placeholder="请选择类别" style="width:100%;">
-              <el-option label="省电力公司" value="省电力公司"></el-option>
-              <el-option label="供电局" value="供电局"></el-option>
-              <el-option label="集中器" value="集中器"></el-option>
-              <el-option label="电表" value="电表"></el-option>
+          <el-form-item :label="$t('department.category')">
+            <el-select v-model="form.type" :placeholder="$t('department.category')" style="width:100%;">
+              <el-option :label="$t('department.ProvincialElectricPower')" value="省电力公司"></el-option>
+              <el-option :label="$t('department.powersupplybureau')" value="供电局"></el-option>
+              <el-option :label="$t('department.concertation')" value="集中器"></el-option>
+              <el-option :label="$t('department.meter')" value="电表"></el-option>
             </el-select>
           </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="standardName">确 定</el-button>
+        <el-button @click="dialogVisible = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="standardName">{{$t('developer.determine')}}</el-button>
       </span>
     </el-dialog>
     <tree-table
@@ -47,17 +47,17 @@
       border
       style="margin-top:20px;"
     >
-      <template slot="scope" slot-scope="{scope}">
+      <!-- <template slot="scope" slot-scope="{scope}">
         <el-tag>{{ scope.row.level}}</el-tag>
-      </template>
+      </template> -->
       <template slot="operation" slot-scope="{scope}">
-        <el-button size="mini" type="success" icon="el-icon-edit" @click="handleEdit(scope.row)">编辑</el-button>
+        <el-button size="mini" type="success" icon="el-icon-edit" @click="handleEdit(scope.row)">{{$t('developer.edit')}}</el-button>
         <el-button
           size="mini"
           type="danger"
           icon="el-icon-delete"
           @click="handleDelete(scope.row)"
-        >删除</el-button>
+        >{{$t('developer.delete')}}</el-button>
       </template>
     </tree-table>
     <!-- <el-table :data="treeData"
@@ -100,15 +100,15 @@
     </el-table-column>
     </el-table> -->
     <!--部门弹窗-->
-    <el-dialog title="编辑部门" :visible.sync="departmentEdit">
+    <el-dialog :title="$t('developer.edit')" :visible.sync="departmentEdit">
       <el-form :model="departmentForm">
-        <el-form-item label="部门名称" :label-width="formLabelWidth">
+        <el-form-item :label="$t('user.name')" :label-width="formLabelWidth">
           <el-input v-model="departmentForm.name" autocomplete="off" style="width:300px;"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="departmentEdit = false">取 消</el-button>
-        <el-button type="primary" @click="updatedepartment">确 定</el-button>
+        <el-button @click="departmentEdit = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="updatedepartment">{{$t('developer.determine')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -139,7 +139,7 @@ export default {
       },
       columns: [
         {
-          label: "名称",
+          label: "Name",
           key: "name",
           expand: true,
           align:'left'
@@ -151,16 +151,12 @@ export default {
           // align: "center"
         },
         {
-          label: "level",
-          key: "scope"
-        },
-        {
-          label: "创建时间",
+          label: "Created time",
           key: "createtime",
           // align: "center"
         },
         {
-          label: "操作",
+          label: "Operation",
           key: "operation"
         }
       ],

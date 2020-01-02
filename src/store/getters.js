@@ -1,7 +1,6 @@
 /* eslint-disable key-spacing */
 const getters = {
   sidebar: state => state.app.sidebar,
-  status: state => state.user.status,
   device: state => state.app.device,
   token: state => state.user.token,
   avatar: state => state.user.avatar,

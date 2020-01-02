@@ -1,14 +1,14 @@
 <template>
   <div class="roles">
     <div class="search">
-      <el-input placeholder="请输入内容" v-model="search" clearable></el-input>
+      <el-input :placeholder="$t('user.name')" v-model="search" clearable></el-input>
       <el-button
         type="primary"
         icon="el-icon-search"
         style="margin-left:20px;"
         @click="searchvalue"
-      >搜 索</el-button>
-      <el-button type="primary" icon="el-icon-plus" @click="add">新 增</el-button>
+      >{{$t('developer.search')}}</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="add">{{$t('developer.add')}}</el-button>
     </div>
     <div class="tableroles" style="margin-top:20px">
       <el-table
@@ -17,17 +17,17 @@
         @row-click="getDetailmenu"
         highlight-current-row
       >
-        <el-table-column label="名称" align="center">
+        <el-table-column :label="$t('user.name')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="描述" align="center">
+        <el-table-column :label="$t('developer.describe')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.desc}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="备注" align="center">
+        <el-table-column :label="$t('user.Remarks')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.alias}}</span>
           </template>
@@ -37,7 +37,7 @@
             <span>{{scope.row.id}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center">
+        <el-table-column :label="$t('developer.operation')" align="center">
           <template slot-scope="scope">
             <!-- <el-button size="mini" type="primary" @click="handleEdit(scope.row)">分配权限</el-button> -->
             <!-- <el-button size="mini" type="success" @click="addmenu(scope.row)">分配菜单</el-button> -->
@@ -47,13 +47,13 @@
               type="success"
               icon="el-icon-edit"
               @click="handleEditrole(scope.row)"
-            >编 辑</el-button>
+            >{{$t('developer.edit')}}</el-button>
             <el-button
               size="mini"
               type="danger"
               icon="el-icon-delete"
               @click="handleDelete(scope.row)"
-            >删 除</el-button>
+            >{{$t('developer.delete')}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -69,7 +69,7 @@
         ></el-pagination>
       </div>
     </div>
-    <el-dialog title="增加权限" :visible.sync="centerDialogVisible" width="50%">
+    <el-dialog :title="$t('developer.add')" :visible.sync="centerDialogVisible" width="50%">
       <el-table
         :data="tableDataroles"
         style="width: 100%;text-align:center"
@@ -77,12 +77,12 @@
         ref="multipleTable"
       >
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column label="名称" align="center">
+        <el-table-column :label="$t('user.name')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="描述" align="center">
+        <el-table-column :label="$t('user.Remarks')" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.attributes.desc}}</span>
           </template>
@@ -94,21 +94,23 @@
         </el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="centerDialogVisible=false">取 消</el-button>
-        <el-button type="primary" @click="addacl">确 认</el-button>
+        <el-button @click="centerDialogVisible=false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="addacl">{{$t('developer.determine')}}</el-button>
       </span>
     </el-dialog>
     <!--菜单-->
     <div class="rolefooter">
       <div class="footerleft">
         <p class="top">
-          <span>权限分配</span>
+         <span class="svg-container">
+          <svg-icon icon-class="role_group" />
+         </span> <span>{{$t('user.assignroles1')}}</span>
           <el-button
             type="primary"
             icon="el-icon-success"
             :disabled="rolecontrol"
             @click="controlroles"
-          >保 存</el-button>
+          >{{$t('product.preservation')}}</el-button>
         </p>
         <div class="rolecontrol">
           <el-tree
@@ -129,13 +131,16 @@
       </div>
       <div class="footerright">
         <p class="top">
-          <span>菜单分配</span>
+           <span class="svg-container">
+             <svg-icon icon-class="menu_group" />
+           </span>
+           <span>{{$t('user.assignmenu')}}</span>
           <el-button
             type="primary"
             icon="el-icon-success"
             @click="getCheckedKeys"
             :disabled="rolecontrol"
-          >保 存</el-button>
+          >{{$t('product.preservation')}}</el-button>
         </p>
         <div class="menucontrol" style="margin-top:30px;">
           <el-tree
@@ -156,15 +161,15 @@
       </div>
     </div>
     <!--编辑权限弹窗-->
-    <el-dialog title="编辑角色" :visible.sync="roleEdit">
+    <el-dialog :title="$t('developer.edit')" :visible.sync="roleEdit">
       <el-form :model="form">
-        <el-form-item label="角色名称" :label-width="formLabelWidth">
+        <el-form-item :label="$t('user.name')" :label-width="formLabelWidth">
           <el-input v-model="form.name" autocomplete="off" style="width:300px;" disabled></el-input>
         </el-form-item>
-        <el-form-item label="角色备注" :label-width="formLabelWidth">
+        <el-form-item :label="$t('user.Remarks')" :label-width="formLabelWidth">
           <el-input v-model="form.alias" autocomplete="off" style="width:300px;"></el-input>
         </el-form-item>
-        <el-form-item label="角色描述" :label-width="formLabelWidth">
+        <el-form-item :label="$t('developer.describe')" :label-width="formLabelWidth">
           <el-input
             v-model="form.desc"
             autocomplete="off"
@@ -175,8 +180,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="roleEdit = false">取 消</el-button>
-        <el-button type="primary" @click="updaterole">确 定</el-button>
+        <el-button @click="roleEdit = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="updaterole">{{$t('developer.determine')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -263,11 +268,9 @@ export default {
             obj.parent = items.attributes.parent.id
             obj.createtime = new Date(items.attributes.createdAt).toLocaleDateString()
             this.data.push(obj)
-            })
-        
+            }) 
          },
          (error=>{
-           console.log(error)
            if(error.code=='209'){
              this.$message({
             type: "warning",
@@ -280,7 +283,6 @@ export default {
          }))
           
     },
-
     diguiquchu(datas, arr, v, needdelarr) {
       // 递归找出半选中的数据
       arr.map(item => {

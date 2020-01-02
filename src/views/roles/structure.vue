@@ -6,7 +6,7 @@
         <el-input
           v-model="query.value"
           clearable
-          placeholder="输入用户名称搜索"
+          :placeholder="$t('user.name')"
           style="width: 200px;"
           class="filter-item"
         />
@@ -15,41 +15,41 @@
           type="primary"
           icon="el-icon-search"
           @click="userFordepartment"
-        >搜索</el-button>
+        >{{$t('developer.search')}}</el-button>
         <el-button
           class="filter-item"
           type="primary"
           icon="el-icon-circle-plus"
           @click="adduser"
-        >新增用户</el-button>
+        >{{$t('user.newusers')}}</el-button>
         <el-table
           v-loading="loading"
           :data="tableData"
           size="small"
           style="width: 100%;margin-top:20px"
         >
-          <el-table-column label="用户名">
+          <el-table-column :label="$t('user.username')">
             <template slot-scope="scope">
               <div>{{scope.row.attributes.username}}</div>
             </template>
           </el-table-column>
-          <el-table-column label="电话">
+          <el-table-column :label="$t('user.phonenumber')">
             <template slot-scope="scope">
               <div>{{scope.row.attributes.phone}}</div>
             </template>
           </el-table-column>
-          <el-table-column :show-overflow-tooltip="true" label="邮箱">
+          <el-table-column :show-overflow-tooltip="true" :label="$t('user.email')">
             <template slot-scope="scope">
               <div>{{scope.row.attributes.email}}</div>
             </template>
           </el-table-column>
-          <el-table-column label="部门">
+          <el-table-column :label="$t('user.department')">
             <template slot-scope="scope">
               <div>{{ scope.row.departmentname}}</div>
             </template>
           </el-table-column>
 
-          <el-table-column :show-overflow-tooltip="true" label="创建日期">
+          <el-table-column :show-overflow-tooltip="true" :label="$t('user.createdtime')">
             <template slot-scope="scope">
               <span>{{new Date(scope.row.createdAt).toLocaleDateString()}}</span>
             </template>
@@ -66,19 +66,9 @@
               />
             </template>
           </el-table-column>-->
-          <el-table-column label="操作" align="center" width="400">
+          <el-table-column :label="$t('developer.operation')" align="center" width="400">
             <template slot-scope="scope">
-              <el-button
-                type="success"
-                size="small"
-                @click="changerole(scope.$index,scope.row)"
-                v-if="scope.row.attributes.emailVerified==false"
-              >
-                <div
-                  style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"
-                ></div>启用
-              </el-button>
-              <el-button
+               <el-button
                 type="info"
                 size="small"
                 @click="changerole(scope.$index,scope.row)"
@@ -86,11 +76,22 @@
               >
                 <div
                   style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#a94442;margin-right:10px"
-                ></div>禁用
+                ></div>{{$t('developer.prohibit')}}
               </el-button>
-              <el-button type="success" size="small" @click="handleEditor(scope.row)">编辑</el-button>
-              <el-button type="danger" size="small" @click="handleDetele(scope.row)">删除</el-button>
-              <el-button size="mini" type="primary" @click="editorrole(scope.row.id)">分配角色</el-button>
+              <el-button
+                type="success"
+                size="small"
+                @click="changerole(scope.$index,scope.row)"
+                v-else
+              >
+                <div
+                  style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px"
+                ></div>{{$t('developer.enable')}}
+              </el-button>
+             
+              <el-button type="success" size="small" @click="handleEditor(scope.row)">{{$t('developer.edit')}}</el-button>
+              <el-button type="danger" size="small" @click="handleDetele(scope.row)">{{$t('developer.delete')}}</el-button>
+              <el-button size="mini" type="primary" @click="editorrole(scope.row.id)">{{$t('user.assignroles')}}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -106,15 +107,15 @@
         />
       </el-col>
       <!--分配角色-->
-      <el-dialog title="分配角色" :visible.sync="roleacl">
+      <el-dialog :title="$t('user.assignroles')" :visible.sync="roleacl">
         <el-table :data="rolelist" @selection-change="handleSelectionChange" ref="multipleTable">
           <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column label="名称" align="center">
+          <el-table-column :label="$t('user.name')" align="center">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.name}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="描述" align="center">
+          <el-table-column :label="$t('developer.describe')" align="center">
             <template slot-scope="scope">
               <span>{{scope.row.attributes.desc}}</span>
             </template>
@@ -126,8 +127,8 @@
           </el-table-column>
         </el-table>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="roleacl = false">取 消</el-button>
-          <el-button type="primary" @click="adduseracl">确 定</el-button>
+          <el-button @click="roleacl = false">{{$t('developer.cancel')}}</el-button>
+          <el-button type="primary" @click="adduseracl">{{$t('developer.determine')}}</el-button>
         </div>
       </el-dialog>
     </el-row>
@@ -338,7 +339,7 @@ export default {
                 this.userFordepartment();
               },
               error => {
-                console.log(error);
+                this.$message.error(error.message)
               }
             );
           });

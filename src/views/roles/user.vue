@@ -2,7 +2,7 @@
   <div class="user">
     <div class="search">
       <el-input placeholder="请输入内容" v-model="search" clearable></el-input>
-      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">搜 索</el-button>
+      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">{{$t('developer.search')}}</el-button>
       <el-button
         type="primary"
         icon="el-icon-plus"
@@ -14,17 +14,17 @@
     <div class="tableuser">
       <div class="tableroles" style="margin-top:20px">
         <el-table :data="tableData" style="width: 100%;text-align:center">
-          <el-table-column label="用户名" prop="username" align="center"></el-table-column>
-          <el-table-column label="电话" prop="phone" align="center"></el-table-column>
+          <el-table-column :label="$t('user.username')" prop="username" align="center"></el-table-column>
+          <el-table-column :label="$t('user.phonenumber')" prop="phone" align="center"></el-table-column>
           <el-table-column label="ID" prop="id" align="center">
             <template slot-scope="scope">
               <el-tag type="success">{{scope.row.id}}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" align="center">
+          <el-table-column :label="$t('developer.operation')" align="center">
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.row.id)">详情</el-button>
-              <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+              <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">{{$t('developer.delete')}}</el-button>
               <el-button size="mini" type="primary" @click="editorrole(scope.row.id)">分配角色</el-button>
             </template>
           </el-table-column>

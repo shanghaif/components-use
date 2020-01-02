@@ -1,17 +1,17 @@
 <template>
   <div class="test">
     <div class="search">
-      <el-input placeholder="请输入内容" v-model="search" clearable></el-input>
-      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">搜 索</el-button>
+      <el-input :placeholder="$t('user.name')" v-model="search" clearable></el-input>
+      <el-button type="primary" icon="el-icon-search" style="margin-left:20px;">{{$t('developer.search')}}</el-button>
       <!-- <el-button type="primary" icon="el-icon-plus" @click="dialogVisible=true">新增一级菜单</el-button> -->
     </div>
-    <el-dialog title="新增" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+    <el-dialog :title="$t('developer.add')" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
       <el-form ref="form" :model="form" label-width="80px">
-        <el-form-item label="菜单名称">
+        <el-form-item :label="$t('menu.menuname')">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="菜单路径">
-          <el-select v-model="form.menuroad" placeholder="请选择菜单" style="width:100%">
+        <el-form-item :label="$t('menu.menupath')">
+          <el-select v-model="form.menuroad" :placeholder="$t('menu.menupath')" style="width:100%">
             <el-option
               v-for="(item,index) in originmenuurl"
               :label="item.path+'--------(描述)'+item.name"
@@ -21,16 +21,16 @@
           </el-select>
           <!-- <el-input v-model="form.menuroad"></el-input> -->
         </el-form-item>
-        <el-form-item label="排序">
+        <el-form-item :label="$t('menu.sort')">
           <el-input v-model="form.number" type="number"></el-input>
         </el-form-item>
-        <el-form-item label="图标">
+        <el-form-item :label="$t('menu.icon')">
           <el-input v-model="form.iconfont"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="standardName">确 定</el-button>
+        <el-button @click="dialogVisible = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="standardName">{{$t('developer.determine')}}</el-button>
       </span>
     </el-dialog>
     <tree-table
@@ -47,34 +47,39 @@
       <template slot="showtopmenu" slot-scope="{scope}">
         <span>{{scope.row.showtopmenu}}</span>
       </template>
+       <template slot="icon" slot-scope="{scope}">
+         <span class="svg-container">
+             <svg-icon :icon-class="scope.row.icon" />
+           </span>
+      </template>
       <template slot="operation" slot-scope="{scope}">
-        <el-button size="mini" type="primary" icon="el-icon-plus" @click="addmenus(scope.row)">子菜单</el-button>
+        <el-button size="mini" type="primary" icon="el-icon-plus" @click="addmenus(scope.row)">{{$t('menu.childrenmenu')}}</el-button>
         <el-button
           size="mini"
           type="success"
           icon="el-icon-edit"
           @click="handleEdit(scope.row)"
           v-if="scope.row.objectId!=0"
-        >编辑</el-button>
+        >{{$t('developer.edit')}}</el-button>
         <el-button
           size="mini"
           type="danger"
           icon="el-icon-delete"
           @click="handleDelete(scope.row)"
           v-if="scope.row.objectId!=0"
-        >删除</el-button>
+        >{{$t('developer.delete')}}</el-button>
       </template>
     </tree-table>
     <!--编辑菜单-->
-    <el-dialog title="编辑菜单" :visible.sync="MenuEdit">
+    <el-dialog :title="$t('developer.edit')" :visible.sync="MenuEdit">
       <el-form :model="MenuForm">
-        <el-form-item label="菜单名称" :label-width="formLabelWidth">
+        <el-form-item :label="$t('menu.menuname')" :label-width="formLabelWidth">
           <el-input v-model="MenuForm.name" autocomplete="off" style="width:300px;"></el-input>
         </el-form-item>
-        <el-form-item label="菜单路径" :label-width="formLabelWidth">
+        <el-form-item :label="$t('menu.menupath')" :label-width="formLabelWidth">
           <el-input v-model="MenuForm.url" autocomplete="off" style="width:300px;" disabled></el-input>
         </el-form-item>
-        <el-form-item label="父级菜单" :label-width="formLabelWidth">
+        <el-form-item :label="$t('menu.parentmenu')" :label-width="formLabelWidth">
           <el-cascader
             v-model="MenuForm.fathername"
             :options="treeData"
@@ -85,14 +90,14 @@
             style="wdith:300px"
           ></el-cascader>
         </el-form-item>
-        <el-form-item label="序号" :label-width="formLabelWidth">
+        <el-form-item :label="$t('menu.sort')" :label-width="formLabelWidth">
           <el-input v-model="MenuForm.number" autocomplete="off" style="width:300px;" type="number"></el-input>
         </el-form-item>
-        <el-form-item label="顶部显示" :label-width="formLabelWidth">
+        <el-form-item :label="$t('menu.Navigation')" :label-width="formLabelWidth">
           <el-select
             v-model="MenuForm.roles"
             multiple
-            placeholder="请选择需要一级菜单显示的权限"
+            :placeholder="$t('menu.text')"
             style="width:300px;"
             @change="SelectTopmenu"
             @remove-tag="removerole"
@@ -107,8 +112,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="MenuEdit = false">取 消</el-button>
-        <el-button type="primary" @click="updatemenu">确 定</el-button>
+        <el-button @click="MenuEdit = false">{{$t('developer.cancel')}}</el-button>
+        <el-button type="primary" @click="updatemenu">{{$t('developer.determine')}}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -147,39 +152,45 @@ export default {
       key: 1,
       columns: [
         {
-          label: "菜单名称",
+          label: "Menu name",
           key: "name",
           expand: true,
           align: "left"
         },
         {
-          label: "菜单路径",
+          label: "Menu path",
           key: "url",
           width: 200,
           expand:true,
           align: "center"
         },
         {
-          label: "顶部导航",
+          label: "Navigation",
           key: "showtopmenu",
           expand:true,
           align: "center"
         },
         {
-          label: "序号",
+          label: "Index",
           key: "number",
           expand:true,
           width: 100
         },
         {
-          label: "创建时间",
+          label: "Icon",
+          key: "icon",
+          expand:true,
+          width: 100
+        },
+        {
+          label: "Created time",
           key: "createtime",
           align: "center"
         },
         {
-          label: "操作",
+          label: "Operation",
           key: "operation",
-          width: 300
+          width: 400
         }
       ],
       data: [],

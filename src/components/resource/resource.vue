@@ -1,5 +1,5 @@
 <template>
-    <div class="resource1">
+    <div class="resource1" style="border-left:38px solid #1579bf;padding-left:10px;">
         <div>
             <el-input v-model="search" placeholder="请输入集中器地址搜索" style="width:150px"></el-input>
             <el-button type="primary" @click="searchvalue" size="mini">搜索</el-button>

@@ -97,7 +97,6 @@ export default {
           ],
         })
       })
- 
       this.linesSeries = series
     },
     getScatterSeries (data) {

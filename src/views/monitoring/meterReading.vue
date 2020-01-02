@@ -11,7 +11,7 @@
         <el-form-item label="pn值">
           <el-input v-model.number="form.addr_web"></el-input>
         </el-form-item>
-        <el-form-item label="任务模板">
+        <!-- <el-form-item label="任务模板">
           <el-select v-model="form.task_value" @change="handleTaskChange" placeholder="请选择任务模板">
             <el-option
               v-for="item in form.task"
@@ -20,7 +20,7 @@
               :value="item.value"
             ></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="数据类型">
           <el-select
             v-model="form.data_type_value"
@@ -49,7 +49,7 @@
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            v-if="form.data_type_value=='05060101'"
+            v-if="form.data_type_value=='050601FF'||form.data_type_value=='050601EE'"
             :picker-options="form.pickerDisabled"
           ></el-date-picker>
           <el-date-picker
@@ -58,7 +58,7 @@
             range-separator="至"
             start-placeholder="开始月份"
             end-placeholder="结束月份"
-            v-else-if="form.data_type_value=='0001FF01'"
+            v-else-if="form.data_type_value=='0001FF01'||form.data_type_value=='0001EE01'"
             :picker-options="form.pickerDisabled"
           ></el-date-picker>
         </el-form-item>
@@ -79,11 +79,11 @@
         border 
         style="width: 100%">
         <el-table-column prop="freeze_time" label="冻结时间" width="150"></el-table-column>
-       
         <el-table-column prop="vcaddr_web" label="集中器地址" width="150"></el-table-column>
          <el-table-column prop="pn" label="pn" width="150"></el-table-column>
         <el-table-column prop="tasktype" label="任务模板" ></el-table-column>
         <el-table-column prop="data_type" label="数据类型" width="180"></el-table-column>
+        <!-- <el-table-column prop="" label="上一日用电量" width="120"></el-table-column> -->
         <el-table-column prop="forward_power_total" label="正向有功电能总" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_1" label="正向有功费率1(尖)" width="120"></el-table-column>
         <el-table-column prop="forward_work_rate_2" label="正向有功费率2(峰)" width="120"></el-table-column>
@@ -169,18 +169,20 @@ export default {
         addr_web: "", //电能表地址
         task: [
           //任务模板
-          { value: "05060101", label: "日冻结抄表任务" },
+          { value: "050601FF", label: "日冻结抄表任务" },
           { value: "0001FF01", label: "月冻结抄表任务" },
         ],
-        task_value: "05060101",
+        task_value: "050601FF",
         data_type: [
           //数据类型
-          { value: "05060101", label: "历史日数据" },
+          { value: "050601FF", label: "历史日数据" },
+          { value: "050601EE", label: "日用量" },
           { value: "0001FF01", label: "历史月数据" },
+          { value: "0001EE01", label: "月用量" },
         ],
-        data_type_value: "05060101",
+        data_type_value: "050601EE",
         day_time: [
-          new Date(new Date().getTime()-86400000*3).toLocaleDateString() ,//开始时间
+          new Date(new Date().getTime()-86400000*1).toLocaleDateString() ,//开始时间
           new Date(new Date().getTime()).toLocaleDateString()//结束时间
         ], //日时间
         month_time: [
@@ -204,7 +206,7 @@ export default {
       search_res:[],
       // 选中电表（后续有特殊处理，接口查询不一样）
       isMeter:false,
-      freeze:"05060101",//数据冻结
+      freeze:"050601FF",//数据冻结
       isshowround:true
     };
   },
@@ -234,7 +236,7 @@ export default {
      
       let start,end;
       // console.log(this.form.day_time)
-      if (type=='05060101'){
+      if (type=='050601FF'||type=='050601EE'){
           start=this.StartTime(this.form.day_time);
           end=this.EndTime(this.form.day_time);
       }else {
@@ -307,8 +309,8 @@ export default {
     reset() {
       this.form.vcaddr_web = "";
       this.form.addr_web = "";
-      this.form.task_value = "05060101";
-      this.form.data_type_value = "05060101";
+      this.form.task_value = "050601FF";
+      this.form.data_type_value = "050601FF";
       this.form.month_time = [
         new Date(new Date().getTime()-86400000*30).toLocaleDateString(), 
           new Date(new Date().getTime()).toLocaleDateString()
