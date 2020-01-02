@@ -27,7 +27,7 @@
         <el-table-column type="selection" align="center" width="50"></el-table-column>
         <el-table-column prop :label="$t('concentrator.status')" align="center" width="100">
           <template slot-scope="scope">
-            <div v-if="!scope.row.attributes.jsondata.isonline">
+            <div v-if="scope.row.attributes.jsondata.isonline">
               <p
                 style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#00cc33;margin-right:10px;vertical-align:middle;"
               ></p>
@@ -62,11 +62,11 @@
             <el-switch
               v-model="value6"
               active-color="#13ce66"
-              v-if="scope.row.attributes.jsondata.iscon!==true"
+              v-if="scope.row.attributes.jsondata.iscon==true"
               disabled
             ></el-switch>
             <el-switch
-              v-if="scope.row.attributes.jsondata.iscon==true"
+              v-if="scope.row.attributes.jsondata.iscon!=true"
               v-model="value7"
               active-color="#cccccc"
               disabled

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function addMeter({addr,yhdz,organization,pn,vcaddr,gddw,tq,yhmc,yhabh,yhlb,zcbh,jldbh,sblb,sblx,ccbh,tysj,dhpc,zhbl,cbqd,xl,cz,eddy,bddl,zqd,sccj,jlzzfl,jlfs,zfbbz,jldwz,jlddz,scjyrq,txfs,txgw,ljdz,btl,jlbx,xgwzh,dbmm,deveui,appeui}) {
+export function addMeter({addr,yhdz,organization,pn,vcaddr,gddw,tq,yhmc,yhabh,yhlb,zcbh,jldbh,sblb,sblx,ccbh,tysj,dhpc,zhbl,cbqd,xl,cz,eddy,bddl,zqd,sccj,jlzzfl,jlfs,zfbbz,jldwz,jlddz,scjyrq,txfs,txgw,ljdz,btl,jlbx,xgwzh,dbmm,deveui,appeui,ct,pt}) {
   return request({
     url: '/yhgx',
     method: 'post',
@@ -45,7 +45,8 @@ export function addMeter({addr,yhdz,organization,pn,vcaddr,gddw,tq,yhmc,yhabh,yh
         dbmm,
         deveui,
         appeui,
-        
+        ct,
+        pt
     }
   })
 }

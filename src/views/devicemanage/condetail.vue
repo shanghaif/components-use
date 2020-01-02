@@ -77,7 +77,6 @@
       </el-tab-pane>
       <!-- <el-tab-pane label="实时任务" name="second">
                  <div class="secondsearch">
-                    
                      <el-input placeholder="请输入内容" v-model="input6" style="margin-left:30px;width:300px">
                         <el-button slot="append" icon="el-icon-search"></el-button>
                      </el-input>

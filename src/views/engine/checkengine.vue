@@ -31,29 +31,29 @@
                 :default-sort = "{prop: 'date', order: 'descending'}"
                 >
                 <el-table-column
-                prop="address"
+                prop="node"
                 label="节点"
                 >
                 </el-table-column>
                 <el-table-column
-                prop="date"
+                prop="matched"
                 label="已命中"
                 sortable
                 width="180">
                 </el-table-column>
                 <el-table-column
-                prop="name"
+                prop="speed"
                 label="命中速度"
                 sortable
                 width="180">
                 </el-table-column>
                 <el-table-column
-                prop="address"
+                prop="speed_max"
                 label="最大命中速度"
                 >
                 </el-table-column>
                  <el-table-column
-                prop="address"
+                prop="speed_last5m"
                 label="5分钟平均速度"
                 >
                 </el-table-column>
@@ -67,24 +67,33 @@
             </div>
              <div class="box-table">
                <el-table
-                :data="engineData"
+                :data="rulesdata"
                 style="width: 100%"
                 >
                 <el-table-column
-                prop="address"
+                prop="name"
                 label="类型"
                 width="180"
                 >
                 </el-table-column>
                 <el-table-column
-                prop="date"
                 label="参数"
                 >
+                <template slot-scope="scope">
+                    <!-- <el-input type="textarea" :value="JSON.stringify(scope.row.params,null,4)" rows="5" cols="10" readonly></el-input> -->
+                   <span>{{scope.row.params}}</span>
+                </template>
                 </el-table-column>
                 <el-table-column
-                prop="date"
                 label="度量指标"
+                align="center"
                 >
+                <template slot-scope="scope">
+                    <ul >
+                        <li v-for="(items,index) in scope.row.metrics" :key="index"><span style="display:inline-block;width:120px;" >{{items.node}}</span><span class="type">{{'成功:'+items.success}}</span><span class="type">{{'失败:'+items.failed}}</span></li>
+                        <li><span style="display:inline-block;width:120px;margin-top:20px;">合计</span><span class="type">{{'成功:'+allsuccss(scope.row.metrics)}}</span><span class="type">{{'失败:'+allfailed(scope.row.metrics)}}</span></li>
+                    </ul>
+                </template>
                 </el-table-column>
                
             </el-table>
@@ -93,6 +102,7 @@
     </div>
 </template>
 <script>
+import {getRuleDetail} from '@/api/rules'
 export default {
    data() {
       return {
@@ -101,16 +111,45 @@ export default {
               remarks:'',
               sql:''
           },
-          engineData: [{
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市普陀区金沙江路 1518 弄'
-            }]
+          engineData: [],
+            ruleid:'',
+            rulesdata:[]
         }
    },
    mounted() {
+       this.detailForRule()
    },
    methods: {
+       detailForRule(){
+           this.rulesdata=[]
+           this.ruleid = this.$route.query.id
+           getRuleDetail(this.ruleid).then(response=>{
+            if(response){
+                this.engineform.region = response.for.join(',')
+                this.engineform.remarks =response.description;
+                this.engineform.sql = response.rawsql
+                this.engineData = response.metrics
+                this.rulesdata = response.actions
+            }
+           }).catch(error=>{
+               this.$message.error(error.error)
+           })
+       },
+       allsuccss(row){
+           
+           var success=0
+            row.map(items=>{
+                success+=items.success
+            })
+            return success
+       },
+       allfailed(row){
+           var failed=0
+           row.map(items=>{
+               failed+=items.failed
+           })
+           return failed
+       }
    }
 }
 </script>
@@ -136,7 +175,12 @@ export default {
    /deep/ .el-form-item__content{
        color:#71737d!important;
    }
+   /deep/ .type{
+       margin-left:20px;
+   }
   }
-  
+  li{
+      list-style: none;
+  }
 }
 </style>

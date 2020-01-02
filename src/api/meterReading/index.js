@@ -19,7 +19,7 @@ export function getMeterDate(skip,limit,vcaddr,addr,start_date,end_date,di,resou
 }
 export function getMeterListDate(skip,limit,vcaddr,addr,start_date,end_date,type,di) {
   return request({
-    url: '/tdengine/meter/hisdata',
+    url: '/result/meter/hisdata',
     method: 'get',
     params:{
         skip,
@@ -30,13 +30,12 @@ export function getMeterListDate(skip,limit,vcaddr,addr,start_date,end_date,type
         end_date,
         type, 
         di,
-      
     }
   })
 }
 export function getMeterListDate1(skip,limit,vcaddr,start_date,end_date,type,di) {
   return request({
-    url: '/tdengine/meter/hisdata',
+    url: '/result/meter/hisdata',
     method: 'get',
     params:{
         skip,

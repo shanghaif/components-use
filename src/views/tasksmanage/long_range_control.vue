@@ -75,8 +75,8 @@
                 size="small"
                 @click="resetForm1(ruleform.icon,ruleform.meteraddr)"
               >查询</el-button>
-              <el-button type="primary" size="small" @click="submitForm('ruleform','switch_off')" :disabled="ruleform.cur_status==1">拉闸</el-button>
-              <el-button type="primary" size="small" @click="submitForm('ruleform','switch_on')" :disabled="ruleform.cur_status==0">合闸</el-button>
+              <el-button type="primary" size="small" @click="submitForm('ruleform','switch_off')" >拉闸</el-button>
+              <el-button type="primary" size="small" @click="submitForm('ruleform','switch_on')" >合闸</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -388,7 +388,7 @@ export default {
     //树取到电表数据
     meterdetail(val) {
       icon=val
-      this.tableData=[]
+     
       if ( val.icon != "集中器") {
         this.$message({
           type: "error",
@@ -446,8 +446,8 @@ export default {
       else if (val.icon == "集中器") {
         this.devobjectId = [];
         this.loading = true;
+         this.tableData=[]
         this.devobjectId.push(val.objectId);
-        this.tableData=[]
         this.ruleform.icon='集中器'
         var Vcon = Parse.Object.extend('Vcon')
         var vcon = new Parse.Query(Vcon)
@@ -658,6 +658,7 @@ export default {
       }
       datas.ascending('-createdAt')
       datas.equalTo("data.meteraddr", val);
+      datas.equalTo('type','meter_ctrl')
       datas.skip(this.start1);
       datas.limit(this.length1);
       datas.count().then(

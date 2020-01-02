@@ -41,8 +41,8 @@
 
           <el-table-column :label="$t('developer.channelstatus')">
             <template slot-scope="scope">
-              <span v-if="scope.row.attributes.isEnable==true" style="color:green">{{$t('developer.enabled')}}</span>
-              <span v-else>{{$t('developer.disabled')}}</span>
+              <span v-if="scope.row.attributes.status=='ONLINE'" style="color:green">在线</span>
+              <span v-else style="color:red">离线</span>
             </template>
           </el-table-column>
           <el-table-column :label="$t('developer.channeladdr')" width="200">
@@ -66,15 +66,15 @@
               <span>{{scope.row.attributes.desc}}</span>
             </template>
           </el-table-column>
-          <el-table-column :label="$t('developer.operation')" width="250">
+          <el-table-column :label="$t('developer.operation')" width="300">
             <template slot-scope="scope">
               <el-button
                 type="success"
                 v-if="scope.row.attributes.isEnable==false"
                 size="mini"
-                @click="qyChannel(scope.row)"
+                @click="qyChannel(scope.row,'enable')"
               >{{$t('developer.enable')}}</el-button>
-              <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row)">{{$t('developer.prohibit')}}</el-button>
+              <el-button type="danger" v-else size="mini" @click="qyChannel(scope.row,'disable')">{{$t('developer.prohibit')}}</el-button>
               <el-button type="primary" size="mini" @click="updateChannel(scope.row)">{{$t('developer.edit')}}</el-button>
               <el-popover placement="top" width="300" :ref="`popover-${scope.$index}`">
                 <p>确定删除这个{{scope.row.attributes.name}}通道吗？</p>
@@ -87,6 +87,7 @@
                 </div>
                 <el-button type="danger" size="mini" slot="reference">{{$t('developer.delete')}}</el-button>
               </el-popover>
+              <el-button type="primary" size="mini" @click="subProTopic(scope.row)">订阅日志</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -784,13 +785,6 @@
             </el-form-item> -->
             <!--TCP和UDP部分配置--------------------------------------------------------------------------------------->
             <el-form-item
-              label="IP"
-              v-if="addchannel.region=='UDP'||addchannel.region=='TCP'"
-              class="notlastchildren"
-            >
-              <el-input v-model="addchannel.ip" autocomplete="off" disabled></el-input>
-            </el-form-item>
-            <el-form-item
               :label="$t('developer.port')"
               v-if="addchannel.region=='UDP'||addchannel.region=='TCP'|| addchannel.region=='HTTP'"
               prop="port"
@@ -799,7 +793,13 @@
             >
               <el-input v-model.number="addchannel.port" autocomplete="off" :placeholder="$t('developer.port')"></el-input>
             </el-form-item>
-
+            <el-form-item
+              label="IP"
+              v-if="addchannel.region=='UDP'||addchannel.region=='TCP'"
+              class="notlastchildren"
+            >
+              <el-input v-model="addchannel.ip" autocomplete="off" disabled></el-input>
+            </el-form-item>
             <el-form-item
               :label="$t('developer.cacheconstraint')"
               v-if="addchannel.region=='TCP'"
@@ -1048,6 +1048,24 @@
         <!-----------------------------------选择通道的类型----------------------------------------------------------------------->
       </el-tab-pane>
     </el-tabs>
+     <el-dialog :title="channelname+'日志'" :visible.sync="subdialog" :before-close="handleCloseSubdialog" width="85%">
+              <div style="margin-top:20px;">
+             
+                <pre id="subdialog" class="ace_editor" style="min-height:300px;width:100%">
+                      <textarea class="ace_text-input" style="overflow:scroll"></textarea>
+                      </pre>
+              </div>
+              <span slot="footer" class="dialog-footer" style="height:30px;">
+                 <el-switch
+                  style="display: inline-block;margin-right:10px;"
+                  v-model="value4"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  inactive-text="自动刷新"
+                  @change="stopsub"
+                ></el-switch>
+              </span>
+            </el-dialog>
   </div>
 </template>
 <script>
@@ -1055,6 +1073,15 @@
 import Parse from "parse";
 import { prototype } from "stream";
 import {channelConnect} from '@/api/testchannel'
+import { subupadte } from "@/api/systemmanage/system";
+var subdialog;
+import {
+  Websocket,
+  sendInfo,
+  TOPIC_EMPTY,
+  MSG_EMPTY,
+  DISCONNECT_MSG
+} from "@/utils/wxscoket.js";
 export default {
   data() {
     
@@ -1106,12 +1133,12 @@ export default {
           channeltype: "采集通道",
           channelvalue: "1"
         },
-        {
-          name: "Tdengine",
-          value: "Tdengine",
-          channeltype: "资源通道",
-          channelvalue: "2"
-        },
+        // {
+        //   name: "Tdengine",
+        //   value: "Tdengine",
+        //   channeltype: "资源通道",
+        //   channelvalue: "2"
+        // },
       ],
       channelformsearch: {
         name: ""
@@ -1168,7 +1195,16 @@ export default {
         ]
       },
       productIds: [],
-      channelupdated: ""
+      channelupdated: "",
+      issub: false,
+      subtimer: null,
+      subdialog: false,
+      textarea: "",
+      subdialogtimer: null,
+      subdialogid: "",
+      subaction:'stop',
+      channelname:'',
+      value4:true
     };
   },
   mounted() {
@@ -1237,6 +1273,7 @@ export default {
       if (this.channelformsearch.name != "") {
         channel.equalTo("name", this.channelformsearch.name);
       }
+      channel.equalTo('type','1')
       channel.ascending("-createdAt");
       channel.skip(this.start);
       channel.limit(this.length);
@@ -1330,7 +1367,7 @@ export default {
             } else if (this.addchannel.region == "MQTTCLI") {
               channel.set("config", {
                 address: this.addchannel.address,
-                port: this.addchannel.port,
+                port: this.addchannel.port,  
                 username: this.addchannel.username,
                 password: this.addchannel.password,
                 clean_start: this.addchannel.clean_start,
@@ -1444,28 +1481,42 @@ export default {
       this.channelId = "";
     },
     //更新状态
-    qyChannel(row) {
-      var Channel = Parse.Object.extend("Channel");
-      var channel = new Channel();
-      channel.id = row.id;
-      channel.set("isEnable", !row.attributes.isEnable);
-      channel.save().then(
-        resultes => {
+    qyChannel(row,action) {
+       subupadte(row.id, action)
+        .then(resultes => {
           if (resultes) {
             this.$message({
-              type: "success",
-              message: "状态修改成功"
+              type:'success',
+              message:`${action=='enable' ? '启用成功':'禁用成功'}`
             });
-            this.getChannel();
+
           }
-        },
-        error => {
-          this.$message({
-            type: "error",
-            message: error.message
-          });
-        }
-      );
+          this.getChannel()
+        })
+        .catch(error => {
+          this.$message.error(error.error);
+        });
+      // var Channel = Parse.Object.extend("Channel");
+      // var channel = new Channel();
+      // channel.id = row.id;
+      // channel.set("isEnable", !row.attributes.isEnable);
+      // channel.save().then(
+      //   resultes => {
+      //     if (resultes) {
+      //       this.$message({
+      //         type: "success",
+      //         message: "状态修改成功"
+      //       });
+      //       this.getChannel();
+      //     }
+      //   },
+      //   error => {
+      //     this.$message({
+      //       type: "error",
+      //       message: error.message
+      //     });
+      //   }
+      // );
     },
     //编辑
     updateChannel(row) {
@@ -1525,7 +1576,119 @@ export default {
           });
         }
       );
-    }
+    },
+     nowtime() {
+      var timestamp3 = Date.parse(new Date());
+      var date = new Date(timestamp3);
+      var Y = date.getFullYear() + "年";
+      var M =
+        (date.getMonth() + 1 <= 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "月";
+      var D =
+        (date.getDate() + 1 <= 10 ? "0" + date.getDate() : date.getDate()) +
+        "日  ";
+      var h =
+        (date.getHours() + 1 <= 10 ? "0" + date.getHours() : date.getHours()) +
+        ":";
+      var m =
+        (date.getMinutes() + 1 <= 10
+          ? "0" + date.getMinutes()
+          : date.getMinutes()) + ":";
+      var s =
+        date.getSeconds() + 1 <= 10
+          ? "0" + date.getSeconds()
+          : date.getSeconds();
+      return h + m + s+" ";
+    },
+    //订阅日志
+    subProTopic(row) {
+      this.subdialog = true;
+      this.subdialogid = row.id;
+      this.channelname = row.id;
+      setTimeout(() => {
+        subdialog = ace.edit("subdialog");
+        subdialog.session.setMode("ace/mode/text"); // 设置语言
+        subdialog.setTheme("ace/theme/gob"); // 设置主题
+        subdialog.setReadOnly(true);
+        subdialog.setOptions({
+          enableBasicAutocompletion: false,
+          enableSnippets: true,
+          enableLiveAutocompletion: true // 设置自动提示
+        });
+      });
+      var info = {
+        topic: "log/channel/"+ row.id,
+        qos: 2
+      };
+      var channeltopic = new RegExp("log/channel/"+ row.id);
+      var submessage = "";
+      var _this = this;
+      Websocket.add_hook(channeltopic, function(Msg) {
+        //判断长度
+        if (subdialog.session.getLength() >= 1000) {
+          submessage = "";
+        } else {
+          submessage += _this.nowtime() + Msg + `\n`;
+        }
+        subdialog.setValue(submessage);
+        subdialog.gotoLine(subdialog.session.getLength())
+      });
+      //订阅
+      var text0 = JSON.stringify({ action: "start_logger" });
+      Websocket.subscribe(info, function(res) {
+        if (res.result) {
+          console.log(info)
+          console.log("订阅成功");
+          var sendInfo = {
+            topic: "channel/" + row.id,
+            text: text0,
+            retained: true,
+            qos: 2
+          };
+          Websocket.sendMessage(sendInfo);
+          _this.subdialogtimer = window.setInterval(() => {
+            Websocket.sendMessage(sendInfo);
+          }, 600000);
+        }
+      });
+    },
+     stopsub(value) {
+      var text0
+      if(value==false){
+        // this.subaction = 'start'
+         text0 = JSON.stringify({ action: "stop_logger" });
+      }else{
+        // this.subaction = 'stop'
+        text0 = JSON.stringify({ action: "start_logger" });
+      }
+      var sendInfo = {
+        topic: "channel/" + this.subdialogid,
+        text: text0,
+        retained: true,
+        qos: 2
+      };
+      Websocket.sendMessage(sendInfo);
+    },
+     handleCloseSubdialog() {
+      var text0 = JSON.stringify({ action: "stop_logger" });
+      var sendInfo = {
+        topic: "channel/" + this.subdialogid,
+        text: text0,
+        retained: true,
+        qos: 2
+      };
+      Websocket.sendMessage(sendInfo);
+      this.subdialog = false;
+      window.clearInterval(this.subdialogtimer);
+      this.subdialogtimer = null;
+    },
+  },
+  beforeDestroy() {
+    window.clearInterval(this.subtimer);
+    this.subtimer = null;
+    window.clearInterval(this.subdialogtimer);
+    this.subdialogtimer = null;
   }
 };
 </script>

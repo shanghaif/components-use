@@ -28,7 +28,7 @@
           <template slot-scope="scope">
             <el-button
               size="mini"
-              @click="handleEdit(scope.row.objectId)"
+              @click="handleEdit(scope.row)"
               style="margin-right:20px"
             >控制 面板</el-button>
             <el-button size="mini" type="primary" @click="addJson(scope.row)">配 置</el-button>
@@ -47,6 +47,7 @@
       ></el-pagination>
     </div>
     <!--弹窗-->
+    
     <el-dialog title="配置信息" :visible.sync="dialogVisible" width="50%">
       <div class="dialog-content">
         <el-input type="textarea" :rows="10" placeholder="请输入内容" v-model="rowdata"></el-input>
@@ -56,11 +57,19 @@
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="配置信息" :visible.sync="dialogVisible1" width="50%">
+      <div id="editor_holder"></div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible1 = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible1 = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { Parse } from "parse";
 let protection, query;
+var editor
 export default {
   data() {
     return {
@@ -70,7 +79,8 @@ export default {
       pagesize: 10,
       total: 0,
       start: 0,
-      productid:''
+      productid:'',
+      dialogVisible1:false,
     };
   },
   mounted() {
@@ -85,16 +95,30 @@ export default {
       this.start = Number(val - 1) * Number(this.pagesize);
       this.getDevices(this.pagesize, this.start);
     },
-    handleEdit(id) {},
+    handleEdit(row) {
+      console.log(row)
+      this.dialogVisible1 = true
+     
+      setTimeout(()=>{
+         editor = new JSONEditor(
+            document.getElementById("editor_holder"),
+            {
+              schema:{"default":row.attributes.basedata},
+              theme:'foundation4'
+            }
+          );
+      },500)
+     
+    },
     getDevices(val, start) {
-      var Product = Parse.Object.extend('Product')
-      var product = new Parse.Query(Product)
-      product.equalTo('devType','pump')
-      product.find().then(response=>{
-        this.productid = response[0].id
-          protection = Parse.Object.extend("Devices");
+      // var Product = Parse.Object.extend('Product')
+      // var product = new Parse.Query(Product)
+      // product.equalTo('devType','pump')
+      // product.find().then(response=>{
+      //   this.productid = response[0].id
+          protection = Parse.Object.extend("PumpDevice");
           query = new Parse.Query(protection);
-          query.equalTo("product",this.productid);
+          // query.equalTo("product",this.productid);
           query.limit(val);
           query.skip(start);
           query.count().then(total => {
@@ -117,7 +141,7 @@ export default {
                 console.log(error);
               };
           });
-      })
+      // })
       
     },
     addJson(row) {
@@ -130,9 +154,27 @@ export default {
 <style scoped>
 .device {
   width: 100%;
-  min-height: 100%;
+  min-height: 875px;
   padding: 20px;
   box-sizing: border-box;
-  background: #ffffff;
+  background: url("../../imgages/echartbanner1.png") no-repeat;
+  background-size: cover;
+}
+</style>
+<style>
+  .device .el-table th.is-leaf{
+ background-color:#00587e;
+ color:#ffffff;
+}
+.device .el-table--striped .el-table__body tr.el-table__row--striped td{
+  background-color:#08263e;
+  color:#419ba5;
+}
+.device td{
+   background-color:#08263e;
+  color:#419ba5;
+}
+.device .el-table__empty-block{
+  background:#08263e;
 }
 </style>

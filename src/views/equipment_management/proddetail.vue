@@ -44,6 +44,16 @@
               >{{$t('product.gotoequipment')}}</el-link>
             </span>
           </li>
+          <li>
+             <div class="block">
+            <el-image :src="productimg" style="width:250px;height:200px;position:relative;top:-55px;text-align: center;
+               line-height: 200px;">
+               <div slot="error" class="image-slot">
+                <i class="el-icon-picture-outline"></i>
+              </div>
+            </el-image>
+          </div>
+          </li>
         </ul>
       </div>
     </div>
@@ -100,7 +110,7 @@
                   <td class="notbottom" v-else-if="productdetail.netType=='WIFI'">WiFi</td>
                   <td class="notbottom" v-else-if="productdetail.netType=='ETHERNET'">以太网</td>
                   <td class="notbottom" v-else-if="productdetail.netType=='LORA'">LoRaWAN</td>
-                  <td class="notbottom" v-else>{{$t('product.other')}}</td>
+                  <td class="notbottom" v-else>{{productdetail.netType}}</td>
                 </tr>
                 <tr>
                   <td class="cloumn">{{$t('developer.describe')}}</td>
@@ -184,6 +194,7 @@
             :visible.sync="topicdialogVisible"
             width="40%"
             :before-close="handleClose"
+            :close-on-click-modal="false"
           >
             <div class="topiccontent">
               <div style="padding:10px;box-sizing:border-box;background:#e6f9fc;font-size:16px;">
@@ -399,6 +410,7 @@
             width="40%"
             top="5vh"
             :before-close="wmxhandleClose"
+            :close-on-click-modal="false"
           >
             <div class="wmxheader">
               <el-form ref="sizeForm" :model="sizeForm" size="small" :rules="sizerule">
@@ -638,6 +650,7 @@
             width="40%"
             top="15vh"
             :before-close="structhandleClose"
+            :close-on-click-modal="false"
           >
             <div class="structheader">
               <el-form ref="structform" :model="structform" size="small" :rules="structrule">
@@ -846,7 +859,7 @@
               <el-form-item>
                 <el-button
                   type="primary"
-                  @click="subAce('formInline')"
+                  @click="subAce('formInline',true)"
                   size="small"
                 >{{$t('product.preservation')}}</el-button>
                 <el-button type="primary" @click="subAce1('formInline')" size="small">设为公共</el-button>
@@ -888,7 +901,7 @@
                   <span>{{utc2beijing(scope.row.attributes.createdAt)}}</span>
                 </template>
               </el-table-column>
-              <el-table-column :label="$t('developer.operation')" align="center">
+              <el-table-column :label="$t('developer.operation')" align="center" width="200">
                 <template slot-scope="scope">
                   <el-button
                     type="primary"
@@ -942,7 +955,7 @@
             >{{$t('developer.createchannel')}}</el-button>
           </div>
           <div>
-            <el-table :data="channelData" style="width: 100%;">
+            <el-table :data="channelData" style="width: 100%;" :row-class-name="getChannelEnable">
               <el-table-column :label="$t('developer.channelnumber')">
                 <template slot-scope="scope">
                   <span>{{scope.row.id}}</span>
@@ -983,7 +996,6 @@
                   >{{$t('developer.remove')}}</el-button>
                   <el-button type="primary" size="mini" @click="subProTopic(scope.row)">订阅日志</el-button>
                   <el-button type="primary" size="mini" @click="updatesub(scope.row)">重载配置</el-button>
-                 
                 </template>
               </el-table-column>
             </el-table>
@@ -997,86 +1009,153 @@
                 :total="channeltotal"
               ></el-pagination>
             </div>
-            <!---日志订阅弹窗-->
-            <el-dialog title="日志" :visible.sync="subdialog" :before-close="handleCloseSubdialog">
-              <div style="margin-top:20px;">
-                <!-- <el-input
-                      type="textarea"
-                      placeholder="请输入内容"
-                      v-model="textarea"
-                      :rows="10"
-                      readonly
-                    >
-                </el-input>-->
-                <pre id="subdialog" class="ace_editor" style="min-height:300px;width:100%">
-                      <textarea class="ace_text-input" style="overflow:scroll"></textarea>
-                      </pre>
-              </div>
 
-              <!-- </div> -->
-              <span slot="footer" class="dialog-footer" style="height:30px;">
-                <el-button type="success" size="mini" @click="stopsub('start')" v-if="subaction=='start'">启动</el-button>
-                <el-button type="warning" size="mini" @click="stopsub('stop')" v-else>停止</el-button>
-              </span>
-            </el-dialog>
             <!--添加通道-->
-            <el-dialog title="添加通道" :visible.sync="innerVisible" append-to-body>
-              <div class="addchannel">
-                <el-table :data="allchannelData" height="400" style="width: 100%">
-                  <el-table-column :label="$t('developer.channelnumber')">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.id}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('developer.channelname')">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.attributes.name}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('developer.channeladdr')">
-                    <template slot-scope="scope">
-                      <span>{{'channel/'+scope.row.id}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('developer.channeltype')">
-                    <template slot-scope="scope">
-                      <span
-                        v-if="scope.row.attributes.type==1"
-                      >{{$t('developer.collectionchannel')}}</span>
-                      <span v-else>{{$t('developer.resourcechannel')}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('developer.servicetype')">
-                    <template slot-scope="scope">
-                      <span>{{scope.row.attributes.cType}}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('developer.operation')">
-                    <template slot-scope="scope">
-                      <el-button
-                        size="mini"
-                        @click="addProductChannel(scope.row.id)"
-                        type="primary"
-                      >{{$t('developer.add')}}</el-button>
-                    </template>
-                  </el-table-column>
-                </el-table>
-                <div class="elpagination" style="margin-top:20px;">
-                  <el-pagination
-                    @size-change="allChannelSizeChange"
-                    @current-change="allChannelCurrentChange"
-                    :page-sizes="[10, 20, 30, 50]"
-                    :page-size="allChannellength"
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total="allChanneltotal"
-                  ></el-pagination>
-                </div>
-              </div>
-            </el-dialog>
           </div>
         </el-tab-pane>
-        <el-tab-pane :label="$t('product.newstorage')" name="sixeth">
-          <div style="width:40%">
+        <el-tab-pane label="物采集" name="eighth">
+          <TaskCollection />
+        </el-tab-pane>
+        <el-tab-pane label="物存储" name="seven">
+          <div class="productchannel" style="text-align:right;padding:10px;">
+            <el-popover
+              title="自定义数据模型提示"
+              placement="right"
+              width="600"
+              @show="questionModel"
+              trigger="hover"
+            >
+              <pre id="editorinsert" class="ace_editor" style="min-height:400px"><el-input class="ace_text-input" type="textarea"></el-input></pre>
+              <el-button
+                type="primary"
+                size="mini"
+                slot="reference"
+                icon="el-icon-question"
+              >自定义数据模型帮助</el-button>
+            </el-popover>
+            <el-button
+              type="primary"
+              size="small"
+              @click="resourceShowAllChannel"
+            >{{$t('developer.createchannel')}}</el-button>
+          </div>
+          <div>
+            <el-table
+              :data="resourcechannelData"
+              style="width: 100%;"
+              :row-class-name="getChannelEnable"
+            >
+              <el-table-column :label="$t('developer.channelnumber')">
+                <template slot-scope="scope">
+                  <span>{{scope.row.id}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('developer.channelname')">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.name}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('developer.channeladdr')">
+                <template slot-scope="scope">
+                  <span>{{'channel/'+scope.row.id}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('developer.channeltype')">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+                  <span v-else>{{$t('developer.resourcechannel')}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('developer.servicetype')">
+                <template slot-scope="scope">
+                  <span>{{scope.row.attributes.cType}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="侦听端口">
+                <template slot-scope="scope">
+                  <span v-if="scope.row.attributes.config.port">{{scope.row.attributes.config.port}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('developer.operation')" width="350">
+                <template slot-scope="scope">
+                  <el-button
+                    type="danger"
+                    size="mini"
+                    @click="deleteRelation(scope.row)"
+                  >{{$t('developer.remove')}}</el-button>
+                  <el-button type="primary" size="mini" @click="subProTopic(scope.row)">订阅日志</el-button>
+
+                  <el-button type="primary" size="mini" @click="customize(scope.row)">自定义模型</el-button>
+
+                  <!-- <el-button type="primary" size="mini" @click="customize(scope.row)">自定义模型</el-button> -->
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="elpagination" style="margin-top:20px;">
+              <el-pagination
+                @size-change="resourcechannelSizeChange"
+                @current-change="resourcechannelCurrentChange"
+                :page-sizes="[10, 20, 30, 50]"
+                :page-size="resourcelength"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="resourcetotal"
+              ></el-pagination>
+            </div>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="物规则" name="sixeth">
+          <div class="engintable">
+            <div class="engineheader">
+              <h3>{{$t('rule.rule')}}</h3>
+              <el-button
+                type="primary"
+                icon="el-icon-plus"
+                style="float:right;margin:19px 0"
+                size="small"
+                @click="addEngine"
+              >{{$t('developer.add')}}</el-button>
+            </div>
+            <el-table
+              :data="engineData"
+              style="width: 100%;text-align:center"
+              :cell-class-name="getRowindex"
+            >
+              <el-table-column label="ID" align="center" width="180">
+                <template slot-scope="scope">
+                  <span @click="detailRules(scope.row.id)">{{scope.row.id}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('rule.TriggerEvent')" align="center">
+                <template slot-scope="scope">
+                  <span>{{scope.row.for.join(',')}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="rawsql" align="center" label="SQL"></el-table-column>
+              <el-table-column align="center" :label="$t('rule.ResponseAction')">
+                <template slot-scope="scope">
+                  <span>{{actions(scope.row.actions)}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column align="center" :label="$t('developer.operation')">
+                <template slot-scope="scope">
+                  <el-button type="info" @click="detailRules(scope.row.id)" size="mini" plain>查看</el-button>
+                  <el-button type="info" @click="deleteRule(scope.row.id)" size="mini" plain>删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="block">
+              <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :page-sizes="[10, 20, 30, 50]"
+                :page-size="rulepagesize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="ruletotal"
+              ></el-pagination>
+            </div>
+          </div>
+
+          <!-- <div style="width:40%">
             <div>
               <el-tag>{{$t('product.modeltemplate')}}</el-tag>
             </div>
@@ -1104,7 +1183,7 @@
             <pre id="editor5" class="ace_editor" style="min-height:300px;width:100%">
               <textarea class="ace_text-input"></textarea>
             </pre>
-          </div>
+          </div>-->
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -1113,6 +1192,7 @@
       :title="$t('product.viewobjectmodel')"
       :visible.sync="schemadialogVisible"
       :before-close="handleClose"
+      :close-on-click-modal="false"
     >
       <div>
         <div style="background:#ffffff">
@@ -1124,10 +1204,118 @@
         <el-button type="primary" @click="preserve">{{$t('developer.determine')}}</el-button>
       </span>
     </el-dialog>
+    <!--通道弹窗-->
+    <el-dialog title="添加通道" :visible.sync="innerVisible" append-to-body :close-on-click-modal="false">
+      <div class="addchannel">
+        <el-table :data="allchannelData" height="400" style="width: 100%">
+          <el-table-column :label="$t('developer.channelnumber')">
+            <template slot-scope="scope">
+              <span>{{scope.row.id}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channelname')">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.name}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channeladdr')">
+            <template slot-scope="scope">
+              <span>{{'channel/'+scope.row.id}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.channeltype')">
+            <template slot-scope="scope">
+              <span v-if="scope.row.attributes.type==1">{{$t('developer.collectionchannel')}}</span>
+              <span v-else>{{$t('developer.resourcechannel')}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.servicetype')">
+            <template slot-scope="scope">
+              <span>{{scope.row.attributes.cType}}</span>
+            </template>
+          </el-table-column>
+          <el-table-column :label="$t('developer.operation')">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="addProductChannel(scope.row.id)"
+                type="primary"
+              >{{$t('developer.add')}}</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="elpagination" style="margin-top:20px;">
+          <el-pagination
+            @size-change="allChannelSizeChange"
+            @current-change="allChannelCurrentChange"
+            :page-sizes="[10, 20, 30, 50]"
+            :page-size="allChannellength"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="allChanneltotal"
+          ></el-pagination>
+        </div>
+      </div>
+    </el-dialog>
+    <!---日志订阅弹窗-->
+    <el-dialog
+      :title="channelname+'日志'"
+      :visible.sync="subdialog"
+      :before-close="handleCloseSubdialog"
+      width="85%"
+      :close-on-click-modal="false"
+    >
+      <div style="margin-top:20px;">
+        <pre id="subdialog" class="ace_editor" style="min-height:300px;width:100%">
+                      <textarea class="ace_text-input" style="overflow:scroll"></textarea>
+                      </pre>
+      </div>
+
+      <!-- </div> -->
+      <span slot="footer" class="dialog-footer" style="height:30px;">
+        <el-switch
+          style="display: inline-block;margin-right:10px;"
+          v-model="value4"
+          active-color="#13ce66"
+          inactive-color="#ff4949"
+          inactive-text="自动刷新"
+          @change="stopsub"
+        ></el-switch>
+        <!-- <el-button type="success" size="mini" @click="stopsub('start')" v-if="subaction=='start'">启动</el-button>
+        <el-button type="warning" size="mini" @click="stopsub('stop')" v-else>停止</el-button>-->
+      </span>
+    </el-dialog>
+    <!--资源通道关联模型-->
+    <el-dialog :visible.sync="resourcedialogFormVisible" width="90%" top="1vh" :close-on-click-modal="false" :show-close="false" :before-close="closeWuDialog">
+      <el-form :model="resourceform" ref="resourceform">
+        <div class="wumoxing">
+          <el-row>
+            <el-col :span="8">
+              <div class="grid-content bg-purple">
+                <el-form-item label="物模型">
+                  <pre id="editormodel" class="ace_editor" style="min-height:600px"><el-input class="ace_text-input" type="textarea"></el-input></pre>
+                </el-form-item>
+              </div>
+            </el-col>
+            <el-col :span="16">
+              <div class="grid-content bg-purple-light">
+                <el-form-item label="自定义数据模型">
+                  <pre id="editorcreate" class="ace_editor" style="min-height:600px"><el-input class="ace_text-input" type="textarea"></el-input></pre>
+                </el-form-item>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeWuDialog">退 出</el-button>
+        <el-button type="primary" @click="addData">保 存</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import Parse from "parse";
+import { getRule, ruleDelete } from "@/api/rules";
 var editor;
 var editor1;
 var editor2;
@@ -1135,9 +1323,15 @@ var editorgraphql;
 var editor5;
 var editor6;
 var subdialog;
+var editormodel;
+var editorcreate;
+var editorinsert;
+var editorsubtable;
+var channelrow = {};
 let Base64 = require("js-base64").Base64;
 var setdata = "";
 var isallchannel = false;
+var isupdatetrue = ''
 import { Compile, subupadte } from "@/api/systemmanage/system";
 import { getIndustry } from "@/api/applicationManagement";
 import { setTimeout } from "timers";
@@ -1149,7 +1343,11 @@ import {
   MSG_EMPTY,
   DISCONNECT_MSG
 } from "@/utils/wxscoket.js";
+import TaskCollection from './task_collection'
 export default {
+  components:{
+    TaskCollection
+  },
   data() {
     var validCode = (rule, value, callback) => {
       let reg = /[0-9a-zA-Z]/;
@@ -1203,6 +1401,7 @@ export default {
     };
     return {
       //topic数据
+      productimg:'',
       topicdialogVisible: false,
       topicform: {
         topic: "",
@@ -1406,7 +1605,24 @@ export default {
       textarea: "",
       subdialogtimer: null,
       subdialogid: "",
-      subaction:'stop'
+      subaction: "stop",
+      channelname: "",
+      value4: true,
+      //规则配置
+      rulepagesize: 10,
+      rulestart: 0,
+      ruletotal: 0,
+      engineData: [],
+      //物存储型式
+      channeltype: 0,
+      resourcechannelData: [],
+      resourcestart: 0,
+      resourcelength: 10,
+      resourcetotal: 0,
+      //自定义模型模板
+      resourcedialogFormVisible: false,
+      resourceform: {},
+      resourcechannelid: ""
     };
   },
   watch: {
@@ -1414,7 +1630,7 @@ export default {
       deep: true,
       handler(val) {
         this.subtimer = window.setInterval(() => {
-          this.subAce("formInline");
+          this.subAce("formInline",false);
         }, 5000);
       }
     }
@@ -1431,6 +1647,7 @@ export default {
   },
   mounted() {
     //editor编辑器使用
+    this.orginRule();
     editor2 = ace.edit("editor2");
     editor2.session.setMode("ace/mode/text"); // 设置语言
     editor2.setTheme("ace/theme/monokai"); // 设置主题
@@ -1441,28 +1658,31 @@ export default {
       enableLiveAutocompletion: true // 设置自动提示
     });
     //物存储graphql写入
-    editorgraphql = ace.edit("editor4");
-    editorgraphql.session.setMode("ace/mode/graphqlschema"); // 设置语言
-    editorgraphql.setTheme("ace/theme/monokai"); // 设置主题
-    editorgraphql.setOptions({
-      enableBasicAutocompletion: true,
-      enableSnippets: true,
-      enableLiveAutocompletion: true // 设置自动提示
-    });
-    editorgraphql.setValue("");
-    //物存储控制输出
-    editor5 = ace.edit("editor5");
-    editor5.session.setMode("ace/mode/json"); // 设置语言
-    editor5.setTheme("ace/theme/gob"); // 设置主题
-    editor5.setReadOnly(true);
-    editor5.setOptions({
-      enableBasicAutocompletion: true,
-      enableSnippets: true,
-      enableLiveAutocompletion: true // 设置自动提示
-    });
-    editor5.setValue("");
+    // editorgraphql = ace.edit("editor4");
+    // editorgraphql.session.setMode("ace/mode/graphqlschema"); // 设置语言
+    // editorgraphql.setTheme("ace/theme/monokai"); // 设置主题
+    // editorgraphql.setOptions({
+    //   enableBasicAutocompletion: true,
+    //   enableSnippets: true,
+    //   enableLiveAutocompletion: true // 设置自动提示
+    // });
+    // editorgraphql.setValue("");
+    // //物存储控制输出
+    // editor5 = ace.edit("editor5");
+    // editor5.session.setMode("ace/mode/json"); // 设置语言
+    // editor5.setTheme("ace/theme/gob"); // 设置主题
+    // editor5.setReadOnly(true);
+    // editor5.setOptions({
+    //   enableBasicAutocompletion: true,
+    //   enableSnippets: true,
+    //   enableLiveAutocompletion: true // 设置自动提示
+    // });
+    // editor5.setValue("");
     this.Industry();
     this.getAllunit();
+    if (this.$route.query.activeName) {
+      this.activeName = this.$route.query.activeName;
+    }
   },
   methods: {
     //判断是否为结构体，可展开
@@ -1472,11 +1692,20 @@ export default {
         return "row-expand-cover";
       }
     },
+    getChannelEnable(row, rowIndex) {
+      if (row.row.attributes.isEnable == true) {
+        return "green_active";
+      } else {
+        return "red_active";
+      }
+    },
     handleClick(val) {
       if (val.name == "fiveth") {
         this.getProductChannel();
       } else if (val.name == "second") {
         this.getTopic();
+      } else if (val.name == "seven") {
+        this.getResourceChannel();
       } else if (val.name != "fourth") {
         window.clearInterval(this.subtimer);
         this.subtimer = null;
@@ -1530,6 +1759,7 @@ export default {
       var product = new Product();
       product.id = this.productId;
       query.equalTo("product", product);
+      query.equalTo("type", "1");
       query.skip(this.channelstart);
       query.limit(this.channellength);
       query.ascending("-updatedAt");
@@ -1537,6 +1767,29 @@ export default {
         this.channeltotal = count;
         query.find().then(res => {
           this.channelData = res;
+          if (res.length == 0) {
+            isallchannel = true;
+          } else {
+            isallchannel = false;
+          }
+        });
+      });
+    },
+    getResourceChannel() {
+      var Channel = Parse.Object.extend("Channel");
+      var query = new Parse.Query(Channel);
+      var Product = Parse.Object.extend("Product");
+      var product = new Product();
+      product.id = this.productId;
+      query.equalTo("product", product);
+      query.equalTo("type", "2");
+      query.skip(this.channelstart);
+      query.limit(this.channellength);
+      query.ascending("-updatedAt");
+      query.count().then(count => {
+        this.resourcetotal = count;
+        query.find().then(res => {
+          this.resourcechannelData = res;
           if (res.length == 0) {
             isallchannel = true;
           } else {
@@ -1562,8 +1815,13 @@ export default {
               type: "success",
               message: "添加成功"
             });
-            this.showAllChannel();
-            this.getProductChannel();
+            if (this.channeltype == 1) {
+              this.showAllChannel();
+              this.getProductChannel();
+            } else {
+              this.resourceShowAllChannel();
+              this.getResourceChannel();
+            }
           }
         },
         error => {
@@ -1591,7 +1849,11 @@ export default {
               type: "success",
               message: "删除成功"
             });
-            this.getProductChannel();
+            if (this.channeltype == 1) {
+              this.getProductChannel();
+            } else {
+              this.getResourceChannel();
+            }
           }
         },
         error => {
@@ -1602,7 +1864,7 @@ export default {
         }
       );
     },
-    //关联分页
+    //关联服务通道分页
     channelSizeChange(val) {
       this.channellength = val;
       this.getProductChannel();
@@ -1611,8 +1873,18 @@ export default {
       this.channelstart = (val - 1) * this.channellength;
       this.getProductChannel();
     },
-    //展示全部通道
+    //资源通道关联
+    resourcechannelSizeChange(val) {
+      this.resourcelength = val;
+      this.getResourceChannel();
+    },
+    resourcechannelCurrentChange(val) {
+      this.resourcestart = (val - 1) * this.resourcelength;
+      this.getResourceChannel();
+    },
+    //展示全部服务通道
     showAllChannel() {
+      this.channeltype = 1;
       this.innerVisible = true;
       var Channel = Parse.Object.extend("Channel");
       var query = new Parse.Query(Channel);
@@ -1621,6 +1893,7 @@ export default {
       product.id = this.productId;
       query.skip(this.allChannelstart);
       query.limit(this.allChannellength);
+      query.equalTo("type", "1");
       query.ascending("-updatedAt");
       if (!isallchannel) {
         query.notEqualTo("product", product);
@@ -1639,6 +1912,248 @@ export default {
     allChannelCurrentChange(val) {
       this.allChannelstart = (val - 1) * this.allChannellength;
       this.showAllChannel();
+    },
+    //得到全部未关联资源通道
+    resourceShowAllChannel() {
+      this.channeltype = 2;
+      this.innerVisible = true;
+      var Channel = Parse.Object.extend("Channel");
+      var query = new Parse.Query(Channel);
+      var Product = Parse.Object.extend("Product");
+      var product = new Product();
+      product.id = this.productId;
+      query.skip(this.resourcestart);
+      query.limit(this.resourcelength);
+      query.equalTo("type", "2");
+      query.ascending("-updatedAt");
+      // if (!isallchannel) {
+      query.notEqualTo("product", product);
+      // }
+      query.count().then(count => {
+        this.allChanneltotal = count;
+        query.find().then(resultes => {
+          this.allchannelData = resultes;
+        });
+      });
+    },
+    //自定义模型弹窗
+    customize(row) {
+      this.resourcedialogFormVisible = true;
+      this.resourcechannelid = row.id;
+      for (var key in row.attributes.config) {
+        channelrow[key] = row.attributes.config[key];
+      }
+      setTimeout(() => {
+        editormodel = ace.edit("editormodel");
+        editormodel.session.setMode("ace/mode/json"); // 设置语言
+        editormodel.setTheme("ace/theme/twilight"); // 设置主题
+        editormodel.setOptions({
+          enableBasicAutocompletion: true,
+          enableSnippets: true,
+          enableLiveAutocompletion: true // 设置自动提示
+        });
+        editormodel.setReadOnly(true);
+        editormodel.setValue(JSON.stringify(this.productdetail.thing, null, 4));
+        //物建表
+        editorcreate = ace.edit("editorcreate");
+        editorcreate.session.setMode("ace/mode/mysql"); // 设置语言
+        editorcreate.setTheme("ace/theme/twilight"); // 设置主题
+        editorcreate.setOptions({
+          enableBasicAutocompletion: true,
+          enableSnippets: true,
+          enableLiveAutocompletion: true // 设置自动提示
+        });
+        if (row.attributes.config.datamodel&&row.attributes.config.datamodel!='') {
+          editorcreate.setValue(row.attributes.config.datamodel);
+        } else {
+          editorcreate.setValue(`{
+            "vars":{
+              "database":"aosong",
+              "stable":"meter",
+              "value":[
+                {
+                  "timestamp":"TIMESTAMP",
+                  "bytes":8
+                },
+                {
+                  "temperature":"FLOAT",
+                  "bytes":4
+                },
+                {
+                  "humidity":"FLOAT",
+                  "bytes":4
+                }
+              ],
+              "tags":[
+                {
+                  "devaddr":"BINARY",
+                  "bytes":12
+                }
+              ],
+              "table":"devaddr",
+              "keep":3650
+            },
+            "sql":{
+              "create_database":"CREATE DATABASE IF NOT EXISTS \${database} KEEP \${keep}",
+              "drop_database":"DROP DATABASE IF EXISTS \${database}",
+              "creat_stable":"CREATE TABLE IF NOT EXISTS \${database}.\${stable} (\${timestamp} TIMESTAMP, temperature FLOAT, humidity FLOAT) TAGS(devaddr BINARY[12]);",
+              "drop_stable":"DROP TABLE \${database}.\${stable}",
+              "insert_stable":"INSERT INTO \${database}.\${table} USING \${database}.\${stable} TAGS (\${devaddr}) VALUES (\${temperature}, \${humidity})",
+              "insert_table":"INSERT INTO \${database}.\${table} VALUES (\${temperature}, \${humidity})",
+              "create_table":"CREATE TABLE \${databas}.\${table} USING \${database}.\${stable} TAGS (\${devaddr});"
+            }
+          }`);
+        }
+        //物存储
+
+        //子表
+        //   editorsubtable = ace.edit("editorsubtable");
+        //   editorsubtable.session.setMode("ace/mode/mysql"); // 设置语言
+        //   editorsubtable.setTheme("ace/theme/gob"); // 设置主题
+        //   editorsubtable.setOptions({
+        //     enableBasicAutocompletion: true,
+        //     enableSnippets: true,
+        //     enableLiveAutocompletion: true // 设置自动提示
+        //   });
+        //   if(row.attributes.config.subtable){
+        //     editorsubtable.setValue(row.attributes.config.subtable)
+        //   }else{
+        //     editorsubtable.setValue('')
+        //   }
+      });
+    },
+    questionModel() {
+      setTimeout(() => {
+        editorinsert = ace.edit("editorinsert");
+        editorinsert.session.setMode("ace/mode/mysql"); // 设置语言
+        editorinsert.setTheme("ace/theme/gob"); // 设置主题
+        editorinsert.setOptions({
+          enableBasicAutocompletion: true,
+          enableSnippets: true,
+          enableLiveAutocompletion: true // 设置自动提示
+        });
+        editorinsert.setValue(`{
+          "vars":{
+            "database":"database",
+            "table":"stable",
+            "value":[
+              {
+                "timestamp":"TIMESTAMP",
+                "bytes":8
+              },
+              {
+                "int":"INT",
+                "bytes":4
+              },
+              {
+                "bigint":"BIGINT",
+                "bytes":8
+              },
+              {
+                "float":"FLOAT",
+                "bytes":4
+              },
+              {
+                "double":"DOUBLE",
+                "bytes":8
+              },
+              {
+                "binary":"BINARY",
+                "bytes":"自定义"
+              },
+              {
+                "smallint":"SMALLINT",
+                "bytes":2
+              },
+              {
+                "tinyint":"TINYINT",
+                "bytes":1
+              },
+              {
+                "bool":"BOOL",
+                "bytes":1
+              },
+              {
+                "nchar":"NCHAR",
+                "bytes":"自定义"
+              }
+            ],
+            "tags":[
+              {
+                "int":"INT",
+                "bytes":4
+              },
+              {
+                "bigint":"BIGINT",
+                "bytes":8
+              },
+              {
+                "float":"FLOAT",
+                "bytes":4
+              },
+              {
+                "double":"DOUBLE",
+                "bytes":8
+              },
+              {
+                "binary":"BINARY",
+                "bytes":"自定义"
+              },
+              {
+                "smallint":"SMALLINT",
+                "bytes":2
+              },
+              {
+                "tinyint":"TINYINT",
+                "bytes":1
+              },
+              {
+                "bool":"BOOL",
+                "bytes":1
+              },
+              {
+                "nchar":"NCHAR",
+                "bytes":"自定义"
+              }
+            ]
+          },
+          "sql":{
+            "create_database":"CREATE DATABASE IF NOT EXISTS {{database}} KEEP {{keep}}",
+            "drop_database":"DROP DATABASE IF EXISTS {{database}}",
+            "creat_stable":"CREATE TABLE IF NOT EXISTS {{database}}.{{stable}} ({{timestamp}} TIMESTAMP, temperature FLOAT, humidity FLOAT) TAGS(devaddr BINARY[12]);",
+            "drop_stable":"DROP TABLE {{database}}.{{stable}}",
+            "insert_stable":"INSERT INTO {{database}}.{{table}} USING {{database}}.{{stable}} TAGS ({{devaddr}}) VALUES ({{temperature}}, {{humidity}})",
+            "insert_table":"INSERT INTO {{database}}.{{table}} VALUES ({{temperature}}, {{humidity}})",
+            "create_table":"CREATE TABLE {{database}}.{{table}} USING {{database}}.{{stable}} TAGS ({{devaddr}});"
+          }
+        }`);
+      });
+    },
+    //添加自定义模型
+    addData() {
+      var Channel = Parse.Object.extend("Channel");
+      var channel = new Channel();
+      // channelrow.insert = editorinsert.getValue();
+      channel.id = this.resourcechannelid;
+      // channelrow.subtable = editorsubtable.getValue();
+      channelrow.datamodel = editorcreate.getValue();
+      channel.set("config", channelrow);
+      channel.save().then(
+        response => {
+          if (response) {
+            this.$message.success("添加成功");
+           
+          }
+        },
+        error => {
+          returnLogin(error);
+        }
+      );
+    },
+    closeWuDialog(){
+          this.resourcedialogFormVisible = false;
+          this.resourcechannelid = "";
+        
     },
     //删除枚举型
     removeDomain(item) {
@@ -2050,14 +2565,14 @@ export default {
         enableLiveAutocompletion: true // 设置自动提示
       });
 
-      editor6 = ace.edit("editor6");
-      editor6.session.setMode("ace/mode/json"); // 设置语言
-      editor6.setTheme("ace/theme/twilight"); // 设置主题
-      editor6.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true // 设置自动提示
-      });
+      // editor6 = ace.edit("editor6");
+      // editor6.session.setMode("ace/mode/json"); // 设置语言
+      // editor6.setTheme("ace/theme/twilight"); // 设置主题
+      // editor6.setOptions({
+      //   enableBasicAutocompletion: true,
+      //   enableSnippets: true,
+      //   enableLiveAutocompletion: true // 设置自动提示
+      // });
 
       this.productId = this.$route.query.id;
       var Product = Parse.Object.extend("Product");
@@ -2080,6 +2595,7 @@ export default {
             this.form.Productname = response.attributes.name;
             this.ProductSecret = response.attributes.productSecret;
             this.form.Productkey = this.productId;
+            this.productimg = window.location.origin+response.attributes.icon
             if (response.attributes.decoder) {
               setdata = response.attributes.decoder.code;
               this.formInline.name = response.attributes.decoder.name;
@@ -2098,7 +2614,8 @@ export default {
               this.wmxData = this.productdetail.thing.properties.concat([]);
             }
             editor.setValue(Base64.decode(setdata));
-            editor6.setValue(JSON.stringify(this.productdetail.thing, null, 4));
+            editor.gotoLine(editor.session.getLength());
+            // editor6.setValue(JSON.stringify(this.productdetail.thing, null, 4));
             var Devices = Parse.Object.extend("Devices");
             var devices = new Parse.Query(Devices);
 
@@ -2173,7 +2690,8 @@ export default {
             this.warningeditror.map(items => {
               log += items + "\r\n";
             });
-            editor2.setValue(log);
+            isupdatetrue+=log
+            editor2.setValue(isupdatetrue);
           }
         })
         .catch(error => {
@@ -2181,7 +2699,8 @@ export default {
           this.warningeditror.map(items => {
             log += items + "\r\n";
           });
-          editor2.setValue(log);
+          isupdatetrue+=log
+          editor2.setValue(isupdatetrue);
         });
     },
     decoderSizeChange(val) {
@@ -2203,7 +2722,7 @@ export default {
         }
       });
     },
-    subAce(formName) {
+    subAce(formName,istrue) {
       this.$refs[formName].validate(valid => {
         if (valid) {
           var obj = {
@@ -2223,8 +2742,13 @@ export default {
                 type: "success",
                 message: "保存成功"
               });
+               if(istrue==true){
+                isupdatetrue+='保存成功'+"\r\n"
+                  editor2.setValue(isupdatetrue);
+              }
             } else {
-              editor2.setValue("保存成功");
+             
+            
             }
             this.issub = true;
           });
@@ -2551,12 +3075,13 @@ export default {
         date.getSeconds() + 1 <= 10
           ? "0" + date.getSeconds()
           : date.getSeconds();
-      return h + m + s+" ";
+      return h + m + s + " ";
     },
     //订阅日志
     subProTopic(row) {
       this.subdialog = true;
       this.subdialogid = row.id;
+      this.channelname = row.id;
       setTimeout(() => {
         subdialog = ace.edit("subdialog");
         subdialog.session.setMode("ace/mode/text"); // 设置语言
@@ -2569,10 +3094,12 @@ export default {
         });
       });
       var info = {
-        topic: "channel/" + row.id + "/" + "logger",
+        topic: "log/channel/" + row.id + "/" + this.productId,
         qos: 2
       };
-      var channeltopic = new RegExp("channel/" + row.id + "");
+      var channeltopic = new RegExp(
+        "log/channel/" + row.id + "/" + this.productId
+      );
       var submessage = "";
       var _this = this;
       Websocket.add_hook(channeltopic, function(Msg) {
@@ -2583,14 +3110,16 @@ export default {
           submessage += _this.nowtime() + Msg + `\n`;
         }
         subdialog.setValue(submessage);
+        subdialog.gotoLine(subdialog.session.getLength());
       });
       //订阅
       var text0 = JSON.stringify({ action: "start_logger" });
       Websocket.subscribe(info, function(res) {
         if (res.result) {
+          console.log(info);
           console.log("订阅成功");
           var sendInfo = {
-            topic: "channel/" + row.id,
+            topic: "channel/" + row.id + "/" + _this.productId,
             text: text0,
             retained: true,
             qos: 2
@@ -2606,7 +3135,7 @@ export default {
     handleCloseSubdialog() {
       var text0 = JSON.stringify({ action: "stop_logger" });
       var sendInfo = {
-        topic: "channel/" + this.subdialogid,
+        topic: "channel/" + this.subdialogid + "/" + this.productId,
         text: text0,
         retained: true,
         qos: 2
@@ -2617,17 +3146,17 @@ export default {
       this.subdialogtimer = null;
     },
     //停止topic刷新
-    stopsub(action) {
-      var text0
-      if(action=='stop'){
-        this.subaction = 'start'
-         text0 = JSON.stringify({ action: "stop_logger" });
-      }else{
-        this.subaction = 'stop'
+    stopsub(value) {
+      var text0;
+      if (value == false) {
+        // this.subaction = 'start'
+        text0 = JSON.stringify({ action: "stop_logger" });
+      } else {
+        // this.subaction = 'stop'
         text0 = JSON.stringify({ action: "start_logger" });
       }
       var sendInfo = {
-        topic: "channel/" + this.subdialogid,
+        topic: "channel/" + this.subdialogid + "/" + this.productId,
         text: text0,
         retained: true,
         qos: 2
@@ -2740,6 +3269,61 @@ export default {
           console.log(error);
           this.$message.error(error);
         });
+    },
+    //规则tab显示
+    orginRule() {
+      getRule()
+        .then(response => {
+          if (response) {
+            this.engineData = response;
+          }
+        })
+        .catch(error => {
+          this.$message.error(error.error);
+        });
+    },
+    //分页
+    handleSizeChange(val) {},
+    handleCurrentChange(val) {},
+    addEngine() {
+      this.$router.push({
+        path: "/rules_engine/addengine",
+        query: {
+          title: "新增",
+          productid: this.productId
+        }
+      });
+    },
+    actions(row) {
+      var string = [];
+      row.map(items => {
+        string.push(items.name);
+      });
+      return string.join(",");
+    },
+    //表格单个单元格class添加
+    getRowindex(row, rowIndex, columnIndex) {
+      if (row.columnIndex == 0) {
+        return "firstcolumn";
+      }
+    },
+    detailRules(id) {
+      this.$router.push({
+        path: "/rules_engine/checkengine",
+        query: { id: id }
+      });
+    },
+    deleteRule(id) {
+      ruleDelete(id)
+        .then(resultes => {
+          if (resultes) {
+            this.$message.success("删除成功");
+            this.orginRule();
+          }
+        })
+        .catch(error => {
+          this.$message.error(error.error);
+        });
     }
   },
   beforeDestroy() {
@@ -2779,12 +3363,21 @@ export default {
 .mailtable .notbottom {
   border-bottom: 0;
 }
+
 .editheader .product ul {
   width: 100%;
   height: 50px;
   padding-left: 0;
+  display: flex;
+  justify-content: space-between;
 }
-.editheader .product ul li:first-child,
+.editheader .product ul li{
+  list-style: none;
+  font-size: 16px;
+  text-align: left;
+  color:#74777a;
+}
+/* .editheader .product ul li:first-child,
 .editheader .product ul li:last-child {
   width: 25%;
   list-style: none;
@@ -2802,7 +3395,7 @@ export default {
   line-height: 50px;
   float: left;
   text-align: left;
-}
+} */
 </style>
 <style>
 .editproduct .el-tabs__item {
@@ -2886,10 +3479,43 @@ export default {
 .editproduct .el-table__expanded-cell .el-table th.is-leaf {
   background: #ced7de9c;
 }
-.editproduct #pane-sixeth {
+/* .editproduct #pane-sixeth {
   display: flex;
-}
+} */
 .editproduct .el-col-2 {
   text-align: center;
+}
+.green_active {
+  color: green;
+}
+.red_active {
+  color: red;
+}
+.wumoxing .el-form-item__content{
+  margin-left:10px;
+}
+.task_collection .el-form-item__content{
+  clear: none;
+}
+.task_collection .el-form-item{
+  margin-bottom:10px;
+}
+</style>
+<style lang="scss" scoped>
+.engintable {
+  width: 100%;
+  height: auto;
+  .engineheader {
+    h3 {
+      float: left;
+    }
+  }
+  .block {
+    margin-top: 20px;
+  }
+}
+/deep/ .firstcolumn {
+  color: #34c388;
+  cursor: pointer;
 }
 </style>

@@ -74,3 +74,13 @@ export function getDev(addr,productId) {
     }
   })
 }
+export function subupadte(channelId,action) {
+  return request({
+    url: `/control/channel`,
+    method: 'post',
+    params: {
+      id:channelId,
+      action:action
+    }
+  })
+}

@@ -151,6 +151,12 @@
             <el-form-item label="PN值" :label-width="formLabelWidth">
               <el-input v-model="mod_form.pn" autocomplete="off"></el-input>
             </el-form-item>
+             <el-form-item label="CT倍率" :label-width="formLabelWidth" >
+              <el-input v-model.number="mod_form.ct" autocomplete="off" placeholder="请输入ct值" :min='1'></el-input>
+            </el-form-item>
+              <el-form-item label="PT倍率" :label-width="formLabelWidth" >
+              <el-input v-model.number="mod_form.pt" autocomplete="off" placeholder="请输入pt值" :min='1'></el-input>
+            </el-form-item>
             <el-form-item label="抄表类型" :label-width="formLabelWidth">
               <el-select v-model="mod_form.cblx" disabled clearable placeholder="请选择抄表类型">
                 <el-option
@@ -390,6 +396,12 @@
             </el-form-item>
             <el-form-item label="PN值" :label-width="formLabelWidth" prop="pn">
               <el-input v-model.number="add_form.pn" autocomplete="off" placeholder="请输入PN值"></el-input>
+            </el-form-item>
+            <el-form-item label="CT倍率" :label-width="formLabelWidth" prop="ct">
+              <el-input v-model.number="add_form.ct" autocomplete="off" placeholder="请输入ct值" :min='1'></el-input>
+            </el-form-item>
+              <el-form-item label="PT倍率" :label-width="formLabelWidth" prop="pt">
+              <el-input v-model.number="add_form.pt" autocomplete="off" placeholder="请输入ct值" :min='1'></el-input>
             </el-form-item>
             <el-form-item label="抄表类型" :label-width="formLabelWidth">
               <el-select v-model="add_form.cblx" clearable placeholder="请选择抄表类型">
@@ -827,10 +839,24 @@ export default {
         jlbx: "", //计量表箱
         xgwzh: "", //箱位置号
         deveui: "", //采集器编号
-        appeui: "" //注册应用号
+        appeui: "" ,//注册应用号
+        ct:1,
+        pt:1
       },
       // 表单验证
      add_form_rules:{
+       ct:[
+         {required:true, message:'请输入CT倍率值', trigger:'blur'},
+         {
+           type:'number',message:'CT倍率值必须为数值'
+         }
+       ],
+        pt:[
+         {required:true, message:'请输入PT倍率值', trigger:'blur'},
+         {
+           type:'number',message:'PT倍率值必须为数值'
+         }
+       ],
        tq: [
             { required: true, message: '请输入台区名称', trigger: 'blur' },
           ],
@@ -996,7 +1022,9 @@ export default {
         xgwzh: "", //箱位置号
         dbmm: "", //电表密码
         deveui: "", //采集器编号
-        appeui: "" //注册应用号
+        appeui: "", //注册应用号
+        ct:1,
+        pt:1
       },
       formLabelWidth: "120px",
       table4: false,
@@ -1049,22 +1077,7 @@ export default {
         mode: "vconcentrator",
         version: "v1"
       },
-      // rules: {
-      //   yhabh: [{ required: true, message: "请输入用户编号", trigger: "blur" }],
-      //   addr: [{ validator: validatevcaddr, required: true, trigger: "blur" }],
-      //   vcaddr: [
-      //     { validator: validatevcaddr, required: true, trigger: "blur" }
-      //   ],
-      //   pn: [{ required: true, message: "请输入pn值", trigger: "blur" }],
-      //   departmentid: [
-      //     {
-      //       type: "array",
-      //       required: true,
-      //       message: "请选择具体部门",
-      //       trigger: "blur"
-      //     }
-      //   ]
-      // },
+      
       // 获取excel导入的信息
       demo: "",
       gsmc: "",
@@ -1371,7 +1384,8 @@ export default {
               xgwzh: this.add_form.xgwzh,
               dbmm: this.add_form.dbmm,
               deveui:this.add_form.deveui,
-             
+              ct:this.add_form.ct,
+              pt:this.add_form.pt             
           })
             .then(res => {
               this.dialogFormVisibleAdd = false;
@@ -1569,7 +1583,6 @@ export default {
     },
     // 修改
     editorMeter(row) {
-      console.log(row)
       this.mod_form.yhabh = row.yhabh;
       this.mod_form.vcaddr = row.vcaddr;
       this.mod_form.deveui = row.deveui;
@@ -1611,6 +1624,8 @@ export default {
       this.mod_form.appeui = row.appeui;
       this.mod_form.cblx = row.cblx;
       this.smartmeterid = row.objectId;
+      this.mod_form.ct = row.ct
+      this.mod_form.pt = row.pt
     },
     // 确定修改
     sure() {
@@ -1661,6 +1676,8 @@ export default {
             object.set("jlbx", this.mod_form.jlbx);
             object.set("xgwzh", this.mod_form.xgwzh);
             object.set("dbmm", this.mod_form.dbmm);
+            object.set("ct", this.mod_form.ct);
+            object.set("pt", this.mod_form.pt);
             object.save().then(
               resultes => {
                 this.$message({
@@ -1851,6 +1868,8 @@ export default {
             obj.pn = items.attributes.pn;
             obj.gddw = items.attributes.gddw;
             obj.cblx = items.attributes.cblx;
+            obj.ct = items.attributes.ct
+            obj.pt = items.attributes.pt
             this.tableData3.push(obj);
           });
           this.loading = false;
